@@ -1,0 +1,1 @@
+O PlanIQ é uma aplicação web para gestão e controle de estudos para concursos públicos. O sistema atua como um gerenciador de edital, permitindo o registro e monitoramento em tempo real de horas líquidas, questões resolvidas e taxa de acertos.
