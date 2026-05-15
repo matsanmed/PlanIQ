@@ -1,0 +1,3160 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <!-- Definições básicas da página -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PlanIQ - Planner de Estudos</title>
+    
+    <!-- Importar tipo de letra moderno e ícones -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* === VARIÁVEIS DO TEMA ESCURO DE ALTO CONTRASTE (Padrão) === */
+        :root {
+            --bg-color: #0f172a;        
+            --sidebar-bg: #1e293b;      
+            --panel-bg: #1e293b;        
+            --hover-bg: #334155;        
+            --text-main: #f8fafc;       
+            --text-muted: #cbd5e1;      
+            --primary-color: #3b82f6;   
+            --border-color: #334155;    
+            --input-border: #475569;
+            
+            --success-color: #22c55e;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+
+            --status-gray: #64748b;
+            --status-blue: #3b82f6;
+            --status-green: #10b981;
+
+            --icon-blue-bg: rgba(59, 130, 246, 0.2);
+            --icon-blue-text: #60a5fa;
+            --icon-green-bg: rgba(34, 197, 94, 0.2);
+            --icon-green-text: #4ade80;
+            --icon-purple-bg: rgba(168, 85, 247, 0.2);
+            --icon-purple-text: #c084fc;
+            --icon-yellow-bg: rgba(245, 158, 11, 0.2);
+            --icon-yellow-text: #fbbf24;
+            --icon-red-bg: rgba(239, 68, 68, 0.2);
+        }
+
+        /* === VARIÁVEIS DO TEMA CLARO (Ativado via botão) === */
+        body.light-theme {
+            --bg-color: #f4f7f6;
+            --sidebar-bg: #ffffff;
+            --panel-bg: #ffffff;
+            --hover-bg: #f0f4f8;
+            --text-main: #333333;
+            --text-muted: #777777;
+            --primary-color: #2563eb;
+            --border-color: #e5e7eb;
+            --input-border: #e5e7eb;
+            
+            --success-color: #16a34a;
+            --warning-color: #f59e0b;
+            --danger-color: #dc2626;
+
+            --status-gray: #9ca3af;
+            --status-blue: #3b82f6;
+            --status-green: #10b981;
+
+            --icon-blue-bg: #e0e7ff;
+            --icon-blue-text: #4f46e5;
+            --icon-green-bg: #dcfce7;
+            --icon-green-text: #16a34a;
+            --icon-purple-bg: #f3e8ff;
+            --icon-purple-text: #9333ea;
+            --icon-yellow-bg: #fef3c7;
+            --icon-yellow-text: #d97706;
+            --icon-red-bg: #fee2e2;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            display: flex;
+            height: 100vh;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            overflow: hidden;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* === BARRA LATERAL (SIDEBAR) === */
+        .sidebar {
+            width: 260px;
+            background-color: var(--sidebar-bg);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            padding: 1.5rem 0;
+            transition: background-color 0.3s;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            padding: 0 1.5rem;
+            margin-bottom: 2rem;
+            color: var(--primary-color);
+        }
+
+        .nav-menu { list-style: none; flex: 1; overflow-y: auto;}
+        .nav-menu::-webkit-scrollbar { width: 5px; }
+        .nav-menu::-webkit-scrollbar-thumb { background-color: var(--border-color); border-radius: 4px; }
+        .nav-item {
+            padding: 0.75rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .nav-item:hover, .nav-item.active {
+            background-color: var(--hover-bg);
+            color: var(--primary-color);
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .sidebar-footer {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid var(--border-color);
+            display: flex; flex-direction: column; gap: 0.5rem;
+        }
+
+        /* === ÁREA DE CONTEÚDO PRINCIPAL === */
+        .main-content {
+            flex: 1;
+            padding: 2rem 3rem;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: var(--border-color) transparent;
+        }
+        .main-content::-webkit-scrollbar { width: 8px; }
+        .main-content::-webkit-scrollbar-thumb { background-color: var(--border-color); border-radius: 4px; }
+
+        header h1 { font-size: 1.8rem; margin-bottom: 1.5rem; }
+
+        .panel {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            transition: background-color 0.3s;
+        }
+        .panel-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-main);
+        }
+
+        /* === TABELAS === */
+        table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+        th, td { text-align: left; padding: 0.75rem 0; border-bottom: 1px solid var(--border-color); }
+        th { color: var(--text-muted); font-weight: 500; }
+        .text-success { color: var(--success-color); font-weight: 600;}
+        .text-warning { color: var(--warning-color); font-weight: 600;}
+
+        /* === BOTÕES E EXTRAS === */
+        .btn-primary {
+            background-color: var(--primary-color); color: white; border: none; padding: 0.75rem;
+            width: 100%; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex;
+            justify-content: center; align-items: center; gap: 8px; transition: all 0.2s;
+        }
+        .btn-primary:hover { filter: brightness(1.1); }
+
+        .btn-icon {
+            background: var(--hover-bg); border: 1px solid var(--border-color); border-radius: 4px;
+            padding: 0.4rem 0.8rem; cursor: pointer; color: var(--text-main); transition: all 0.2s;
+        }
+        .btn-icon:hover { filter: brightness(1.2); }
+        
+        .btn-danger-outline { background: var(--icon-red-bg); color: var(--danger-color); border: 1px solid var(--danger-color); border-radius: 4px; padding: 0.4rem 0.8rem; cursor: pointer; }
+        .btn-danger-outline:hover { filter: brightness(1.2); }
+
+        .btn-success-outline { background: var(--icon-green-bg); color: var(--success-color); border: 1px solid var(--success-color); border-radius: 4px; padding: 0.4rem 0.8rem; cursor: pointer; }
+        .btn-success-outline:hover { filter: brightness(1.2); }
+
+        .progress-bar-container {
+            width: 100%; height: 8px; background: var(--border-color); border-radius: 4px; margin-top: 10px; overflow: hidden;
+        }
+        .progress-bar-fill {
+            height: 100%; background: var(--primary-color); border-radius: 4px; transition: width 0.4s ease;
+        }
+
+        /* === DASHBOARD CARDS === */
+        .dash-cards-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        .dash-top-card {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .dash-card-title {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 15px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .dash-card-big-number {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: var(--text-main);
+            margin-bottom: 10px;
+        }
+        .dash-card-substats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 10px;
+            font-weight: 500;
+        }
+
+        .dashboard-main-grid {
+            display: grid;
+            grid-template-columns: 2.5fr 1fr; 
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        /* === ESTILOS ECRÃS VARIADOS === */
+        .edital-container { background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; }
+        .edital-tabs { display: flex; gap: 15px; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; }
+        .edital-tabs button { background: none; border: none; font-size: 1rem; font-weight: 600; color: var(--text-muted); cursor: pointer; padding: 5px 10px; border-radius: 6px; transition: all 0.2s; }
+        .edital-tabs button:hover { background: var(--hover-bg); }
+        .edital-tabs button.active { color: var(--primary-color); background: var(--icon-blue-bg); }
+
+        .disciplinas-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; margin-bottom: 2rem; }
+        .disciplina-box { background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem 1rem; cursor: pointer; text-align: center; display: flex; flex-direction: column; justify-content: center; min-height: 140px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); transition: all 0.2s; }
+        .disciplina-box:hover { border-color: var(--primary-color); transform: translateY(-2px); }
+        .disciplina-box.selected { border: 2px solid var(--primary-color); background-color: var(--hover-bg); }
+        .disciplina-box-title { font-weight: 700; color: var(--text-main); margin-bottom: 10px; font-size: 0.95rem; }
+        .disciplina-detail-panel { background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 8px; padding: 2rem; margin-top: 1rem; border-top: 4px solid var(--primary-color); }
+
+        .stats-grid-detail { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin: 1.5rem 0; font-size: 0.9rem; }
+        .stats-grid-detail div { display: flex; justify-content: space-between; padding: 10px 15px; background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 6px; }
+
+        .topico-item button { background: none; border: none; cursor: pointer; color: var(--text-muted); margin-left: 10px; font-size: 1rem; }
+        .topico-item button:hover { color: var(--primary-color); }
+        .btn-delete:hover { color: var(--danger-color) !important; }
+        .topicos-list { list-style: none; padding: 0; border-top: 1px solid var(--border-color); margin-top: 1rem; }
+        .topico-item { padding: 0.8rem 1rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; background: var(--panel-bg); }
+        .topico-item:last-child { border-bottom: none; }
+
+        .status-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+        .status-nao_iniciado { background: var(--status-gray); }
+        .status-estudando { background: var(--status-blue); }
+        .status-concluido { background: var(--status-green); }
+        .select-status { border: 1px solid var(--border-color); border-radius: 4px; padding: 3px; font-size: 0.8rem; color: var(--text-main); background: var(--bg-color); outline: none; }
+
+        .hidden { display: none !important; }
+
+        /* === MODAIS === */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); display: flex; justify-content: center; align-items: center; z-index: 1000; }
+        .modal-content { background: var(--panel-bg); padding: 2rem; border-radius: 8px; width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto; box-shadow: 0 4px 15px rgba(0,0,0,0.3); border: 1px solid var(--border-color); }
+        .modal-content::-webkit-scrollbar { width: 6px; }
+        .modal-content::-webkit-scrollbar-thumb { background-color: var(--border-color); border-radius: 4px; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; }
+        .btn-close { background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--text-muted); }
+        .btn-close:hover { color: var(--danger-color); }
+        .form-group { margin-bottom: 1.2rem; }
+        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 500; font-size: 0.9rem; }
+        .form-control { width: 100%; padding: 0.75rem; border: 1px solid var(--border-color); border-radius: 6px; font-size: 0.95rem; background: var(--bg-color); color: var(--text-main); }
+        .checkbox-group { display: flex; flex-wrap: wrap; gap: 15px; margin-top: 5px; }
+        .checkbox-item { display: flex; align-items: center; gap: 5px; font-size: 0.9rem; cursor: pointer;}
+        .grid-2-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .btn-success { background-color: var(--success-color); color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; font-weight: 600; cursor: pointer; width: 100%; margin-top: 1rem;}
+        .btn-success:hover { filter: brightness(1.1); }
+
+        .badge { background-color: var(--icon-blue-bg); color: var(--icon-blue-text); padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; margin-right: 4px; display: inline-block; font-weight: 500; }
+
+        /* === ESTILOS TELA DE REVISÃO E CRONOGRAMA === */
+        .revisoes-horizontal-scroll { display: flex; gap: 1rem; overflow-x: auto; padding-bottom: 1rem; scrollbar-width: thin; scrollbar-color: var(--border-color) transparent; }
+        .revisoes-horizontal-scroll::-webkit-scrollbar { height: 8px; }
+        .revisoes-horizontal-scroll::-webkit-scrollbar-thumb { background-color: var(--border-color); border-radius: 4px; }
+
+        .revisao-card { min-width: 260px; background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; border-left: 4px solid var(--primary-color); display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+        .revisao-card.urgente { border-left-color: var(--danger-color); }
+        .revisao-card.alerta { border-left-color: var(--warning-color); }
+        .revisao-card.normal { border-left-color: var(--success-color); }
+
+        .revisao-card-title { font-weight: 700; font-size: 0.95rem; color: var(--text-main); margin-bottom: 0.3rem; }
+        .revisao-card-subtitle { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.8rem; display: flex; align-items: center; gap: 5px; }
+        .revisao-badge { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 600; margin-bottom: 0.5rem; width: fit-content; }
+        
+        .badge-urgente { background: var(--icon-red-bg); color: var(--danger-color); }
+        .badge-alerta { background: var(--icon-yellow-bg); color: var(--warning-color); }
+        .badge-normal { background: var(--icon-green-bg); color: var(--success-color); }
+
+        .calendar-wrapper { background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden; }
+        .calendar-header-row { display: grid; grid-template-columns: repeat(7, 1fr); background: var(--hover-bg); text-align: right; font-weight: 600; font-size: 0.8rem; color: var(--text-muted); border-bottom: 1px solid var(--border-color); }
+        .calendar-header-row div { padding: 0.5rem; border-right: 1px solid var(--border-color); }
+        .calendar-header-row div:last-child { border-right: none; }
+        
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); auto-rows: minmax(100px, auto); }
+        .calendar-day { border-right: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); padding: 0.5rem; background: var(--panel-bg); display: flex; flex-direction: column; gap: 4px; }
+        .calendar-day:nth-child(7n) { border-right: none; }
+        .calendar-day.empty { background: var(--bg-color); }
+        
+        .day-number { font-weight: 600; color: var(--text-muted); font-size: 0.85rem; align-self: flex-end; margin-bottom: 5px; }
+        .calendar-day.today .day-number { background: var(--primary-color); color: white; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; }
+
+        .cal-review-item { font-size: 0.7rem; padding: 3px 5px; border-radius: 4px; background: var(--icon-blue-bg); color: var(--icon-blue-text); border-left: 2px solid var(--primary-color); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; transition: all 0.2s; }
+        .cal-review-item:hover { filter: brightness(1.2); }
+        .cal-review-item.urgente { background: var(--icon-red-bg); color: var(--danger-color); border-left-color: var(--danger-color); }
+        .cal-review-item.alerta { background: var(--icon-yellow-bg); color: var(--warning-color); border-left-color: var(--warning-color); }
+
+        /* === ESTILOS PARA DESEMPENHO === */
+        .desempenho-card { background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 1rem; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .desempenho-header { padding: 1rem 1.5rem; display: flex; justify-content: space-between; align-items: center; cursor: pointer; font-weight: 600; background-color: var(--bg-color); border-bottom: 1px solid transparent; transition: all 0.2s; }
+        .desempenho-header:hover { background-color: var(--hover-bg); }
+        .desempenho-body { padding: 0; border-top: 1px solid var(--border-color); overflow-x: auto; }
+        .desempenho-body table th { background: var(--hover-bg); padding: 0.75rem 1.5rem; font-size: 0.8rem; }
+        .desempenho-body table td { padding: 0.75rem 1.5rem; }
+
+        /* === ESTILOS PARA KANBAN E CICLO DE ESTUDOS === */
+        .kanban-board { display: flex; gap: 1rem; overflow-x: auto; padding-bottom: 1rem; scrollbar-width: thin; scrollbar-color: var(--border-color) transparent; }
+        .kanban-col { min-width: 280px; background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 8px; display: flex; flex-direction: column; }
+        .kanban-col-header { font-weight: 700; padding: 1rem; border-bottom: 2px solid; color: var(--text-main); border-top-left-radius: 8px; border-top-right-radius: 8px; background: var(--panel-bg); }
+        .kanban-col-body { padding: 1rem; display: flex; flex-direction: column; gap: 1rem; flex: 1; }
+        .kanban-card { background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 6px; padding: 1rem; box-shadow: 0 2px 4px rgba(0,0,0,0.05); display: flex; flex-direction: column; gap: 8px; position: relative; }
+        .kanban-card h4 { font-size: 0.95rem; color: var(--text-main); padding-right: 20px; }
+        .kanban-card p { font-size: 0.8rem; color: var(--text-muted); line-height: 1.4; }
+        .tag-row { display: flex; gap: 5px; flex-wrap: wrap; }
+        .mini-tag { font-size: 0.65rem; padding: 2px 6px; border-radius: 4px; background: var(--hover-bg); color: var(--text-muted); font-weight: 600; }
+        .add-card-btn { background: transparent; border: 1px dashed var(--border-color); color: var(--text-muted); padding: 0.8rem; border-radius: 6px; cursor: pointer; font-weight: 500; transition: all 0.2s; }
+        .add-card-btn:hover { background: var(--hover-bg); color: var(--primary-color); border-color: var(--primary-color); }
+
+        .ciclo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 15px; }
+        .ciclo-step { background: var(--panel-bg); border: 1px solid var(--border-color); border-left: 4px solid var(--primary-color); border-radius: 8px; padding: 1.5rem; display: flex; flex-direction: column; gap: 10px; position: relative; transition: transform 0.2s ease, border-left-width 0.2s ease, opacity 0.2s ease; }
+        .ciclo-step[draggable="true"] { cursor: grab; }
+        .ciclo-step[draggable="true"]:active { cursor: grabbing; }
+        .ciclo-step.dragging { opacity: 0.5; border: 2px dashed var(--primary-color); }
+        .ciclo-step.drag-over { border-left-width: 10px; border-left-color: var(--primary-color); transform: scale(1.02); background: var(--hover-bg); }
+        .ciclo-step-number { position: absolute; top: -10px; left: -10px; width: 28px; height: 28px; background: var(--primary-color); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.8rem; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        .btn-delete-card { position: absolute; top: 10px; right: 10px; background: none; border: none; color: var(--text-muted); cursor: pointer; transition: color 0.2s; }
+        .btn-delete-card:hover { color: var(--danger-color); }
+
+        /* === ESTILOS PARA METAS === */
+        .meta-card { background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 2px 4px rgba(0,0,0,0.05); position: relative; }
+        .meta-card h3 { font-size: 1.2rem; color: var(--text-main); margin-bottom: 1rem; display: flex; align-items: center; gap: 8px; }
+        .meta-progress-blocks { display: flex; gap: 4px; margin-bottom: 1rem; align-items: center; }
+        .meta-block { flex: 1; height: 20px; border-radius: 3px; background: var(--hover-bg); max-width: 25px; }
+        .meta-block.filled { background: var(--text-main); }
+        .meta-perc-text { margin-left: 10px; font-weight: 600; color: var(--text-muted); }
+        .meta-msg { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1rem; }
+        .meta-status-pill { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; margin-bottom: 1rem; }
+        .meta-date-info { font-size: 0.85rem; color: var(--text-muted); font-weight: 500; }
+        .meta-date-info i { color: #ea580c; margin-right: 5px; }
+
+        /* === ESTILOS PARA SIMULADOS & REDAÇÃO === */
+        .block-progress-container {
+            display: flex; gap: 2px; align-items: center;
+        }
+        .block-progress-item {
+            width: 12px; height: 12px; background: var(--hover-bg); border-radius: 2px;
+        }
+        .block-progress-item.filled {
+            background: var(--warning-color);
+        }
+        .record-card {
+            background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; position: relative;
+        }
+        .record-pill {
+            display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; background: var(--icon-red-bg); color: var(--danger-color); font-weight: 600; margin-bottom: 10px;
+        }
+        .record-item-list {
+            list-style: none; font-size: 0.85rem; color: var(--text-muted); margin-top: 15px;
+        }
+        .record-item-list li { margin-bottom: 8px; display: flex; align-items: center; gap: 5px; }
+    </style>
+</head>
+<body>
+    <script>
+        if (localStorage.getItem('planiq-theme') === 'light') {
+            document.body.classList.add('light-theme');
+        }
+    </script>
+
+    <aside class="sidebar">
+        <div class="logo"><i class="fa-solid fa-graduation-cap"></i> PlanIQ</div>
+        
+        <nav class="nav-menu">
+            <a href="#" class="nav-item active" onclick="navegarPara('dashboard')"><i class="fa-solid fa-house" style="width:20px;"></i> Início</a>
+            <a href="#" class="nav-item" onclick="navegarPara('edital')"><i class="fa-solid fa-book-open" style="width:20px;"></i> O Meu Edital</a>
+            <a href="#" class="nav-item" onclick="navegarPara('cronograma')"><i class="fa-solid fa-calendar-alt" style="width:20px;"></i> Cronograma</a>
+            <a href="#" class="nav-item" onclick="navegarPara('revisoes')"><i class="fa-solid fa-calendar-days" style="width:20px;"></i> Revisões</a>
+            <a href="#" class="nav-item" onclick="navegarPara('desempenho')"><i class="fa-solid fa-chart-simple" style="width:20px;"></i> Desempenho</a>
+            <a href="#" class="nav-item" onclick="navegarPara('simulados')"><i class="fa-solid fa-file-pen" style="width:20px;"></i> Simulados e Redação</a>
+            <a href="#" class="nav-item" onclick="navegarPara('metas')"><i class="fa-solid fa-bullseye" style="width:20px;"></i> Metas</a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <button onclick="toggleTheme()" class="nav-item" style="width: 100%; border: none; background: transparent; cursor: pointer; text-align: left; padding: 0.5rem 1.5rem;">
+                <i class="fa-solid fa-sun" id="theme-icon" style="width: 20px;"></i> <span id="theme-text">Modo Claro</span>
+            </button>
+            <a href="#" class="nav-item" style="padding: 0.5rem 1.5rem; border: none;"><i class="fa-solid fa-gear" style="width:20px;"></i> Definições</a>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        
+        <!-- ========================================== -->
+        <!-- ECRÃ 1: DASHBOARD                          -->
+        <!-- ========================================== -->
+        <div id="view-dashboard">
+            <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <h1 style="margin-bottom: 0;">Dashboard</h1>
+                <button class="btn-primary" style="width: auto; padding: 0.6rem 1.2rem;" onclick="abrirModalEstudo()">
+                    <i class="fa-solid fa-plus"></i> Adicionar Estudo
+                </button>
+            </header>
+
+            <div class="panel" style="padding: 1rem; text-align: center; margin-bottom: 1.5rem; font-style: italic; color: var(--text-muted); font-size: 1.05rem;">
+                "A disciplina é a ponte entre metas e realizações."
+            </div>
+
+            <section class="dash-cards-grid">
+                <div class="dash-top-card">
+                    <div class="dash-card-title">
+                        <i class="fa-regular fa-clock" style="color: var(--primary-color); font-size: 1.2rem;"></i> Horas Totais
+                    </div>
+                    <div class="dash-card-big-number" id="dash-horas-totais">0h 0m</div>
+                </div>
+
+                <div class="dash-top-card">
+                    <div class="dash-card-title">
+                        <i class="fa-solid fa-chart-line" style="color: var(--success-color); font-size: 1.2rem;"></i> Desempenho
+                    </div>
+                    <div class="dash-card-big-number" id="dash-perc-geral">0%</div>
+                    <div class="progress-bar-container" style="height: 6px; margin: 0; background: var(--bg-color);">
+                        <div class="progress-bar-fill" id="dash-bar-geral" style="width: 0%; background: var(--success-color);"></div>
+                    </div>
+                    <div class="dash-card-substats">
+                        <span title="Total de Questões"><i class="fa-solid fa-list-ol"></i> <span id="dash-q-total">0</span></span>
+                        <span title="Acertos" style="color: var(--success-color);"><i class="fa-solid fa-check"></i> <span id="dash-q-acertos">0</span></span>
+                        <span title="Erros" style="color: var(--danger-color);"><i class="fa-solid fa-xmark"></i> <span id="dash-q-erros">0</span></span>
+                    </div>
+                </div>
+
+                <div class="dash-top-card">
+                    <div class="dash-card-title">
+                        <i class="fa-solid fa-book-open" style="color: var(--warning-color); font-size: 1.2rem;"></i> Progresso do Edital
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: baseline;">
+                        <div class="dash-card-big-number" id="dash-perc-edital">0%</div>
+                        <div style="font-size: 1rem; color: var(--text-muted); font-weight: 600;" id="dash-frac-edital">0/0</div>
+                    </div>
+                    <div class="progress-bar-container" style="height: 6px; margin: 0; background: var(--bg-color);">
+                        <div class="progress-bar-fill" id="dash-bar-edital" style="width: 0%; background: var(--warning-color);"></div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="dashboard-main-grid">
+                <div class="col-left">
+                    <div class="panel" style="margin-bottom: 1.5rem;">
+                        <h2 class="panel-title">Resumo por Disciplina</h2>
+                        <div style="overflow-x: auto;">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Disciplina</th>
+                                        <th>Horas</th>
+                                        <th>Questões</th>
+                                        <th>Acertos %</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabela-disciplinas"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="panel" style="margin-bottom: 1.5rem;">
+                        <h2 class="panel-title"><i class="fa-solid fa-bullseye" style="color: var(--danger-color);"></i> Resumo de Metas</h2>
+                        <div id="dash-metas-container"></div>
+                    </div>
+                </div>
+
+                <div class="col-right">
+                    <div class="panel" style="margin-bottom: 1.5rem; text-align: center;">
+                        <h3 style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">Resumo de Hoje</h3>
+                        <p style="font-weight: 800; font-size: 1.5rem; margin: 10px 0; color: var(--text-main);"><i class="fa-regular fa-clock" style="color:var(--primary-color);"></i> <span id="dash-hoje-h">0h 0m</span></p>
+                        <p style="font-size: 0.9rem; color: var(--text-muted); font-weight: 500;"><i class="fa-solid fa-check-double" style="color:var(--success-color);"></i> <span id="dash-hoje-q">0</span> questões resolvidas</p>
+                    </div>
+
+                    <div class="panel" style="margin-bottom: 1.5rem; text-align: center;">
+                        <h3 style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">Esta Semana</h3>
+                        <p style="font-weight: 800; font-size: 1.5rem; margin: 10px 0; color: var(--text-main);"><i class="fa-regular fa-clock" style="color:var(--primary-color);"></i> <span id="dash-semana-h">0h 0m</span></p>
+                        <p style="font-size: 0.9rem; color: var(--text-muted); font-weight: 500;"><i class="fa-solid fa-check-double" style="color:var(--success-color);"></i> <span id="dash-semana-q">0</span> questões resolvidas</p>
+                    </div>
+
+                    <div class="panel" style="margin-bottom: 1.5rem; text-align: center;">
+                        <h3 style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">Este Mês</h3>
+                        <p style="font-weight: 800; font-size: 1.5rem; margin: 10px 0; color: var(--text-main);"><i class="fa-regular fa-clock" style="color:var(--primary-color);"></i> <span id="dash-mes-h">0h 0m</span></p>
+                        <p style="font-size: 0.9rem; color: var(--text-muted); font-weight: 500;"><i class="fa-solid fa-check-double" style="color:var(--success-color);"></i> <span id="dash-mes-q">0</span> questões resolvidas</p>
+                    </div>
+
+                    <div class="panel" style="margin-bottom: 1.5rem; border: 2px solid var(--primary-color);" id="painel-proxima-atividade">
+                        <h2 class="panel-title">Próxima Atividade</h2>
+                        <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 10px;">A calcular sugestões...</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- ECRÃ 2: O MEU EDITAL                       -->
+        <!-- ========================================== -->
+        <div id="view-edital" class="hidden">
+            <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <div>
+                    <h1 style="margin-bottom: 0;">O Meu Edital</h1>
+                    <p style="color: var(--text-muted); margin-top: 5px;">Gira as disciplinas e controle o estado dos assuntos.</p>
+                </div>
+                <button class="btn-primary" style="width: auto; padding: 0.6rem 1.2rem;" onclick="adicionarDisciplina()">
+                    <i class="fa-solid fa-plus"></i> Nova Disciplina
+                </button>
+            </header>
+            
+            <div class="edital-container">
+                <div class="edital-tabs">
+                    <button id="tab-ativas" class="active" onclick="mudarAbaEdital('ativas')">
+                        <i class="fa-solid fa-layer-group"></i> Ativas
+                    </button>
+                    <button id="tab-desativadas" onclick="mudarAbaEdital('desativadas')">
+                        <i class="fa-solid fa-box-archive"></i> Desativadas
+                    </button>
+                </div>
+
+                <div class="disciplinas-grid" id="grid-disciplinas"></div>
+                <div id="disciplina-detalhes" class="disciplina-detail-panel hidden"></div>
+            </div>
+        </div> 
+
+        <!-- ========================================== -->
+        <!-- ECRÃ 3: CRONOGRAMA & HISTÓRICO             -->
+        <!-- ========================================== -->
+        <div id="view-cronograma" class="hidden">
+            <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <div>
+                    <h1 style="margin-bottom: 0;">Planeamento de Estudos</h1>
+                    <p style="color: var(--text-muted); margin-top: 5px;">Organize a sua rotina via Cronograma ou Ciclo de Estudos.</p>
+                </div>
+            </header>
+
+            <div class="edital-tabs" style="margin-bottom: 1rem;">
+                <button id="tab-c-semanal" class="active" onclick="mudarAbaCronograma('semanal')">
+                    <i class="fa-regular fa-calendar-week"></i> Cronograma Semanal
+                </button>
+                <button id="tab-c-ciclo" onclick="mudarAbaCronograma('ciclo')">
+                    <i class="fa-solid fa-arrows-spin"></i> Ciclo de Estudos
+                </button>
+            </div>
+
+            <div id="view-c-semanal">
+                <div style="margin-bottom: 1.5rem; text-align: right;">
+                    <button class="btn-danger-outline btn-icon" onclick="reiniciarCronograma()">
+                        <i class="fa-solid fa-rotate-left"></i> Reiniciar Semana
+                    </button>
+                </div>
+                <div id="kanban-container" class="kanban-board"></div>
+            </div>
+
+            <div id="view-c-ciclo" class="hidden">
+                <div style="margin-bottom: 1.5rem; text-align: right;">
+                    <button class="btn-danger-outline btn-icon" onclick="reiniciarCiclo()">
+                        <i class="fa-solid fa-rotate-left"></i> Reiniciar Ciclo
+                    </button>
+                </div>
+                <div id="ciclo-container"></div>
+            </div>
+
+            <div style="margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--border-color);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <h2 class="panel-title" style="margin:0; border:none; font-size:1.3rem;">Histórico de Estudos</h2>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn-danger-outline" style="width: auto; padding: 0.6rem 1.2rem; font-weight: 600;" onclick="excluirTodoHistorico()">
+                            <i class="fa-solid fa-trash"></i> Excluir Histórico
+                        </button>
+                        <button class="btn-primary" style="width: auto; padding: 0.6rem 1.2rem;" onclick="abrirModalEstudo()">
+                            <i class="fa-solid fa-plus"></i> Adicionar Estudo Direto
+                        </button>
+                    </div>
+                </div>
+                <div class="panel" style="overflow-x: auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Disciplina</th>
+                                <th>Tópico</th>
+                                <th>Tempo</th>
+                                <th>Categorias</th>
+                                <th style="text-align: center;">Acertos/Erros</th>
+                                <th>Desempenho</th>
+                                <th style="text-align: center;">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="lista-historico"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- ECRÃ 4: REVISÕES                           -->
+        <!-- ========================================== -->
+        <div id="view-revisoes" class="hidden">
+            <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <div>
+                    <h1 style="margin-bottom: 0;">Agenda de Revisões</h1>
+                    <p style="color: var(--text-muted); margin-top: 5px;">O seu cronograma inteligente baseado em desempenho (Spaced Repetition).</p>
+                </div>
+                <button class="btn-primary" style="width: auto; padding: 0.6rem 1.2rem;" onclick="abrirModalEstudo()">
+                    <i class="fa-solid fa-plus"></i> Adicionar Estudo
+                </button>
+            </header>
+
+            <section style="margin-bottom: 2.5rem;">
+                <h2 class="panel-title" style="color: var(--danger-color); border-bottom-color: var(--danger-color); font-size: 1.2rem;">
+                    <i class="fa-solid fa-triangle-exclamation"></i> Prioridades (Hoje & Atrasadas)
+                </h2>
+                <div id="lista-prioridades" class="revisoes-horizontal-scroll"></div>
+            </section>
+
+            <section style="margin-bottom: 2.5rem;">
+                <h2 class="panel-title" style="color: var(--primary-color); border-bottom-color: var(--primary-color); font-size: 1.2rem;">
+                    <i class="fa-solid fa-calendar-week"></i> Revisões Semanais (Próximos 7 dias)
+                </h2>
+                <div id="lista-semana" class="revisoes-horizontal-scroll"></div>
+            </section>
+
+            <section>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h2 class="panel-title" style="margin: 0; border: none; font-size: 1.2rem;">
+                        <i class="fa-regular fa-calendar-days"></i> Visão Mensal
+                    </h2>
+                    <div style="display: flex; align-items: center;">
+                        <button class="btn-icon" onclick="mudarMesCalendario(-1)"><i class="fa-solid fa-chevron-left"></i></button>
+                        <span id="calendario-titulo-mes" style="font-weight: bold; width: 150px; text-align: center;">Maio de 2026</span>
+                        <button class="btn-icon" onclick="mudarMesCalendario(1)"><i class="fa-solid fa-chevron-right"></i></button>
+                    </div>
+                </div>
+
+                <div class="calendar-wrapper">
+                    <div class="calendar-header-row">
+                        <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
+                    </div>
+                    <div id="calendario-grid" class="calendar-grid"></div>
+                </div>
+            </section>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- ECRÃ 5: DESEMPENHO                         -->
+        <!-- ========================================== -->
+        <div id="view-desempenho" class="hidden">
+            <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <div>
+                    <h1 style="margin-bottom: 0;">Desempenho</h1>
+                    <p style="color: var(--text-muted); margin-top: 5px;">Acompanhe as suas métricas, precisão e horas por disciplina e assunto.</p>
+                </div>
+            </header>
+
+            <div id="lista-desempenho-disciplinas"></div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- ECRÃ 6: SIMULADOS & REDAÇÃO (NOVO)         -->
+        <!-- ========================================== -->
+        <div id="view-simulados" class="hidden">
+            <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <div>
+                    <h1 style="margin-bottom: 0;">Simulados & Redações</h1>
+                    <p style="color: var(--text-muted); margin-top: 5px;">Registe os seus testes e treinos discursivos.</p>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn-primary" style="width: auto; padding: 0.6rem 1.2rem; background-color: var(--primary-color);" onclick="abrirModalSimulado()">
+                        <i class="fa-solid fa-list-check"></i> Novo Simulado
+                    </button>
+                    <button class="btn-primary" style="width: auto; padding: 0.6rem 1.2rem; background-color: var(--success-color);" onclick="abrirModalRedacao()">
+                        <i class="fa-solid fa-pen-nib"></i> Nova Redação
+                    </button>
+                </div>
+            </header>
+
+            <div class="edital-tabs" style="margin-bottom: 1rem;">
+                <button id="tab-s-simulados" class="active" onclick="mudarAbaSim('simulados')">
+                    <i class="fa-solid fa-list-check"></i> Meus Simulados
+                </button>
+                <button id="tab-s-redacoes" onclick="mudarAbaSim('redacoes')">
+                    <i class="fa-solid fa-pen-nib"></i> Minhas Redações
+                </button>
+            </div>
+
+            <!-- VIEW: SIMULADOS -->
+            <div id="view-s-simulados">
+                <div class="dashboard-grid">
+                    <div class="col-left">
+                        <div class="panel" style="overflow-x: auto;">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Cargo</th>
+                                        <th>Origem</th>
+                                        <th>Tempo</th>
+                                        <th>Data</th>
+                                        <th style="text-align: center;">Acertos</th>
+                                        <th style="text-align: center;">Erros</th>
+                                        <th style="text-align: center;">Brancos</th>
+                                        <th style="text-align: center;">Pontos</th>
+                                        <th>Desempenho</th>
+                                        <th style="text-align: center;">Total Q.</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="lista-simulados"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="col-right">
+                        <div class="record-card">
+                            <h3 style="font-size: 1.1rem; margin-bottom: 15px; color: var(--text-main); display: flex; justify-content: space-between; align-items: center;">
+                                Melhor Simulado <i class="fa-solid fa-trophy" style="color: var(--warning-color);"></i>
+                            </h3>
+                            <div id="painel-melhor-simulado">
+                                <!-- Preenchido pelo JS -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW: REDAÇÕES -->
+            <div id="view-s-redacoes" class="hidden">
+                <div class="panel" style="overflow-x: auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Tema</th>
+                                <th>Concurso/Prova</th>
+                                <th>Banca</th>
+                                <th style="text-align: center;">Pontos</th>
+                                <th>Data</th>
+                                <th>Tempo</th>
+                                <th>Considerações</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="lista-redacoes"></tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ========================================== -->
+        <!-- ECRÃ 7: METAS                              -->
+        <!-- ========================================== -->
+        <div id="view-metas" class="hidden">
+            <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <div>
+                    <h1 style="margin-bottom: 0;">As Minhas Metas</h1>
+                    <p style="color: var(--text-muted); margin-top: 5px;">Desafie-se! Defina metas de horas ou questões e acompanhe o progresso.</p>
+                </div>
+                <button class="btn-primary" style="width: auto; padding: 0.6rem 1.2rem;" onclick="abrirModalMeta()">
+                    <i class="fa-solid fa-plus"></i> Nova Meta
+                </button>
+            </header>
+
+            <div id="lista-metas" style="display: flex; flex-direction: column; gap: 1.5rem;"></div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- MODAL DE REGISTO DE ESTUDO (Concluir bloco) -->
+        <!-- ========================================== -->
+        <div id="modal-estudo" class="modal-overlay hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 id="modal-estudo-titulo">Registar Estudo Finalizado</h2>
+                    <button class="btn-close" onclick="fecharModalEstudo()"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                
+                <input type="hidden" id="estudo-edit-id">
+
+                <div class="form-group">
+                    <label for="estudo-data">Data</label>
+                    <input type="date" id="estudo-data" class="form-control">
+                </div>
+
+                <div class="form-group">
+                    <label for="select-disciplina">Disciplina</label>
+                    <select id="select-disciplina" class="form-control" onchange="atualizarTopicosEstudo()">
+                        <option value="">Selecione uma disciplina...</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="select-topico">Tópico</label>
+                    <select id="select-topico" class="form-control">
+                        <option value="">Selecione primeiro a disciplina...</option>
+                    </select>
+                </div>
+
+                <div class="form-group grid-2-cols">
+                    <div>
+                        <label for="estudo-horas">Horas Estudadas</label>
+                        <input type="number" id="estudo-horas" class="form-control" min="0" placeholder="Ex: 1">
+                    </div>
+                    <div>
+                        <label for="estudo-minutos">Minutos Estudados</label>
+                        <input type="number" id="estudo-minutos" class="form-control" min="0" max="59" placeholder="Ex: 45">
+                    </div>
+                </div>
+
+                <div class="form-group" style="background-color: var(--icon-green-bg); padding: 10px; border: 1px solid var(--icon-green-text); border-radius: 6px;">
+                    <label class="checkbox-item" style="font-weight: 600; color: var(--success-color); margin-bottom: 0;">
+                        <input type="checkbox" id="estudo-agendar-revisao" checked> 
+                        <i class="fa-solid fa-bolt" style="margin-right: 5px;"></i> Agendar revisão inteligente após este estudo?
+                    </label>
+                </div>
+
+                <div class="form-group">
+                    <label>Categoria (Pode selecionar mais de uma)</label>
+                    <div class="checkbox-group">
+                        <label class="checkbox-item"><input type="checkbox" name="estudo-categoria" value="Teoria"> Teoria</label>
+                        <label class="checkbox-item"><input type="checkbox" name="estudo-categoria" value="Questão"> Questão</label>
+                        <label class="checkbox-item"><input type="checkbox" name="estudo-categoria" value="Revisão"> Revisão</label>
+                        <label class="checkbox-item"><input type="checkbox" name="estudo-categoria" value="Leitura de Lei"> Leitura de Lei</label>
+                        <label class="checkbox-item"><input type="checkbox" name="estudo-categoria" value="Discursiva"> Discursiva</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Material Utilizado</label>
+                    <div class="checkbox-group">
+                        <label class="checkbox-item"><input type="checkbox" name="estudo-material" value="Vídeo aula"> Vídeo aula</label>
+                        <label class="checkbox-item"><input type="checkbox" name="estudo-material" value="PDF"> PDF</label>
+                        <label class="checkbox-item"><input type="checkbox" name="estudo-material" value="Site de questões"> Site de questões</label>
+                    </div>
+                </div>
+
+                <div class="form-group grid-2-cols">
+                    <div>
+                        <label for="estudo-acertos" style="color: var(--success-color);">Questões Acertadas</label>
+                        <input type="number" id="estudo-acertos" class="form-control" min="0" placeholder="Ex: 15">
+                    </div>
+                    <div>
+                        <label for="estudo-erros" style="color: var(--danger-color);">Questões Erradas</label>
+                        <input type="number" id="estudo-erros" class="form-control" min="0" placeholder="Ex: 3">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="estudo-comentario">Comentário</label>
+                    <textarea id="estudo-comentario" class="form-control" rows="3" placeholder="Como foi o rendimento? Ficou com dúvida em algo?"></textarea>
+                </div>
+
+                <button class="btn-success" onclick="salvarEstudo()">
+                    <i class="fa-solid fa-save"></i> Registar
+                </button>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- MODAL DE ADICIONAR TAREFA NO CRONOGRAMA    -->
+        <!-- ========================================== -->
+        <div id="modal-tarefa" class="modal-overlay hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 id="tarefa-titulo">Planear Estudo</h2>
+                    <button class="btn-close" onclick="fecharModalTarefa()"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                
+                <input type="hidden" id="tarefa-contexto"> 
+
+                <div class="form-group">
+                    <label for="tarefa-disciplina">Disciplina</label>
+                    <select id="tarefa-disciplina" class="form-control" onchange="atualizarTopicosTarefa()">
+                        <option value="">Selecione uma disciplina...</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="tarefa-topico">Tópico</label>
+                    <select id="tarefa-topico" class="form-control">
+                        <option value="">Selecione primeiro a disciplina...</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="tarefa-descricao">Descrição Rápida</label>
+                    <input type="text" id="tarefa-descricao" class="form-control" placeholder="Ex: Teoria + 15 Questões...">
+                </div>
+
+                <div class="form-group">
+                    <label>Categoria (Opcional)</label>
+                    <div class="checkbox-group">
+                        <label class="checkbox-item"><input type="checkbox" name="tarefa-categoria" value="Teoria"> Teoria</label>
+                        <label class="checkbox-item"><input type="checkbox" name="tarefa-categoria" value="Questão"> Questão</label>
+                        <label class="checkbox-item"><input type="checkbox" name="tarefa-categoria" value="Revisão"> Revisão</label>
+                        <label class="checkbox-item"><input type="checkbox" name="tarefa-categoria" value="Leitura de Lei"> Leitura de Lei</label>
+                        <label class="checkbox-item"><input type="checkbox" name="tarefa-categoria" value="Discursiva"> Discursiva</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Material (Opcional)</label>
+                    <div class="checkbox-group">
+                        <label class="checkbox-item"><input type="checkbox" name="tarefa-material" value="Vídeo Aula"> Vídeo Aula</label>
+                        <label class="checkbox-item"><input type="checkbox" name="tarefa-material" value="PDF"> PDF</label>
+                        <label class="checkbox-item"><input type="checkbox" name="tarefa-material" value="Site de questões"> Site de questões</label>
+                    </div>
+                </div>
+
+                <button class="btn-primary" onclick="salvarTarefaPlanejada()">
+                    <i class="fa-solid fa-calendar-plus"></i> Adicionar ao Planeamento
+                </button>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- MODAL DE ADICIONAR NOVA META               -->
+        <!-- ========================================== -->
+        <div id="modal-meta" class="modal-overlay hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Criar Nova Meta</h2>
+                    <button class="btn-close" onclick="fecharModalMeta()"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                
+                <div class="form-group">
+                    <label for="meta-titulo">Título da Meta</label>
+                    <input type="text" id="meta-titulo" class="form-control" placeholder="Ex: Estudar 100 horas em Novembro!">
+                </div>
+
+                <div class="form-group">
+                    <label for="meta-tipo">Tipo de Meta</label>
+                    <select id="meta-tipo" class="form-control" onchange="atualizarLabelAlvoMeta()">
+                        <option value="horas">Horas de Estudo</option>
+                        <option value="questoes">Questões Resolvidas</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label id="label-meta-alvo" for="meta-alvo">Quantidade (em Horas)</label>
+                    <input type="number" id="meta-alvo" class="form-control" min="1" placeholder="Ex: 100">
+                </div>
+
+                <div class="form-group grid-2-cols">
+                    <div>
+                        <label for="meta-inicio">Data de Início</label>
+                        <input type="date" id="meta-inicio" class="form-control">
+                    </div>
+                    <div>
+                        <label for="meta-fim">Data Final</label>
+                        <input type="date" id="meta-fim" class="form-control">
+                    </div>
+                </div>
+
+                <button class="btn-success" onclick="salvarMeta()">
+                    <i class="fa-solid fa-bullseye"></i> Guardar Meta
+                </button>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- MODAL DE NOVO SIMULADO                     -->
+        <!-- ========================================== -->
+        <div id="modal-simulado" class="modal-overlay hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 id="simulado-titulo">Registar Simulado</h2>
+                    <button class="btn-close" onclick="fecharModalSimulado()"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                
+                <input type="hidden" id="sim-edit-id">
+
+                <div class="form-group grid-2-cols">
+                    <div>
+                        <label for="sim-cargo">Cargo / Prova</label>
+                        <input type="text" id="sim-cargo" class="form-control" placeholder="Ex: Agente PF">
+                    </div>
+                    <div>
+                        <label for="sim-origem">Origem / Banca</label>
+                        <input type="text" id="sim-origem" class="form-control" placeholder="Ex: Gran, CESPE...">
+                    </div>
+                </div>
+
+                <div class="form-group grid-2-cols">
+                    <div>
+                        <label for="sim-estilo">Estilo de Prova</label>
+                        <select id="sim-estilo" class="form-control">
+                            <option value="multipla_escolha">Múltipla Escolha</option>
+                            <option value="cespe">Cespe (Certo/Errado)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="sim-data">Data de Realização</label>
+                        <input type="date" id="sim-data" class="form-control">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="sim-tempo">Duração (Ex: 4h 30m)</label>
+                    <input type="text" id="sim-tempo" class="form-control" placeholder="Ex: 4h">
+                </div>
+
+                <div style="border-top: 1px solid var(--border-color); margin: 15px 0;"></div>
+                
+                <div class="form-group grid-2-cols">
+                    <div>
+                        <label for="sim-acertos" style="color: var(--success-color);">Acertos</label>
+                        <input type="number" id="sim-acertos" class="form-control" min="0" placeholder="Ex: 90">
+                    </div>
+                    <div>
+                        <label for="sim-erros" style="color: var(--danger-color);">Erros</label>
+                        <input type="number" id="sim-erros" class="form-control" min="0" placeholder="Ex: 20">
+                    </div>
+                </div>
+
+                <div class="form-group grid-2-cols">
+                    <div>
+                        <label for="sim-brancos" style="color: var(--text-muted);">Em Branco</label>
+                        <input type="number" id="sim-brancos" class="form-control" min="0" placeholder="Ex: 10">
+                    </div>
+                    <div>
+                        <label for="sim-pontos" style="color: var(--primary-color);">Pontos Líquidos</label>
+                        <input type="number" id="sim-pontos" class="form-control" step="0.1" placeholder="Ex: 70">
+                        <span style="font-size: 0.7rem; color: var(--text-muted);">Deixe em branco p/ calcular auto.</span>
+                    </div>
+                </div>
+
+                <button class="btn-success" onclick="salvarSimulado()">
+                    <i class="fa-solid fa-save"></i> Guardar Simulado
+                </button>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- MODAL DE NOVA REDAÇÃO                      -->
+        <!-- ========================================== -->
+        <div id="modal-redacao" class="modal-overlay hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 id="redacao-titulo">Registar Redação</h2>
+                    <button class="btn-close" onclick="fecharModalRedacao()"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+
+                <input type="hidden" id="red-edit-id">
+                
+                <div class="form-group">
+                    <label for="red-tema">Tema da Redação</label>
+                    <input type="text" id="red-tema" class="form-control" placeholder="Ex: Efeitos da inteligência artificial...">
+                </div>
+
+                <div class="form-group grid-2-cols">
+                    <div>
+                        <label for="red-concurso">Concurso/Prova</label>
+                        <input type="text" id="red-concurso" class="form-control" placeholder="Ex: Técnico - MPU">
+                    </div>
+                    <div>
+                        <label for="red-banca">Banca</label>
+                        <input type="text" id="red-banca" class="form-control" placeholder="Ex: FGV, CESPE...">
+                    </div>
+                </div>
+
+                <div class="form-group grid-2-cols">
+                    <div>
+                        <label for="red-data">Data</label>
+                        <input type="date" id="red-data" class="form-control">
+                    </div>
+                    <div>
+                        <label for="red-tempo">Duração</label>
+                        <input type="text" id="red-tempo" class="form-control" placeholder="Ex: 1h 15m">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="red-pontos" style="color: var(--primary-color);">Pontuação Obtida</label>
+                    <input type="number" id="red-pontos" class="form-control" step="0.1" placeholder="Ex: 8.5">
+                </div>
+
+                <div class="form-group">
+                    <label for="red-consideracoes">Considerações (Opcional)</label>
+                    <textarea id="red-consideracoes" class="form-control" rows="3" placeholder="Ex: Erros de ortografia, melhorar conclusão..."></textarea>
+                </div>
+
+                <button class="btn-success" onclick="salvarRedacao()">
+                    <i class="fa-solid fa-save"></i> Guardar Redação
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- INÍCIO DO JAVASCRIPT (TOTALMENTE OFFLINE E LOCAL) -->
+    <script>
+        // === SISTEMA DE TEMAS ===
+        function toggleTheme() {
+            const body = document.body;
+            body.classList.toggle('light-theme');
+            const isLight = body.classList.contains('light-theme');
+            localStorage.setItem('planiq-theme', isLight ? 'light' : 'dark');
+            atualizarBotaoTema(isLight);
+        };
+
+        function atualizarBotaoTema(isLight) {
+            const icon = document.getElementById('theme-icon');
+            const text = document.getElementById('theme-text');
+            if(icon && text) {
+                if (isLight) {
+                    icon.className = 'fa-solid fa-moon';
+                    text.innerText = 'Modo Escuro';
+                } else {
+                    icon.className = 'fa-solid fa-sun';
+                    text.innerText = 'Modo Claro';
+                }
+            }
+        };
+
+        atualizarBotaoTema(document.body.classList.contains('light-theme'));
+
+        // 1. ESTRUTURA BASE E ESTADO DO APP
+        let editalDoUsuario = {
+            concursoSelecionado: "Edital Base Administrativo",
+            disciplinas: [
+                { id: 1, nome: "Língua Portuguesa", topicos: ["Classe de palavras", "Verbos", "Sintaxe Período simples", "Sintaxe Período composto", "Concordância verbal e nominal", "Regência verbal e nominal", "Crase", "Colocação pronominal", "Ortografia, acentuação gráfica e pontuação", "Tipos e géneros textuais", "Compreensão e interpretação de textos", "Redação oficial"] },
+                { id: 2, nome: "Direito Administrativo", topicos: ["Princípios da Administração Pública", "Ato Administrativo", "Poderes administrativos", "Organização da Administração", "Agentes Públicos", "Controle da Administração Pública", "Responsabilidade Civil do Estado", "Serviços Públicos", "Lei nº 12.527/2011", "Lei nº 13.709/2018", "Lei nº 8.429/1992", "Lei nº 12.846/2013", "Lei nº 9.784/1999"] },
+                { id: 3, nome: "Ética", topicos: ["Ética, moral, princípios e valores", "Ética e democracia: exercício da cidadania", "Regime disciplinar dos servidores"] },
+                { id: 4, nome: "Direito Constitucional", topicos: ["Princípios fundamentais", "Direitos e garantias fundamentais", "Organização político-administrativa", "Administração pública", "Da Organização dos Poderes", "Da Ordem Social"] },
+                { id: 5, nome: "Informática", topicos: ["Microsoft Windows", "Microsoft Word", "Microsoft Excel", "Redes de Computadores", "Segurança da Informação", "Hardware e Software"] },
+                { id: 6, nome: "Raciocínio Lógico", topicos: ["Estruturas Lógicas e Proposições", "Equivalência Lógica e Negações", "Conjuntos e Diagramas Lógicos", "Raciocínio Lógico Quantitativo", "Análise Combinatória e Probabilidade", "Problemas Aritméticos e Algébricos", "Progressões", "Juros", "Sistema de Amortização"] },
+                { id: 7, nome: "Administração Geral", topicos: ["Comportamento organizacional", "Planeamento", "Organização", "Gestão de projetos", "Gestão de Processos", "Gestão de Pessoas", "Gestão por Competências", "Funções Administrativas"] },
+                { id: 8, nome: "Administração Pública", topicos: ["Modelos de Administração Pública", "Transparência", "Governabilidade e governança", "Políticas públicas", "Lei Complementar nº 131/2009"] },
+                { id: 9, nome: "Administração Financeira e Orçamentária", topicos: ["Orçamento público", "O orçamento público no Brasil", "Programação e execução", "Receita pública", "Despesa pública", "Lei de Responsabilidade Fiscal"] },
+                { id: 10, nome: "Recursos Materiais", topicos: ["Licitação", "Contratos administrativos", "Classificação de Materiais", "Gestão de Estoques", "Recebimento e Armazenagem", "Distribuição de Materiais", "Gestão Patrimonial"] }
+            ]
+        };
+        
+        let registrosDeEstudo = [];
+        let metasDoUsuario = []; 
+        let simuladosDoUsuario = [];
+        let redacoesDoUsuario = [];
+
+        let planejamentoDoUsuario = {
+            cronograma: [
+                { dia: 'Segunda', corBorda: '#57534e', itens: [] },
+                { dia: 'Terça', corBorda: '#991b1b', itens: [] },
+                { dia: 'Quarta', corBorda: '#92400e', itens: [] },
+                { dia: 'Quinta', corBorda: '#ca8a04', itens: [] },
+                { dia: 'Sexta', corBorda: '#4338ca', itens: [] },
+                { dia: 'Sábado', corBorda: '#15803d', itens: [] },
+                { dia: 'Domingo', corBorda: '#be185d', itens: [] }
+            ],
+            ciclo: []
+        };
+
+        let abaAtivaEdital = 'ativas';
+        let disciplinaSelecionadaId = null;
+
+        let mesAtualExibicao = new Date().getMonth();
+        let anoAtualExibicao = new Date().getFullYear();
+
+        let dragStartIndexCiclo = null;
+
+        // === SISTEMA DE ARMAZENAMENTO LOCAL ===
+        function salvarDadosLocais() {
+            localStorage.setItem('PlanIQ_edital', JSON.stringify(editalDoUsuario));
+            localStorage.setItem('PlanIQ_registros', JSON.stringify(registrosDeEstudo));
+            localStorage.setItem('PlanIQ_planejamento', JSON.stringify(planejamentoDoUsuario));
+            localStorage.setItem('PlanIQ_metas', JSON.stringify(metasDoUsuario));
+            localStorage.setItem('PlanIQ_simulados', JSON.stringify(simuladosDoUsuario));
+            localStorage.setItem('PlanIQ_redacoes', JSON.stringify(redacoesDoUsuario));
+        }
+
+        function carregarDadosLocais() {
+            const savedEdital = localStorage.getItem('PlanIQ_edital');
+            if (savedEdital) editalDoUsuario = JSON.parse(savedEdital);
+
+            const savedRegistros = localStorage.getItem('PlanIQ_registros');
+            if (savedRegistros) {
+                registrosDeEstudo = JSON.parse(savedRegistros);
+                registrosDeEstudo.sort((a, b) => b.timestamp - a.timestamp);
+            }
+
+            const savedPlan = localStorage.getItem('PlanIQ_planejamento');
+            if (savedPlan) planejamentoDoUsuario = JSON.parse(savedPlan);
+
+            const savedMetas = localStorage.getItem('PlanIQ_metas');
+            if (savedMetas) metasDoUsuario = JSON.parse(savedMetas);
+
+            const savedSimulados = localStorage.getItem('PlanIQ_simulados');
+            if (savedSimulados) simuladosDoUsuario = JSON.parse(savedSimulados);
+
+            const savedRedacoes = localStorage.getItem('PlanIQ_redacoes');
+            if (savedRedacoes) redacoesDoUsuario = JSON.parse(savedRedacoes);
+        }
+
+        // 2. SISTEMA DE NAVEGAÇÃO E DASHBOARD
+        function navegarPara(tela) {
+            document.getElementById('view-dashboard').classList.add('hidden');
+            document.getElementById('view-edital').classList.add('hidden');
+            document.getElementById('view-cronograma').classList.add('hidden');
+            document.getElementById('view-revisoes').classList.add('hidden');
+            document.getElementById('view-desempenho').classList.add('hidden');
+            document.getElementById('view-metas').classList.add('hidden');
+            document.getElementById('view-simulados').classList.add('hidden');
+            
+            const menuItems = document.querySelectorAll('.nav-menu .nav-item');
+            menuItems.forEach(i => i.classList.remove('active'));
+
+            if (tela === 'dashboard') {
+                document.getElementById('view-dashboard').classList.remove('hidden');
+                menuItems[0].classList.add('active');
+                renderizarDashboard();
+            } else if (tela === 'edital') {
+                document.getElementById('view-edital').classList.remove('hidden');
+                menuItems[1].classList.add('active');
+                renderizarEdital(); 
+            } else if (tela === 'cronograma') {
+                document.getElementById('view-cronograma').classList.remove('hidden');
+                menuItems[2].classList.add('active');
+                renderizarHistorico(); 
+                renderizarViewsCronograma();
+            } else if (tela === 'revisoes') {
+                document.getElementById('view-revisoes').classList.remove('hidden');
+                menuItems[3].classList.add('active');
+                renderizarRevisoes(); 
+            } else if (tela === 'desempenho') {
+                document.getElementById('view-desempenho').classList.remove('hidden');
+                menuItems[4].classList.add('active');
+                renderizarDesempenho(); 
+            } else if (tela === 'simulados') {
+                document.getElementById('view-simulados').classList.remove('hidden');
+                menuItems[5].classList.add('active');
+                renderizarSimulados(); 
+                renderizarRedacoes();
+            } else if (tela === 'metas') {
+                document.getElementById('view-metas').classList.remove('hidden');
+                menuItems[6].classList.add('active');
+                renderizarMetas(); 
+            }
+        };
+
+        function formatarDataLocalParaISO(dataObj) {
+            let ano = dataObj.getFullYear();
+            let mes = String(dataObj.getMonth() + 1).padStart(2, '0');
+            let dia = String(dataObj.getDate()).padStart(2, '0');
+            return `${ano}-${mes}-${dia}`;
+        }
+
+        // VERIFICADORES DE DATA
+        function isToday(dateStr) {
+            let d = new Date(dateStr + "T00:00:00");
+            let today = new Date();
+            return d.getDate() === today.getDate() && d.getMonth() === today.getMonth() && d.getFullYear() === today.getFullYear();
+        }
+
+        function isThisWeek(dateStr) {
+            let d = new Date(dateStr + "T00:00:00");
+            let today = new Date(); today.setHours(0,0,0,0);
+            let dayOfWeek = today.getDay(); 
+            let startOfWeek = new Date(today);
+            startOfWeek.setDate(today.getDate() - dayOfWeek);
+            let endOfWeek = new Date(today);
+            endOfWeek.setDate(today.getDate() + (6 - dayOfWeek));
+            return d >= startOfWeek && d <= endOfWeek;
+        }
+
+        function isThisMonth(dateStr) {
+            let d = new Date(dateStr + "T00:00:00");
+            let today = new Date();
+            return d.getMonth() === today.getMonth() && d.getFullYear() === today.getFullYear();
+        }
+
+        function renderizarDashboard() {
+            let totais = { min: 0, acertos: 0, erros: 0, q: 0 };
+            let hoje = { min: 0, q: 0 };
+            let semana = { min: 0, q: 0 };
+            let mes = { min: 0, q: 0 };
+            let porDisciplina = {};
+
+            editalDoUsuario.disciplinas.forEach(d => {
+                if (d.statusDisciplina !== 'desativada') {
+                    porDisciplina[d.nome] = { min: 0, a: 0, e: 0, q: 0 };
+                }
+            });
+
+            registrosDeEstudo.forEach(reg => {
+                let min = (reg.tempo?.horas || 0)*60 + (reg.tempo?.minutos || 0);
+                let a = reg.questoes?.acertos || 0;
+                let e = reg.questoes?.erros || 0;
+                let q = a + e;
+                
+                totais.min += min; totais.acertos += a; totais.erros += e; totais.q += q;
+
+                if (isToday(reg.data)) { hoje.min += min; hoje.q += q; }
+                if (isThisWeek(reg.data)) { semana.min += min; semana.q += q; }
+                if (isThisMonth(reg.data)) { mes.min += min; mes.q += q; }
+
+                if (porDisciplina[reg.disciplina]) {
+                    porDisciplina[reg.disciplina].min += min;
+                    porDisciplina[reg.disciplina].a += a;
+                    porDisciplina[reg.disciplina].e += e;
+                    porDisciplina[reg.disciplina].q += q;
+                }
+            });
+
+            document.getElementById('dash-horas-totais').innerText = `${Math.floor(totais.min / 60)}h ${totais.min % 60}m`;
+            
+            let percGeral = totais.q > 0 ? Math.round((totais.acertos / totais.q) * 100) : 0;
+            document.getElementById('dash-perc-geral').innerText = `${percGeral}%`;
+            document.getElementById('dash-bar-geral').style.width = `${percGeral}%`;
+            document.getElementById('dash-q-total').innerText = totais.q;
+            document.getElementById('dash-q-acertos').innerText = totais.acertos;
+            document.getElementById('dash-q-erros').innerText = totais.erros;
+
+            let totalTopicos = 0; let concluidosTopicos = 0;
+            editalDoUsuario.disciplinas.forEach(disc => {
+                if (disc.statusDisciplina !== 'desativada') {
+                    disc.topicos.forEach(t => {
+                        totalTopicos++;
+                        let status = typeof t === 'string' ? 'nao_iniciado' : (t.status || 'nao_iniciado');
+                        if (status === 'concluido') concluidosTopicos++;
+                    });
+                }
+            });
+            let percEdital = totalTopicos > 0 ? Math.round((concluidosTopicos / totalTopicos) * 100) : 0;
+            document.getElementById('dash-perc-edital').innerText = `${percEdital}%`;
+            document.getElementById('dash-frac-edital').innerText = `${concluidosTopicos}/${totalTopicos}`;
+            document.getElementById('dash-bar-edital').style.width = `${percEdital}%`;
+
+            let tbody = document.getElementById('tabela-disciplinas');
+            tbody.innerHTML = '';
+            let objEntries = Object.entries(porDisciplina);
+            if(objEntries.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--text-muted); padding: 1rem;">Nenhum estudo registado.</td></tr>';
+            } else {
+                objEntries.sort((a,b) => b[1].min - a[1].min).forEach(([nome, dados]) => {
+                    let h = Math.floor(dados.min / 60); let m = dados.min % 60;
+                    let timeStr = `${h > 0 ? h+'h ' : ''}${m}m`.trim() || '0m';
+                    let p = dados.q > 0 ? Math.round((dados.a / dados.q)*100) : 0;
+                    let pColor = p >= 80 ? 'var(--success-color)' : p >= 60 ? 'var(--warning-color)' : 'var(--danger-color)';
+                    tbody.innerHTML += `
+                        <tr>
+                            <td style="font-weight: 500;">${nome}</td>
+                            <td>${timeStr}</td>
+                            <td>${dados.q}</td>
+                            <td style="color: ${pColor}; font-weight: bold;">${p}%</td>
+                        </tr>
+                    `;
+                });
+            }
+
+            document.getElementById('dash-hoje-h').innerText = `${Math.floor(hoje.min / 60)}h ${hoje.min % 60}m`;
+            document.getElementById('dash-hoje-q').innerText = hoje.q;
+            document.getElementById('dash-semana-h').innerText = `${Math.floor(semana.min / 60)}h ${semana.min % 60}m`;
+            document.getElementById('dash-semana-q').innerText = semana.q;
+            document.getElementById('dash-mes-h').innerText = `${Math.floor(mes.min / 60)}h ${mes.min % 60}m`;
+            document.getElementById('dash-mes-q').innerText = mes.q;
+
+            let metasContainer = document.getElementById('dash-metas-container');
+            metasContainer.innerHTML = '';
+            if(metasDoUsuario.length === 0) {
+                metasContainer.innerHTML = '<p style="color:var(--text-muted); font-size:0.85rem;">Nenhuma meta ativa.</p>';
+            } else {
+                metasDoUsuario.slice(0, 2).forEach(meta => {
+                    let progressoAtual = 0;
+                    registrosDeEstudo.forEach(reg => {
+                        if (reg.data >= meta.dataInicio && reg.data <= meta.dataFim) {
+                            if (meta.tipo === 'horas' && reg.tempo) progressoAtual += (reg.tempo.horas * 60) + reg.tempo.minutos;
+                            else if (meta.tipo === 'questoes' && reg.questoes) progressoAtual += (reg.questoes.acertos + reg.questoes.erros);
+                        }
+                    });
+                    if (meta.tipo === 'horas') progressoAtual = progressoAtual / 60;
+                    let percentualRaw = (progressoAtual / meta.alvo) * 100;
+                    let percentualLimpo = Math.min(Math.round(percentualRaw), 100);
+                    
+                    metasContainer.innerHTML += `
+                        <div style="margin-bottom: 15px;">
+                            <div style="display:flex; justify-content:space-between; font-size:0.85rem; margin-bottom:5px;">
+                                <strong style="color:var(--text-main); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:180px;">${meta.titulo}</strong>
+                                <span style="color:var(--primary-color); font-weight:bold;">${percentualLimpo}%</span>
+                            </div>
+                            <div class="progress-bar-container" style="height: 6px; margin-top:0;">
+                                <div class="progress-bar-fill" style="width: ${percentualLimpo}%;"></div>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            atualizarProximaAtividade();
+        }
+
+        // ... MANTENDO TODAS AS FUNÇÕES ANTERIORES DE EDITAL ...
+        function calcularProgressoDisciplina(disciplinaObj) {
+            if (!disciplinaObj.topicos || disciplinaObj.topicos.length === 0) return 0;
+            let concluidos = disciplinaObj.topicos.filter(t => {
+                let status = typeof t === 'string' ? 'nao_iniciado' : (t.status || 'nao_iniciado');
+                return status === 'concluido';
+            }).length;
+            return Math.round((concluidos / disciplinaObj.topicos.length) * 100);
+        }
+
+        function mudarAbaEdital(aba) {
+            abaAtivaEdital = aba;
+            disciplinaSelecionadaId = null; 
+            document.getElementById('tab-ativas').classList.remove('active');
+            document.getElementById('tab-desativadas').classList.remove('active');
+            document.getElementById(`tab-${aba}`).classList.add('active');
+            renderizarEdital();
+        }
+
+        function selecionarDisciplinaCard(id) {
+            disciplinaSelecionadaId = id;
+            renderizarEdital();
+            setTimeout(() => {
+                const painel = document.getElementById('disciplina-detalhes');
+                if(painel && !painel.classList.contains('hidden')) {
+                    painel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+            }, 100);
+        }
+
+        function renderizarEdital() {
+            const gridContainer = document.getElementById('grid-disciplinas');
+            const detailContainer = document.getElementById('disciplina-detalhes');
+            gridContainer.innerHTML = ''; 
+            detailContainer.innerHTML = '';
+            detailContainer.classList.add('hidden');
+
+            let disciplinasVisiveis = editalDoUsuario.disciplinas.filter(d => {
+                let statusD = d.statusDisciplina || 'ativa';
+                return abaAtivaEdital === 'ativas' ? statusD === 'ativa' : statusD === 'desativada';
+            });
+
+            if(disciplinasVisiveis.length === 0) {
+                gridContainer.innerHTML = `<p style="color: var(--text-muted); grid-column: 1 / -1; padding: 2rem; text-align: center;">Nenhuma disciplina nesta aba.</p>`;
+            }
+
+            disciplinasVisiveis.forEach(disciplina => {
+                let progresso = calcularProgressoDisciplina(disciplina);
+                let isSelected = disciplina.id === disciplinaSelecionadaId ? 'selected' : '';
+                
+                gridContainer.innerHTML += `
+                    <div class="disciplina-box ${isSelected}" onclick="selecionarDisciplinaCard(${disciplina.id})">
+                        <div class="disciplina-box-title">${disciplina.nome}</div>
+                        <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 5px;">Progresso: ${progresso}%</div>
+                        <div class="progress-bar-container" style="height: 6px; margin-top: 0;">
+                            <div class="progress-bar-fill" style="width: ${progresso}%;"></div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            if (disciplinaSelecionadaId) {
+                let d = editalDoUsuario.disciplinas.find(x => x.id === disciplinaSelecionadaId);
+                if (d) {
+                    detailContainer.classList.remove('hidden');
+                    
+                    let acertosTotais = 0;
+                    let errosTotais = 0;
+                    let totalMinutosEstudados = 0; 
+                    
+                    registrosDeEstudo.forEach(reg => {
+                        if (reg.disciplina === d.nome) {
+                            acertosTotais += reg.questoes.acertos || 0;
+                            errosTotais += reg.questoes.erros || 0;
+                            if (reg.tempo) totalMinutosEstudados += (reg.tempo.horas || 0) * 60 + (reg.tempo.minutos || 0);
+                        }
+                    });
+
+                    let horasFinais = Math.floor(totalMinutosEstudados / 60);
+                    let minutosFinais = totalMinutosEstudados % 60;
+                    let textoTempo = '0h 0m';
+                    if (totalMinutosEstudados > 0) {
+                        textoTempo = `${horasFinais > 0 ? horasFinais+'h ' : ''}${minutosFinais > 0 ? minutosFinais+'m' : ''}`.trim();
+                    }
+
+                    let totalQuestoes = acertosTotais + errosTotais;
+                    let progressoGeral = calcularProgressoDisciplina(d);
+                    let statusAtual = d.statusDisciplina || 'ativa';
+                    let isDesativada = statusAtual === 'desativada';
+
+                    let topicosHTML = d.topicos.map((topicoObj, index) => {
+                        let nome = typeof topicoObj === 'string' ? topicoObj : topicoObj.nome;
+                        let status = typeof topicoObj === 'string' ? 'nao_iniciado' : (topicoObj.status || 'nao_iniciado');
+
+                        return `
+                        <li class="topico-item">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <span class="status-dot status-${status}"></span>
+                                <span>${nome}</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 15px;">
+                                <select class="select-status" onchange="mudarStatusTopico(${d.id}, ${index}, this.value)">
+                                    <option value="nao_iniciado" ${status === 'nao_iniciado' ? 'selected' : ''}>Não iniciado</option>
+                                    <option value="estudando" ${status === 'estudando' ? 'selected' : ''}>Estudando</option>
+                                    <option value="concluido" ${status === 'concluido' ? 'selected' : ''}>Concluído</option>
+                                </select>
+                                <div>
+                                    <button onclick="editarTopico(${d.id}, ${index})" title="Editar Assunto"><i class="fa-solid fa-pen"></i></button>
+                                    <button class="btn-delete" onclick="excluirTopico(${d.id}, ${index})" title="Eliminar Assunto"><i class="fa-solid fa-trash"></i></button>
+                                </div>
+                            </div>
+                        </li>
+                    `}).join('');
+
+                    if(d.topicos.length === 0) topicosHTML = '<li class="topico-item text-muted">Nenhum assunto registado nesta matéria.</li>';
+
+                    let botoesStatusHtml = isDesativada 
+                        ? `<button class="btn-success-outline btn-icon" onclick="alternarStatusDisciplina(${d.id})"><i class="fa-solid fa-power-off"></i> Reativar Disciplina</button>`
+                        : `<button class="btn-danger-outline btn-icon" onclick="alternarStatusDisciplina(${d.id})"><i class="fa-solid fa-power-off"></i> Desativar Disciplina</button>`;
+
+                    detailContainer.innerHTML = `
+                        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--border-color); padding-bottom: 15px; margin-bottom: 15px;">
+                            <h2 style="font-size: 1.5rem; color: var(--primary-color);"><i class="fa-solid fa-book"></i> ${d.nome}</h2>
+                            <div style="display: flex; gap: 10px;">
+                                ${botoesStatusHtml}
+                                <button class="btn-icon" onclick="editarDisciplina(${d.id})" title="Renomear Disciplina"><i class="fa-solid fa-pen"></i></button>
+                                <button class="btn-icon" style="color: var(--danger-color); border-color: var(--danger-color);" onclick="excluirDisciplina(${d.id})" title="Excluir Definitivamente"><i class="fa-solid fa-trash"></i></button>
+                                <button class="btn-primary" style="padding: 0.5rem 1rem; width: auto;" onclick="adicionarTopico(${d.id})"><i class="fa-solid fa-plus"></i> Novo Assunto</button>
+                            </div>
+                        </div>
+
+                        <div class="stats-grid-detail">
+                            <div><span style="color: var(--text-muted);">Estado da disciplina:</span> <strong style="color: ${isDesativada ? 'var(--danger-color)' : 'var(--success-color)'};">${isDesativada ? 'Desativada' : 'Ativa'}</strong></div>
+                            <div><span style="color: var(--text-muted);">Horas estudadas:</span> <strong>${textoTempo}</strong></div>
+                            <div><span style="color: var(--text-muted);">Acertos:</span> <strong style="color: var(--success-color);">${acertosTotais}</strong></div>
+                            <div><span style="color: var(--text-muted);">Erros:</span> <strong style="color: var(--danger-color);">${errosTotais}</strong></div>
+                            <div><span style="color: var(--text-muted);">Total de questões:</span> <strong>${totalQuestoes}</strong></div>
+                            <div><span style="color: var(--text-muted);">Progresso do Edital:</span> <strong>${progressoGeral}%</strong></div>
+                        </div>
+
+                        <div class="progress-bar-container" style="margin-bottom: 25px;">
+                            <div class="progress-bar-fill" style="width: ${progressoGeral}%"></div>
+                        </div>
+
+                        <h3 style="margin-bottom: 10px; font-size: 1.1rem;">Assuntos da Matéria</h3>
+                        <ul class="topicos-list">
+                            ${topicosHTML}
+                        </ul>
+                    `;
+                }
+            }
+        };
+
+        function renderizarHistorico() {
+            const container = document.getElementById('lista-historico');
+            if (!container) return; 
+            container.innerHTML = '';
+            if (registrosDeEstudo.length === 0) {
+                container.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-muted); padding: 2rem;">Nenhum estudo registado ainda.</td></tr>`;
+                return;
+            }
+
+            registrosDeEstudo.forEach(registro => {
+                const tr = document.createElement('tr');
+                const pData = registro.data.split('-');
+                const df = pData.length === 3 ? `${pData[2]}/${pData[1]}/${pData[0]}` : registro.data;
+                const catHTML = (registro.categorias || []).map(cat => `<span class="badge">${cat}</span>`).join('');
+                
+                let perfHTML = '-';
+                let acertosErrosHTML = '-';
+                const acertos = registro.questoes?.acertos || 0;
+                const erros = registro.questoes?.erros || 0;
+                const totalQ = acertos + erros;
+                
+                if (totalQ > 0) {
+                    acertosErrosHTML = `<span style="color: var(--success-color); font-weight: bold;">${acertos}</span> / <span style="color: var(--danger-color); font-weight: bold;">${erros}</span>`;
+                    const aproveitamento = Math.round((acertos / totalQ) * 100);
+                    let cor = 'var(--danger-color)'; 
+                    if (aproveitamento >= 80) cor = 'var(--success-color)'; 
+                    else if (aproveitamento >= 60) cor = 'var(--warning-color)'; 
+                    perfHTML = `<span style="color: ${cor}; font-weight: bold;">${aproveitamento}%</span>`;
+                }
+
+                let tempoTexto = '-';
+                if (registro.tempo) {
+                    let h = registro.tempo.horas > 0 ? `${registro.tempo.horas}h ` : '';
+                    let m = registro.tempo.minutos > 0 ? `${registro.tempo.minutos}m` : '';
+                    tempoTexto = (h + m).trim() || '-';
+                }
+
+                tr.innerHTML = `
+                    <td>${df}</td>
+                    <td style="font-weight: 600;">${registro.disciplina}</td>
+                    <td>${registro.topico}</td>
+                    <td><span style="color: var(--text-muted); font-size: 0.85rem;"><i class="fa-regular fa-clock"></i> ${tempoTexto}</span></td>
+                    <td>${catHTML}</td>
+                    <td style="text-align: center;">${acertosErrosHTML}</td>
+                    <td>${perfHTML}</td>
+                    <td style="text-align: center; white-space: nowrap;">
+                        <button class="btn-icon" style="padding: 0.3rem 0.6rem; font-size: 0.8rem;" onclick="editarRegistroEstudo(${registro.timestamp})" title="Editar"><i class="fa-solid fa-pen"></i></button>
+                        <button class="btn-icon" style="padding: 0.3rem 0.6rem; font-size: 0.8rem; color: var(--danger-color);" onclick="excluirRegistroEstudo(${registro.timestamp})" title="Eliminar"><i class="fa-solid fa-trash"></i></button>
+                    </td>
+                `;
+                container.appendChild(tr);
+            });
+        };
+
+        function mudarAbaCronograma(aba) {
+            document.getElementById('tab-c-semanal').classList.remove('active');
+            document.getElementById('tab-c-ciclo').classList.remove('active');
+            document.getElementById('view-c-semanal').classList.add('hidden');
+            document.getElementById('view-c-ciclo').classList.add('hidden');
+            document.getElementById(`tab-c-${aba}`).classList.add('active');
+            document.getElementById(`view-c-${aba}`).classList.remove('hidden');
+        };
+
+        function renderizarViewsCronograma() {
+            const kContainer = document.getElementById('kanban-container');
+            kContainer.innerHTML = '';
+            
+            planejamentoDoUsuario.cronograma.forEach(diaData => {
+                let cardsHTML = '';
+                diaData.itens.forEach(item => {
+                    let tagsTodas = [...(item.categorias || []), ...(item.materiais || [])];
+                    let tagsHTML = tagsTodas.map(t => `<span class="mini-tag">${t}</span>`).join('');
+                    let chkBox = item.concluido ? 'checked' : '';
+                    
+                    cardsHTML += `
+                        <div class="kanban-card">
+                            <button class="btn-delete-card" onclick="excluirTarefaPlanejada('${diaData.dia}', ${item.id})" title="Eliminar"><i class="fa-solid fa-xmark"></i></button>
+                            <h4 style="display:flex; align-items:center; gap:5px;"><i class="fa-solid fa-book" style="color:var(--text-muted);"></i> ${item.disciplina}</h4>
+                            <p><strong><i class="fa-solid fa-bars-staggered" style="font-size:0.8rem;"></i> ${item.topico}</strong></p>
+                            ${item.descricao ? `<p>${item.descricao}</p>` : ''}
+                            <div class="tag-row">${tagsHTML}</div>
+                            <div style="display:flex; align-items:center; gap:5px; margin-top: 5px;">
+                                <input type="checkbox" ${chkBox} onchange="alternarStatusTarefaPlanejada('${diaData.dia}', ${item.id}, this.checked)"> 
+                                <span style="font-size:0.8rem; font-weight:600; color: ${item.concluido ? 'var(--success-color)' : 'var(--text-main)'};">Estudado</span>
+                            </div>
+                            <button class="btn-primary" style="margin-top:5px; font-size:0.8rem;" onclick="abrirModalEstudoPreenchido('${item.disciplina}', '${item.topico}')">
+                                Registar Estudo
+                            </button>
+                        </div>
+                    `;
+                });
+
+                kContainer.innerHTML += `
+                    <div class="kanban-col">
+                        <div class="kanban-col-header" style="border-top: 4px solid ${diaData.corBorda};">${diaData.dia}</div>
+                        <div class="kanban-col-body">
+                            ${cardsHTML}
+                            <button class="add-card-btn" onclick="abrirModalTarefa('${diaData.dia}')"><i class="fa-solid fa-plus"></i> Nova página</button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            const cContainer = document.getElementById('ciclo-container');
+            cContainer.innerHTML = '';
+            
+            let pendentesHTML = '';
+            let concluidosHTML = '';
+
+            let arrayPendentes = [];
+            let arrayConcluidos = [];
+
+            planejamentoDoUsuario.ciclo.forEach((passo) => {
+                if(passo.concluido) arrayConcluidos.push(passo);
+                else arrayPendentes.push(passo);
+            });
+
+            arrayPendentes.forEach((passo, pendenteIndex) => {
+                let tagsTodas = [...(passo.categorias || []), ...(passo.materiais || [])];
+                let tagsHTML = tagsTodas.map(t => `<span class="mini-tag">${t}</span>`).join('');
+                let numPassoReal = planejamentoDoUsuario.ciclo.findIndex(p => p.id === passo.id) + 1;
+
+                pendentesHTML += `
+                    <div class="ciclo-step" draggable="true" 
+                         ondragstart="dragStartCiclo(event, ${pendenteIndex})" 
+                         ondragover="dragOverCiclo(event)" 
+                         ondragleave="dragLeaveCiclo(event)" 
+                         ondrop="dropCiclo(event, ${pendenteIndex})" 
+                         ondragend="dragEndCiclo(event)">
+                        
+                        <button class="btn-delete-card" onclick="excluirTarefaPlanejada('Ciclo', ${passo.id})" title="Eliminar"><i class="fa-solid fa-xmark"></i></button>
+                        <div class="ciclo-step-number">${numPassoReal}</div>
+                        <h4 style="font-size: 1.1rem; color: var(--text-main); margin-top:10px;"><i class="fa-solid fa-book" style="color:var(--text-muted);"></i> ${passo.disciplina}</h4>
+                        <div style="font-size: 0.85rem; color: var(--text-main); font-weight:600;"><i class="fa-solid fa-bars-staggered"></i> ${passo.topico}</div>
+                        ${passo.descricao ? `<p style="font-size: 0.8rem; color: var(--text-muted);">${passo.descricao}</p>` : ''}
+                        <div class="tag-row">${tagsHTML}</div>
+                        
+                        <div style="font-size: 0.9rem; font-weight: bold; color: var(--text-muted); margin-top:10px; display:flex; align-items:center; gap:5px; cursor:pointer;" onclick="alternarStatusTarefaPlanejada('Ciclo', ${passo.id}, true)">
+                            <i class="fa-regular fa-circle"></i> Pendente
+                        </div>
+                        <button class="btn-primary" style="margin-top:10px; font-size:0.8rem;" onclick="abrirModalEstudoPreenchido('${passo.disciplina}', '${passo.topico}')">Registar Estudo</button>
+                    </div>
+                `;
+            });
+
+            arrayConcluidos.forEach((passo) => {
+                let tagsTodas = [...(passo.categorias || []), ...(passo.materiais || [])];
+                let tagsHTML = tagsTodas.map(t => `<span class="mini-tag">${t}</span>`).join('');
+                let numPassoReal = planejamentoDoUsuario.ciclo.findIndex(p => p.id === passo.id) + 1;
+
+                concluidosHTML += `
+                    <div class="ciclo-step" style="border-left-color: var(--success-color);">
+                        <button class="btn-delete-card" onclick="excluirTarefaPlanejada('Ciclo', ${passo.id})" title="Eliminar"><i class="fa-solid fa-xmark"></i></button>
+                        <div class="ciclo-step-number" style="background: var(--success-color);">${numPassoReal}</div>
+                        <h4 style="font-size: 1.1rem; color: var(--text-main); margin-top:10px;"><i class="fa-solid fa-book" style="color:var(--text-muted);"></i> ${passo.disciplina}</h4>
+                        <div style="font-size: 0.85rem; color: var(--text-main); font-weight:600;"><i class="fa-solid fa-bars-staggered"></i> ${passo.topico}</div>
+                        ${passo.descricao ? `<p style="font-size: 0.8rem; color: var(--text-muted);">${passo.descricao}</p>` : ''}
+                        <div class="tag-row">${tagsHTML}</div>
+                        
+                        <div style="font-size: 0.9rem; font-weight: bold; color: var(--success-color); margin-top:10px; display:flex; align-items:center; gap:5px; cursor:pointer;" onclick="alternarStatusTarefaPlanejada('Ciclo', ${passo.id}, false)">
+                            <i class="fa-solid fa-circle-check"></i> Concluído no ciclo atual
+                        </div>
+                    </div>
+                `;
+            });
+
+            let addBtnHTML = `
+                <div class="ciclo-step" style="justify-content:center; align-items:center; border: 1px dashed var(--border-color); background:transparent; cursor:pointer; min-height: 200px;" onmouseover="this.style.borderColor='var(--primary-color)'" onmouseout="this.style.borderColor='var(--border-color)'" onclick="abrirModalTarefa('Ciclo')">
+                    <i class="fa-solid fa-plus" style="font-size:1.5rem; color:var(--text-muted);"></i>
+                    <span style="font-weight:600; color:var(--text-muted); margin-top:5px;">Adicionar Passo</span>
+                </div>
+            `;
+
+            cContainer.innerHTML = `
+                <div style="margin-bottom: 2rem;">
+                    <h3 style="font-size: 1.1rem; color: var(--text-main); margin-bottom: 1rem; display: flex; align-items: center; gap: 8px;">
+                        <i class="fa-solid fa-spinner" style="color: var(--primary-color);"></i> Fila do Ciclo (Pendentes)
+                    </h3>
+                    <div class="ciclo-grid">
+                        ${pendentesHTML}
+                        ${addBtnHTML}
+                    </div>
+                </div>
+
+                ${concluidosHTML ? `
+                <div style="margin-top: 2rem; padding-top: 2rem; border-top: 1px dashed var(--border-color);">
+                    <h3 style="font-size: 1.1rem; color: var(--text-muted); margin-bottom: 1rem; display: flex; align-items: center; gap: 8px;">
+                        <i class="fa-solid fa-check-double" style="color: var(--success-color);"></i> Passos Concluídos
+                    </h3>
+                    <div class="ciclo-grid" style="opacity: 0.6; filter: grayscale(0.2);">
+                        ${concluidosHTML}
+                    </div>
+                </div>
+                ` : ''}
+            `;
+        };
+
+        function dragStartCiclo(e, indexPendente) {
+            dragStartIndexCiclo = indexPendente;
+            e.dataTransfer.effectAllowed = 'move';
+            setTimeout(() => e.target.classList.add('dragging'), 0);
+        }
+
+        function dragOverCiclo(e) {
+            e.preventDefault(); 
+            e.dataTransfer.dropEffect = 'move';
+            e.currentTarget.classList.add('drag-over');
+        }
+
+        function dragLeaveCiclo(e) { e.currentTarget.classList.remove('drag-over'); }
+
+        function dropCiclo(e, dropIndexPendente) {
+            e.preventDefault();
+            e.currentTarget.classList.remove('drag-over');
+            if (dragStartIndexCiclo === null || dragStartIndexCiclo === dropIndexPendente) return;
+
+            let arrayPendentes = [];
+            let arrayConcluidos = [];
+            planejamentoDoUsuario.ciclo.forEach(p => {
+                if (p.concluido) arrayConcluidos.push(p);
+                else arrayPendentes.push(p);
+            });
+
+            const itemArrastado = arrayPendentes.splice(dragStartIndexCiclo, 1)[0];
+            arrayPendentes.splice(dropIndexPendente, 0, itemArrastado);
+            planejamentoDoUsuario.ciclo = [...arrayPendentes, ...arrayConcluidos];
+            salvarDadosLocais();
+            renderizarViewsCronograma();
+        }
+
+        function dragEndCiclo(e) {
+            e.target.classList.remove('dragging');
+            dragStartIndexCiclo = null;
+        }
+
+        function abrirModalTarefa(contexto) {
+            document.getElementById('modal-tarefa').classList.remove('hidden');
+            document.getElementById('tarefa-contexto').value = contexto;
+            document.getElementById('tarefa-titulo').innerText = contexto === 'Ciclo' ? 'Novo Passo do Ciclo' : `Planear Estudo para ${contexto}`;
+
+            const selectDisciplina = document.getElementById('tarefa-disciplina');
+            selectDisciplina.innerHTML = '<option value="">Selecione uma disciplina...</option>';
+            let disciplinasAtivas = editalDoUsuario.disciplinas.filter(d => (d.statusDisciplina || 'ativa') === 'ativa');
+            disciplinasAtivas.forEach(d => {
+                const opt = document.createElement('option');
+                opt.value = d.id;
+                opt.textContent = d.nome;
+                selectDisciplina.appendChild(opt);
+            });
+
+            document.getElementById('tarefa-topico').innerHTML = '<option value="">Selecione primeiro a disciplina...</option>';
+            document.getElementById('tarefa-descricao').value = '';
+            document.querySelectorAll('input[name="tarefa-categoria"]').forEach(cb => cb.checked = false);
+            document.querySelectorAll('input[name="tarefa-material"]').forEach(cb => cb.checked = false);
+        };
+
+        function fecharModalTarefa() { document.getElementById('modal-tarefa').classList.add('hidden'); };
+
+        function atualizarTopicosTarefa() {
+            const disciplinaId = document.getElementById('tarefa-disciplina').value;
+            const selectTopico = document.getElementById('tarefa-topico');
+            selectTopico.innerHTML = '<option value="">Selecione um tópico...</option>';
+            if (!disciplinaId) return;
+
+            const d = editalDoUsuario.disciplinas.find(d => d.id == disciplinaId);
+            if (d && d.topicos) {
+                d.topicos.forEach(topicoObj => {
+                    let nome = typeof topicoObj === 'string' ? topicoObj : topicoObj.nome;
+                    const opt = document.createElement('option');
+                    opt.value = nome;
+                    opt.textContent = nome;
+                    selectTopico.appendChild(opt);
+                });
+            }
+        };
+
+        function salvarTarefaPlanejada() {
+            const contexto = document.getElementById('tarefa-contexto').value;
+            const disciplinaId = document.getElementById('tarefa-disciplina').value;
+            const topico = document.getElementById('tarefa-topico').value;
+            const descricao = document.getElementById('tarefa-descricao').value;
+            const categorias = Array.from(document.querySelectorAll('input[name="tarefa-categoria"]:checked')).map(cb => cb.value);
+            const materiais = Array.from(document.querySelectorAll('input[name="tarefa-material"]:checked')).map(cb => cb.value);
+
+            if (!disciplinaId || !topico) {
+                alert("Por favor, selecione Disciplina e Tópico!");
+                return;
+            }
+
+            const disciplinaNome = editalDoUsuario.disciplinas.find(d => d.id == disciplinaId).nome;
+            const novaTarefa = {
+                id: Date.now(), disciplina: disciplinaNome, topico: topico, descricao: descricao,
+                categorias: categorias, materiais: materiais, concluido: false
+            };
+
+            if (contexto === 'Ciclo') planejamentoDoUsuario.ciclo.push(novaTarefa);
+            else {
+                let diaData = planejamentoDoUsuario.cronograma.find(d => d.dia === contexto);
+                if (diaData) diaData.itens.push(novaTarefa);
+            }
+
+            salvarDadosLocais();
+            renderizarViewsCronograma();
+            fecharModalTarefa();
+        };
+
+        function alternarStatusTarefaPlanejada(contexto, itemId, novoStatus) {
+            if (contexto === 'Ciclo') {
+                let item = planejamentoDoUsuario.ciclo.find(i => i.id === itemId);
+                if(item) item.concluido = novoStatus;
+                
+                let arrayPendentes = [];
+                let arrayConcluidos = [];
+                planejamentoDoUsuario.ciclo.forEach(p => {
+                    if (p.concluido) arrayConcluidos.push(p);
+                    else arrayPendentes.push(p);
+                });
+                planejamentoDoUsuario.ciclo = [...arrayPendentes, ...arrayConcluidos];
+            } else {
+                let diaData = planejamentoDoUsuario.cronograma.find(d => d.dia === contexto);
+                if (diaData) {
+                    let item = diaData.itens.find(i => i.id === itemId);
+                    if(item) item.concluido = novoStatus;
+                }
+            }
+            salvarDadosLocais();
+            renderizarViewsCronograma();
+        };
+
+        function excluirTarefaPlanejada(contexto, itemId) {
+            if(confirm("Deseja realmente eliminar este planeamento?")) {
+                if (contexto === 'Ciclo') {
+                    planejamentoDoUsuario.ciclo = planejamentoDoUsuario.ciclo.filter(i => i.id !== itemId);
+                } else {
+                    let diaData = planejamentoDoUsuario.cronograma.find(d => d.dia === contexto);
+                    if (diaData) diaData.itens = diaData.itens.filter(i => i.id !== itemId);
+                }
+                salvarDadosLocais();
+                renderizarViewsCronograma();
+            }
+        };
+
+        function abrirModalEstudoPreenchido(disciplinaNome, topicoNome) {
+            abrirModalEstudo();
+            let d = editalDoUsuario.disciplinas.find(x => x.nome === disciplinaNome);
+            if(d) {
+                document.getElementById('select-disciplina').value = d.id;
+                atualizarTopicosEstudo(); 
+                document.getElementById('select-topico').value = topicoNome;
+            }
+        };
+
+        function reiniciarCronograma() {
+            if (confirm("Tem certeza que deseja reiniciar o Cronograma Semanal? Isto irá desmarcar todos os itens estudados nesta semana.")) {
+                planejamentoDoUsuario.cronograma.forEach(dia => {
+                    dia.itens.forEach(item => item.concluido = false);
+                });
+                salvarDadosLocais();
+                renderizarViewsCronograma();
+            }
+        };
+
+        function reiniciarCiclo() {
+            if (confirm("Tem certeza que deseja reiniciar o Ciclo de Estudos? Todos os passos voltarão a ficar pendentes.")) {
+                planejamentoDoUsuario.ciclo.forEach(passo => passo.concluido = false);
+                salvarDadosLocais();
+                renderizarViewsCronograma();
+            }
+        };
+
+        function calcularAgendaRevisoes() {
+            let ultimosEstudos = {};
+            registrosDeEstudo.forEach(reg => {
+                let chave = reg.disciplina + "|||" + reg.topico;
+                if (!ultimosEstudos[chave]) ultimosEstudos[chave] = reg;
+            });
+
+            let revisoesPendentes = [];
+            Object.values(ultimosEstudos).forEach(reg => {
+                if (reg.agendarRevisao) {
+                    let totalQ = reg.questoes.acertos + reg.questoes.erros;
+                    let perf = totalQ > 0 ? (reg.questoes.acertos / totalQ) : 0; 
+                    let diasParaPular = 2; 
+                    if (perf <= 0.30) diasParaPular = 2;
+                    else if (perf <= 0.50) diasParaPular = 4;
+                    else if (perf <= 0.75) diasParaPular = 7;
+                    else if (perf <= 0.85) diasParaPular = 10;
+                    else if (perf < 1.00) diasParaPular = 15;
+                    else if (perf === 1.00) diasParaPular = 30;
+
+                    let pData = reg.data.split('-');
+                    let dataIdeal = new Date(pData[0], pData[1] - 1, pData[2]); 
+                    dataIdeal.setDate(dataIdeal.getDate() + diasParaPular);
+
+                    if (dataIdeal.getDay() === 6) dataIdeal.setDate(dataIdeal.getDate() + 2); 
+                    if (dataIdeal.getDay() === 0) dataIdeal.setDate(dataIdeal.getDate() + 1); 
+                    
+                    revisoesPendentes.push({
+                        registroOriginal: reg, perf: perf,
+                        dataIdealOriginal: new Date(dataIdeal),
+                        dataIdeal: dataIdeal, disciplina: reg.disciplina, topico: reg.topico
+                    });
+                }
+            });
+
+            let hoje = new Date(); hoje.setHours(0,0,0,0);
+            let agendaFinal = {}; 
+            let fila = [...revisoesPendentes];
+            let dataAtualAnalise = new Date(hoje);
+            let limiteSeguranca = 0;
+            
+            while(fila.length > 0 && limiteSeguranca < 1000) {
+                limiteSeguranca++;
+                if (dataAtualAnalise.getDay() === 6) { dataAtualAnalise.setDate(dataAtualAnalise.getDate() + 2); continue; }
+                if (dataAtualAnalise.getDay() === 0) { dataAtualAnalise.setDate(dataAtualAnalise.getDate() + 1); continue; }
+
+                let candidatasDoDia = fila.filter(r => r.dataIdeal <= dataAtualAnalise);
+                if (candidatasDoDia.length === 0) { dataAtualAnalise.setDate(dataAtualAnalise.getDate() + 1); continue; }
+
+                candidatasDoDia.sort((a, b) => {
+                    let aC1 = a.perf <= 0.50 ? 1 : 0; let bC1 = b.perf <= 0.50 ? 1 : 0;
+                    if (aC1 !== bC1) return bC1 - aC1;
+                    let atrasoA = dataAtualAnalise.getTime() - a.dataIdealOriginal.getTime();
+                    let atrasoB = dataAtualAnalise.getTime() - b.dataIdealOriginal.getTime();
+                    if (atrasoA !== atrasoB) return atrasoB - atrasoA; 
+                    let aC3 = (a.perf > 0.50 && a.perf <= 0.75) ? 1 : 0; let bC3 = (b.perf > 0.50 && b.perf <= 0.75) ? 1 : 0;
+                    if (aC3 !== bC3) return bC3 - aC3;
+                    return 0; 
+                });
+
+                let aprovadasParaODia = candidatasDoDia.slice(0, 3);
+                let dataString = formatarDataLocalParaISO(dataAtualAnalise);
+                agendaFinal[dataString] = aprovadasParaODia;
+                fila = fila.filter(r => !aprovadasParaODia.includes(r));
+                dataAtualAnalise.setDate(dataAtualAnalise.getDate() + 1);
+            }
+            return agendaFinal;
+        };
+
+        function obterMapaProximasRevisoes() {
+            const agenda = calcularAgendaRevisoes();
+            let mapa = {};
+            let datas = Object.keys(agenda).sort();
+            for (let data of datas) {
+                agenda[data].forEach(item => {
+                    let chave = item.disciplina + "|||" + item.topico;
+                    if (!mapa[chave]) {
+                        let partes = data.split('-');
+                        mapa[chave] = `${partes[2]}/${partes[1]}/${partes[0]}`; 
+                    }
+                });
+            }
+            return mapa;
+        }
+
+        function atualizarProximaAtividade() {
+            const painel = document.getElementById('painel-proxima-atividade');
+            if(!painel) return;
+
+            const agenda = calcularAgendaRevisoes();
+            let hojeObj = new Date(); hojeObj.setHours(0,0,0,0);
+            let stringHoje = formatarDataLocalParaISO(hojeObj);
+            let proximaRevisao = (agenda[stringHoje] && agenda[stringHoje].length > 0) ? agenda[stringHoje][0] : null;
+
+            const diasSemanaNomes = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+            let hojeDiaNome = diasSemanaNomes[hojeObj.getDay()];
+            let diaCronograma = planejamentoDoUsuario.cronograma.find(d => d.dia === hojeDiaNome);
+            let proximoCronograma = diaCronograma ? diaCronograma.itens.find(i => !i.concluido) : null;
+
+            let proximoCiclo = planejamentoDoUsuario.ciclo.find(i => !i.concluido);
+
+            let htmlContent = `<h2 class="panel-title">Próxima Atividade</h2>`;
+
+            if (!proximaRevisao && !proximoCronograma && !proximoCiclo) {
+                htmlContent += `
+                    <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 10px;">Estado da sua agenda:</p>
+                    <p style="font-weight: 600; color: var(--success-color);"><i class="fa-solid fa-check-circle"></i> Tudo em dia!</p>
+                    <p style="font-size: 0.85rem; margin-bottom: 15px;">Não há tarefas pendentes para hoje.</p>
+                `;
+            } else {
+                htmlContent += `<p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 15px;">Sugestões pendentes:</p>`;
+                htmlContent += `<div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px;">`;
+
+                if (proximaRevisao) {
+                    htmlContent += `
+                        <div style="background: var(--bg-color); padding: 10px; border-radius: 6px; border-left: 3px solid var(--danger-color);">
+                            <p style="font-size: 0.75rem; color: var(--danger-color); font-weight: 700; margin-bottom: 3px; text-transform: uppercase;"><i class="fa-solid fa-bolt"></i> Revisão (Hoje/Atrasada)</p>
+                            <p style="font-weight: 600; color: var(--text-main); font-size: 0.9rem; margin-bottom: 2px;">${proximaRevisao.disciplina}</p>
+                            <p style="font-size: 0.8rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${proximaRevisao.topico}</p>
+                        </div>
+                    `;
+                }
+
+                if (proximoCronograma) {
+                    htmlContent += `
+                        <div style="background: var(--bg-color); padding: 10px; border-radius: 6px; border-left: 3px solid var(--primary-color);">
+                            <p style="font-size: 0.75rem; color: var(--primary-color); font-weight: 700; margin-bottom: 3px; text-transform: uppercase;"><i class="fa-regular fa-calendar-week"></i> Cronograma (${hojeDiaNome})</p>
+                            <p style="font-weight: 600; color: var(--text-main); font-size: 0.9rem; margin-bottom: 2px;">${proximoCronograma.disciplina}</p>
+                            <p style="font-size: 0.8rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${proximoCronograma.topico}</p>
+                        </div>
+                    `;
+                }
+
+                if (proximoCiclo) {
+                    let numPassoReal = planejamentoDoUsuario.ciclo.findIndex(p => p.id === proximoCiclo.id) + 1;
+                    htmlContent += `
+                        <div style="background: var(--bg-color); padding: 10px; border-radius: 6px; border-left: 3px solid var(--warning-color);">
+                            <p style="font-size: 0.75rem; color: var(--warning-color); font-weight: 700; margin-bottom: 3px; text-transform: uppercase;"><i class="fa-solid fa-arrows-spin"></i> Ciclo (Passo ${numPassoReal})</p>
+                            <p style="font-weight: 600; color: var(--text-main); font-size: 0.9rem; margin-bottom: 2px;">${proximoCiclo.disciplina}</p>
+                            <p style="font-size: 0.8rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${proximoCiclo.topico}</p>
+                        </div>
+                    `;
+                }
+
+                htmlContent += `</div>`;
+                htmlContent += `<button class="btn-primary" onclick="navegarPara('cronograma')">Ir para Planeamento</button>`;
+            }
+
+            painel.innerHTML = htmlContent;
+        };
+
+        function criarCartaoRevisaoHTML(rev, dataFormatada = null, ehCalendario = false) {
+            let perc = Math.round(rev.perf * 100);
+            let classeCor = 'normal';
+            let classeBadge = 'badge-normal';
+
+            if (perc <= 50) { classeCor = 'urgente'; classeBadge = 'badge-urgente'; }
+            else if (perc <= 75) { classeCor = 'alerta'; classeBadge = 'badge-alerta'; }
+
+            if(ehCalendario) {
+                return `
+                    <div class="cal-review-item ${classeCor}" onclick="prepararConclusaoRevisao('${rev.disciplina}', '${rev.topico}')" title="${rev.disciplina}: ${rev.topico}">
+                        <i class="fa-solid fa-book-open"></i> ${rev.disciplina.substring(0, 10)}...
+                    </div>
+                `;
+            }
+
+            return `
+                <div class="revisao-card ${classeCor}">
+                    <div>
+                        <span class="revisao-badge ${classeBadge}"><i class="fa-solid fa-bullseye"></i> ${perc}%</span>
+                        ${dataFormatada ? `<span style="font-size: 0.75rem; color: var(--text-muted); float: right;"><i class="fa-regular fa-calendar"></i> ${dataFormatada}</span>` : ''}
+                        <h4 class="revisao-card-title"><i class="fa-solid fa-bars-staggered" style="color: var(--text-muted); margin-right:5px;"></i> ${rev.topico}</h4>
+                        <p class="revisao-card-subtitle"><i class="fa-regular fa-folder"></i> ${rev.disciplina}</p>
+                    </div>
+                    <button class="btn-primary" style="padding: 0.5rem; font-size: 0.85rem;" onclick="prepararConclusaoRevisao('${rev.disciplina}', '${rev.topico}')">
+                        <i class="fa-solid fa-check"></i> Revisar
+                    </button>
+                </div>
+            `;
+        }
+
+        function mudarMesCalendario(delta) {
+            mesAtualExibicao += delta;
+            if (mesAtualExibicao > 11) { mesAtualExibicao = 0; anoAtualExibicao++; }
+            if (mesAtualExibicao < 0) { mesAtualExibicao = 11; anoAtualExibicao--; }
+            renderizarRevisoes();
+        }
+
+        function renderizarRevisoes() {
+            if (document.getElementById('view-revisoes').classList.contains('hidden')) return;
+            
+            const agenda = calcularAgendaRevisoes();
+            let hojeObj = new Date(); hojeObj.setHours(0,0,0,0);
+            let stringHoje = formatarDataLocalParaISO(hojeObj);
+            
+            const contPrioridades = document.getElementById('lista-prioridades');
+            contPrioridades.innerHTML = '';
+            if (agenda[stringHoje] && agenda[stringHoje].length > 0) {
+                agenda[stringHoje].forEach(rev => {
+                    contPrioridades.innerHTML += criarCartaoRevisaoHTML(rev, "Para Hoje");
+                });
+            } else {
+                contPrioridades.innerHTML = '<p style="color: var(--text-muted); padding: 1rem; font-size: 0.9rem;">Nenhuma prioridade ou revisão atrasada para hoje! 🎉</p>';
+            }
+
+            const contSemana = document.getElementById('lista-semana');
+            contSemana.innerHTML = '';
+            let itensSemana = 0;
+            const diasSemanaNomes = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+
+            for (let i = 1; i <= 7; i++) {
+                let diaFuturo = new Date(hojeObj);
+                diaFuturo.setDate(diaFuturo.getDate() + i);
+                let stringDia = formatarDataLocalParaISO(diaFuturo);
+                
+                if (agenda[stringDia]) {
+                    agenda[stringDia].forEach(rev => {
+                        let dataFormatada = `${diasSemanaNomes[diaFuturo.getDay()]} (${diaFuturo.getDate()}/${diaFuturo.getMonth()+1})`;
+                        contSemana.innerHTML += criarCartaoRevisaoHTML(rev, dataFormatada);
+                        itensSemana++;
+                    });
+                }
+            }
+            if (itensSemana === 0) {
+                contSemana.innerHTML = '<p style="color: var(--text-muted); padding: 1rem; font-size: 0.9rem;">Nenhuma revisão agendada para os próximos 7 dias úteis.</p>';
+            }
+
+            const mesesNomes = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+            document.getElementById('calendario-titulo-mes').innerText = `${mesesNomes[mesAtualExibicao]} de ${anoAtualExibicao}`;
+            
+            const grid = document.getElementById('calendario-grid');
+            grid.innerHTML = '';
+            let primeiroDiaDoMes = new Date(anoAtualExibicao, mesAtualExibicao, 1).getDay();
+            let diasNoMes = new Date(anoAtualExibicao, mesAtualExibicao + 1, 0).getDate();
+
+            for (let i = 0; i < primeiroDiaDoMes; i++) { grid.innerHTML += `<div class="calendar-day empty"></div>`; }
+            for (let dia = 1; dia <= diasNoMes; dia++) {
+                let dataCelula = new Date(anoAtualExibicao, mesAtualExibicao, dia);
+                let stringDia = formatarDataLocalParaISO(dataCelula);
+                let ehHoje = (stringDia === stringHoje) ? 'today' : '';
+                let itensRevisaoHTML = '';
+                if (agenda[stringDia]) {
+                    agenda[stringDia].forEach(rev => { itensRevisaoHTML += criarCartaoRevisaoHTML(rev, null, true); });
+                }
+                grid.innerHTML += `
+                    <div class="calendar-day ${ehHoje}">
+                        <span class="day-number">${dia}</span>
+                        <div style="display:flex; flex-direction:column; gap:2px; flex:1;">${itensRevisaoHTML}</div>
+                    </div>
+                `;
+            }
+            let totalCelulas = primeiroDiaDoMes + diasNoMes;
+            let celulasRestantes = (7 - (totalCelulas % 7)) % 7;
+            for (let i = 0; i < celulasRestantes; i++) { grid.innerHTML += `<div class="calendar-day empty"></div>`; }
+        };
+
+        function prepararConclusaoRevisao(disciplina, topico) {
+            abrirModalEstudoPreenchido(disciplina, topico);
+            let cbRevisao = document.querySelector('input[name="estudo-categoria"][value="Revisão"]');
+            if(cbRevisao) cbRevisao.checked = true;
+            document.getElementById('estudo-agendar-revisao').checked = false;
+        };
+
+        // 5. FUNÇÕES DE CRUD DO EDITAL E ESTUDOS
+        
+        function alternarStatusDisciplina(disciplinaId) {
+            const d = editalDoUsuario.disciplinas.find(x => x.id === disciplinaId);
+            if(d) {
+                d.statusDisciplina = (d.statusDisciplina === 'desativada') ? 'ativa' : 'desativada';
+                disciplinaSelecionadaId = null; 
+                salvarDadosLocais();
+                renderizarEdital();
+            }
+        }
+
+        function mudarStatusTopico(disciplinaId, topicoIndex, novoStatus) {
+            const disciplina = editalDoUsuario.disciplinas.find(d => d.id === disciplinaId);
+            if(typeof disciplina.topicos[topicoIndex] === 'string') {
+                disciplina.topicos[topicoIndex] = { nome: disciplina.topicos[topicoIndex], status: novoStatus };
+            } else {
+                disciplina.topicos[topicoIndex].status = novoStatus;
+            }
+            salvarDadosLocais();
+            renderizarEdital();
+        };
+
+        function adicionarDisciplina() {
+            const nome = prompt("Digite o nome da nova disciplina:");
+            if (nome && nome.trim() !== "") {
+                editalDoUsuario.disciplinas.push({ id: Date.now(), nome: nome.trim(), topicos: [], statusDisciplina: 'ativa' });
+                abaAtivaEdital = 'ativas'; 
+                salvarDadosLocais();
+                renderizarEdital(); 
+            }
+        };
+
+        function editarDisciplina(id) {
+            const d = editalDoUsuario.disciplinas.find(d => d.id === id);
+            const novoNome = prompt("Edite o nome da disciplina:", d.nome);
+            if (novoNome && novoNome.trim() !== "") {
+                d.nome = novoNome.trim();
+                salvarDadosLocais();
+                renderizarEdital();
+            }
+        };
+
+        function excluirDisciplina(id) {
+            if (confirm("ATENÇÃO: Deseja EXCLUIR DEFINITIVAMENTE esta disciplina e todos os seus assuntos? Esta ação não pode ser desfeita.")) {
+                editalDoUsuario.disciplinas = editalDoUsuario.disciplinas.filter(d => d.id !== id);
+                disciplinaSelecionadaId = null;
+                salvarDadosLocais();
+                renderizarEdital();
+            }
+        };
+
+        function adicionarTopico(disciplinaId) {
+            const d = editalDoUsuario.disciplinas.find(d => d.id === disciplinaId);
+            const nome = prompt(`Adicionar novo assunto em "${d.nome}":`);
+            if (nome && nome.trim() !== "") {
+                d.topicos.push({ nome: nome.trim(), status: 'nao_iniciado' });
+                salvarDadosLocais();
+                renderizarEdital();
+            }
+        };
+
+        function editarTopico(disciplinaId, topicoIndex) {
+            const d = editalDoUsuario.disciplinas.find(d => d.id === disciplinaId);
+            let nomeAtual = typeof d.topicos[topicoIndex] === 'string' ? d.topicos[topicoIndex] : d.topicos[topicoIndex].nome;
+            const novoNome = prompt("Edite o assunto:", nomeAtual);
+            if (novoNome && novoNome.trim() !== "") {
+                if(typeof d.topicos[topicoIndex] === 'string') {
+                    d.topicos[topicoIndex] = { nome: novoNome.trim(), status: 'nao_iniciado' };
+                } else {
+                    d.topicos[topicoIndex].nome = novoNome.trim();
+                }
+                salvarDadosLocais();
+                renderizarEdital();
+            }
+        };
+
+        function excluirTopico(disciplinaId, topicoIndex) {
+            if (confirm("Eliminar este assunto?")) {
+                const d = editalDoUsuario.disciplinas.find(d => d.id === disciplinaId);
+                d.topicos.splice(topicoIndex, 1); 
+                salvarDadosLocais();
+                renderizarEdital();
+            }
+        };
+
+        function abrirModalEstudo() {
+            const modal = document.getElementById('modal-estudo');
+            modal.classList.remove('hidden');
+
+            document.getElementById('modal-estudo-titulo').innerText = "Registar Estudo Finalizado";
+            document.getElementById('estudo-edit-id').value = '';
+
+            const hoje = new Date().toISOString().split('T')[0];
+            document.getElementById('estudo-data').value = hoje;
+
+            const selectDisciplina = document.getElementById('select-disciplina');
+            selectDisciplina.innerHTML = '<option value="">Selecione uma disciplina...</option>';
+            let disciplinasAtivas = editalDoUsuario.disciplinas.filter(d => (d.statusDisciplina || 'ativa') === 'ativa');
+            disciplinasAtivas.forEach(d => {
+                const opt = document.createElement('option');
+                opt.value = d.id;
+                opt.textContent = d.nome;
+                selectDisciplina.appendChild(opt);
+            });
+
+            document.getElementById('select-topico').innerHTML = '<option value="">Selecione primeiro a disciplina...</option>';
+            document.getElementById('estudo-horas').value = '';
+            document.getElementById('estudo-minutos').value = '';
+            document.getElementById('estudo-acertos').value = '';
+            document.getElementById('estudo-erros').value = '';
+            document.getElementById('estudo-comentario').value = '';
+            document.querySelectorAll('input[name^="estudo-"]:not(#estudo-agendar-revisao)').forEach(cb => { if(cb.type==='checkbox') cb.checked = false; });
+            document.getElementById('estudo-agendar-revisao').checked = true; 
+        };
+
+        function editarRegistroEstudo(timestamp) {
+            const registro = registrosDeEstudo.find(r => r.timestamp === timestamp);
+            if (!registro) return;
+
+            abrirModalEstudo();
+            document.getElementById('modal-estudo-titulo').innerText = "Editar Registo de Estudo";
+            document.getElementById('estudo-edit-id').value = timestamp;
+
+            document.getElementById('estudo-data').value = registro.data;
+            
+            let d = editalDoUsuario.disciplinas.find(x => x.nome === registro.disciplina);
+            if(d) {
+                document.getElementById('select-disciplina').value = d.id;
+                atualizarTopicosEstudo(); 
+                document.getElementById('select-topico').value = registro.topico;
+            }
+
+            document.getElementById('estudo-horas').value = registro.tempo?.horas || '';
+            document.getElementById('estudo-minutos').value = registro.tempo?.minutos || '';
+            document.getElementById('estudo-acertos').value = registro.questoes?.acertos || '';
+            document.getElementById('estudo-erros').value = registro.questoes?.erros || '';
+            document.getElementById('estudo-comentario').value = registro.comentario || '';
+            document.getElementById('estudo-agendar-revisao').checked = registro.agendarRevisao;
+
+            document.querySelectorAll('input[name="estudo-categoria"]').forEach(cb => {
+                cb.checked = (registro.categorias || []).includes(cb.value);
+            });
+            document.querySelectorAll('input[name="estudo-material"]').forEach(cb => {
+                cb.checked = (registro.materiais || []).includes(cb.value);
+            });
+        }
+
+        function excluirRegistroEstudo(timestamp) {
+            if (confirm("Tem certeza que deseja eliminar este registo de estudo?")) {
+                registrosDeEstudo = registrosDeEstudo.filter(r => r.timestamp !== timestamp);
+                salvarDadosLocais();
+                atualizarTelasPosAlteracaoHistorico();
+            }
+        }
+
+        function excluirTodoHistorico() {
+            if (confirm("ATENÇÃO CRÍTICA: Deseja eliminar TODO o seu histórico de estudos? Esta ação apagará todas as suas horas e desempenhos e não poderá ser revertida.")) {
+                registrosDeEstudo = [];
+                salvarDadosLocais();
+                atualizarTelasPosAlteracaoHistorico();
+            }
+        }
+
+        function atualizarTelasPosAlteracaoHistorico() {
+            if(!document.getElementById('view-dashboard').classList.contains('hidden')) renderizarDashboard();
+            if(!document.getElementById('view-cronograma').classList.contains('hidden')) renderizarHistorico();
+            if(!document.getElementById('view-revisoes').classList.contains('hidden')) renderizarRevisoes();
+            if(!document.getElementById('view-desempenho').classList.contains('hidden')) renderizarDesempenho();
+            if(!document.getElementById('view-metas').classList.contains('hidden')) renderizarMetas();
+            atualizarProximaAtividade();
+        }
+
+        function fecharModalEstudo() { document.getElementById('modal-estudo').classList.add('hidden'); };
+
+        function atualizarTopicosEstudo() {
+            const disciplinaId = document.getElementById('select-disciplina').value;
+            const selectTopico = document.getElementById('select-topico');
+            selectTopico.innerHTML = '<option value="">Selecione um tópico...</option>';
+
+            if (!disciplinaId) return;
+
+            const d = editalDoUsuario.disciplinas.find(d => d.id == disciplinaId);
+            if (d && d.topicos) {
+                d.topicos.forEach(topicoObj => {
+                    let nome = typeof topicoObj === 'string' ? topicoObj : topicoObj.nome;
+                    const opt = document.createElement('option');
+                    opt.value = nome;
+                    opt.textContent = nome;
+                    selectTopico.appendChild(opt);
+                });
+            }
+        };
+
+        function salvarEstudo() {
+            const data = document.getElementById('estudo-data').value;
+            const disciplinaId = document.getElementById('select-disciplina').value;
+            const topico = document.getElementById('select-topico').value;
+            const horas = document.getElementById('estudo-horas').value;
+            const minutos = document.getElementById('estudo-minutos').value;
+            const acertos = document.getElementById('estudo-acertos').value;
+            const erros = document.getElementById('estudo-erros').value;
+            const comentario = document.getElementById('estudo-comentario').value;
+            const querAgendar = document.getElementById('estudo-agendar-revisao').checked;
+            const editId = document.getElementById('estudo-edit-id').value;
+
+            const categorias = Array.from(document.querySelectorAll('input[name="estudo-categoria"]:checked')).map(cb => cb.value);
+            const materiais = Array.from(document.querySelectorAll('input[name="estudo-material"]:checked')).map(cb => cb.value);
+
+            if (!data || !disciplinaId || !topico) {
+                alert("Por favor, preencha pelo menos a Data, Disciplina e o Tópico!");
+                return;
+            }
+
+            const disciplinaNome = editalDoUsuario.disciplinas.find(d => d.id == disciplinaId).nome;
+
+            const novoRegistro = {
+                data: data,
+                disciplina: disciplinaNome,
+                topico: topico,
+                tempo: { horas: parseInt(horas) || 0, minutos: parseInt(minutos) || 0 },
+                categorias: categorias,
+                materiais: materiais,
+                agendarRevisao: querAgendar,
+                questoes: { acertos: parseInt(acertos) || 0, erros: parseInt(erros) || 0 },
+                comentario: comentario,
+                timestamp: editId ? parseInt(editId) : Date.now() 
+            };
+
+            if (editId) {
+                const index = registrosDeEstudo.findIndex(r => r.timestamp === parseInt(editId));
+                if (index !== -1) registrosDeEstudo[index] = novoRegistro;
+            } else {
+                registrosDeEstudo.unshift(novoRegistro);
+            }
+            
+            registrosDeEstudo.sort((a, b) => b.timestamp - a.timestamp);
+
+            salvarDadosLocais(); 
+            atualizarTelasPosAlteracaoHistorico();
+            
+            fecharModalEstudo();
+        };
+
+        function renderizarDesempenho() {
+            const container = document.getElementById('lista-desempenho-disciplinas');
+            if (!container) return;
+            container.innerHTML = '';
+
+            let mapaRevisoes = obterMapaProximasRevisoes();
+            let disciplinasAtivas = editalDoUsuario.disciplinas.filter(d => (d.statusDisciplina || 'ativa') === 'ativa');
+
+            if (disciplinasAtivas.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: var(--text-muted); padding: 2rem;">Nenhuma disciplina ativa no momento.</p>';
+                return;
+            }
+
+            disciplinasAtivas.forEach(disciplina => {
+                let linhasTabela = '';
+                
+                disciplina.topicos.forEach(topicoObj => {
+                    let nomeTopico = typeof topicoObj === 'string' ? topicoObj : topicoObj.nome;
+                    let statusTopico = typeof topicoObj === 'string' ? 'nao_iniciado' : (topicoObj.status || 'nao_iniciado');
+
+                    let statusLabel = "Não iniciado";
+                    let statusColor = "var(--status-gray)";
+                    if(statusTopico === 'estudando') { statusLabel = "Estudando"; statusColor = "var(--status-blue)"; }
+                    if(statusTopico === 'concluido') { statusLabel = "Concluído"; statusColor = "var(--status-green)"; }
+
+                    let acertos = 0; let erros = 0; let minTotais = 0; let ultimoContato = null;
+
+                    registrosDeEstudo.forEach(reg => {
+                        if (reg.disciplina === disciplina.nome && reg.topico === nomeTopico) {
+                            acertos += reg.questoes.acertos || 0;
+                            erros += reg.questoes.erros || 0;
+                            if (reg.tempo) minTotais += (reg.tempo.horas || 0) * 60 + (reg.tempo.minutos || 0);
+                            let dataReg = new Date(reg.data + "T00:00:00");
+                            if (!ultimoContato || dataReg > ultimoContato) ultimoContato = dataReg;
+                        }
+                    });
+
+                    let totalQuestoes = acertos + erros;
+                    let percAcerto = totalQuestoes > 0 ? Math.round((acertos / totalQuestoes) * 100) : 0;
+                    let corBarra = percAcerto >= 80 ? 'var(--success-color)' : percAcerto >= 60 ? 'var(--warning-color)' : 'var(--danger-color)';
+                    
+                    let h = Math.floor(minTotais / 60); let m = minTotais % 60;
+                    let tempoStr = minTotais > 0 ? `${h > 0 ? h+'h ' : ''}${m}m`.trim() : '-';
+
+                    let dataUltimoStr = '-';
+                    if (ultimoContato) dataUltimoStr = `${String(ultimoContato.getDate()).padStart(2,'0')}/${String(ultimoContato.getMonth()+1).padStart(2,'0')}/${ultimoContato.getFullYear()}`;
+
+                    let chaveRev = disciplina.nome + "|||" + nomeTopico;
+                    let dataRevStr = mapaRevisoes[chaveRev] || '-';
+
+                    linhasTabela += `
+                        <tr>
+                            <td style="font-weight: 500; color: var(--text-main);">${nomeTopico}</td>
+                            <td><span style="color: ${statusColor}; font-weight: 600; font-size: 0.8rem;"><i class="fa-solid fa-circle" style="font-size: 0.5rem; vertical-align: middle;"></i> ${statusLabel}</span></td>
+                            <td><i class="fa-regular fa-clock" style="color:var(--text-muted);"></i> ${tempoStr}</td>
+                            <td style="min-width: 130px;">
+                                <div style="display:flex; justify-content:space-between; font-size: 0.8rem; margin-bottom: 3px; font-weight:600; color:${corBarra};">
+                                    <span>${percAcerto}%</span>
+                                </div>
+                                <div class="progress-bar-container" style="height: 6px; margin-top:0; background:var(--border-color);">
+                                    <div class="progress-bar-fill" style="width: ${percAcerto}%; background: ${corBarra};"></div>
+                                </div>
+                            </td>
+                            <td>${dataUltimoStr}</td>
+                            <td style="color:var(--primary-color); font-weight:600;">${dataRevStr}</td>
+                            <td style="color: var(--success-color); font-weight: 600; text-align:center;">${acertos}</td>
+                            <td style="color: var(--danger-color); font-weight: 600; text-align:center;">${erros}</td>
+                            <td style="font-weight: bold; text-align:center;">${totalQuestoes}</td>
+                        </tr>
+                    `;
+                });
+
+                if (disciplina.topicos.length === 0) {
+                    linhasTabela = `<tr><td colspan="9" style="text-align:center; padding: 1.5rem; color: var(--text-muted);">Nenhum assunto registado nesta matéria.</td></tr>`;
+                }
+
+                container.innerHTML += `
+                    <div class="desempenho-card">
+                        <div class="desempenho-header" onclick="toggleDesempenho(${disciplina.id})">
+                            <span style="font-size: 1.1rem; color: var(--primary-color);">
+                                <i class="fa-solid fa-book-open"></i> ${disciplina.nome}
+                            </span>
+                            <i class="fa-solid fa-chevron-down" id="icon-desempenho-${disciplina.id}"></i>
+                        </div>
+                        <div class="desempenho-body hidden" id="body-desempenho-${disciplina.id}">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Assunto</th>
+                                        <th>Status</th>
+                                        <th>Horas Estudadas</th>
+                                        <th>Desempenho</th>
+                                        <th>Último Contacto</th>
+                                        <th>Revisão</th>
+                                        <th style="text-align:center;">Acertos</th>
+                                        <th style="text-align:center;">Erros</th>
+                                        <th style="text-align:center;">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${linhasTabela}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function toggleDesempenho(id) {
+            const body = document.getElementById(`body-desempenho-${id}`);
+            const icon = document.getElementById(`icon-desempenho-${id}`);
+            if (body.classList.contains('hidden')) {
+                body.classList.remove('hidden');
+                icon.classList.remove('fa-chevron-down');
+                icon.classList.add('fa-chevron-up');
+            } else {
+                body.classList.add('hidden');
+                icon.classList.remove('fa-chevron-up');
+                icon.classList.add('fa-chevron-down');
+            }
+        }
+
+        // === SISTEMA DE METAS ===
+        function abrirModalMeta() {
+            document.getElementById('modal-meta').classList.remove('hidden');
+            document.getElementById('meta-titulo').value = '';
+            document.getElementById('meta-tipo').value = 'horas';
+            document.getElementById('meta-alvo').value = '';
+            document.getElementById('meta-inicio').value = '';
+            document.getElementById('meta-fim').value = '';
+            atualizarLabelAlvoMeta();
+        }
+
+        function fecharModalMeta() {
+            document.getElementById('modal-meta').classList.add('hidden');
+        }
+
+        function atualizarLabelAlvoMeta() {
+            let tipo = document.getElementById('meta-tipo').value;
+            let label = document.getElementById('label-meta-alvo');
+            if(tipo === 'horas') label.innerText = 'Quantidade (em Horas)';
+            else label.innerText = 'Quantidade (Total de Questões)';
+        }
+
+        function salvarMeta() {
+            let titulo = document.getElementById('meta-titulo').value;
+            let tipo = document.getElementById('meta-tipo').value;
+            let alvo = parseInt(document.getElementById('meta-alvo').value);
+            let inicio = document.getElementById('meta-inicio').value;
+            let fim = document.getElementById('meta-fim').value;
+
+            if(!titulo || !alvo || !inicio || !fim) {
+                alert("Por favor, preencha todos os campos da meta.");
+                return;
+            }
+
+            if(new Date(inicio) > new Date(fim)) {
+                alert("A data de início não pode ser maior que a data final.");
+                return;
+            }
+
+            let novaMeta = {
+                id: Date.now(),
+                titulo: titulo,
+                tipo: tipo,
+                alvo: alvo,
+                dataInicio: inicio,
+                dataFim: fim
+            };
+
+            metasDoUsuario.unshift(novaMeta);
+            salvarDadosLocais();
+            renderizarMetas();
+            if(!document.getElementById('view-dashboard').classList.contains('hidden')) renderizarDashboard();
+            fecharModalMeta();
+        }
+
+        function excluirMeta(id) {
+            if(confirm("Deseja mesmo eliminar esta meta?")) {
+                metasDoUsuario = metasDoUsuario.filter(m => m.id !== id);
+                salvarDadosLocais();
+                renderizarMetas();
+                if(!document.getElementById('view-dashboard').classList.contains('hidden')) renderizarDashboard();
+            }
+        }
+
+        function formatarDataExtenso(dataStr) {
+            let partes = dataStr.split('-');
+            let d = new Date(partes[0], partes[1] - 1, partes[2]);
+            const meses = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"];
+            return `${d.getDate()} de ${meses[d.getMonth()]} de ${d.getFullYear()}`;
+        }
+
+        function renderizarMetas() {
+            const container = document.getElementById('lista-metas');
+            if(!container) return;
+            container.innerHTML = '';
+
+            if (metasDoUsuario.length === 0) {
+                container.innerHTML = `<div class="panel" style="text-align:center; padding:3rem; color:var(--text-muted);">Você ainda não tem metas. Clique no botão acima para criar a sua primeira! 🎯</div>`;
+                return;
+            }
+
+            let hojeStr = formatarDataLocalParaISO(new Date());
+
+            metasDoUsuario.forEach(meta => {
+                let progressoAtual = 0;
+
+                registrosDeEstudo.forEach(reg => {
+                    if (reg.data >= meta.dataInicio && reg.data <= meta.dataFim) {
+                        if (meta.tipo === 'horas' && reg.tempo) {
+                            progressoAtual += (reg.tempo.horas * 60) + reg.tempo.minutos;
+                        } else if (meta.tipo === 'questoes' && reg.questoes) {
+                            progressoAtual += (reg.questoes.acertos + reg.questoes.erros);
+                        }
+                    }
+                });
+
+                if (meta.tipo === 'horas') progressoAtual = progressoAtual / 60;
+
+                let percentualRaw = (progressoAtual / meta.alvo) * 100;
+                let percentualLimpo = Math.min(Math.round(percentualRaw), 100); 
+                
+                let textoMotivacional = '';
+                let statusBadge = '';
+                let statusBgColor = 'var(--icon-blue-bg)';
+                let statusTextColor = 'var(--icon-blue-text)';
+
+                if (hojeStr > meta.dataFim && percentualRaw < 100) {
+                    textoMotivacional = "Poxa, o prazo terminou e não batemos a meta. Mas o importante é não parar, tente novamente! 💪";
+                    statusBadge = "Encerrada";
+                    statusBgColor = "var(--icon-red-bg)";
+                    statusTextColor = "var(--danger-color)";
+                } else if (percentualRaw >= 100) {
+                    textoMotivacional = "Incrível! Bateu a sua meta! Parabéns pela dedicação! 🏆🎉";
+                    statusBadge = "Concluída";
+                    statusBgColor = "var(--icon-green-bg)";
+                    statusTextColor = "var(--success-color)";
+                } else if (percentualRaw === 0) {
+                    textoMotivacional = "Que é isto? Ainda não iniciou os seus estudos? Sem moleza, bora! 📚💥";
+                    statusBadge = "Não iniciada";
+                    statusBgColor = "var(--hover-bg)";
+                    statusTextColor = "var(--text-muted)";
+                } else if (percentualRaw < 50) {
+                    textoMotivacional = "Bom começo! Continue focado para atingir a meta! 🚀";
+                    statusBadge = "Em andamento";
+                } else {
+                    textoMotivacional = "Já passamos da metade! Quase lá, mantenha o ritmo! 🔥";
+                    statusBadge = "Em andamento";
+                }
+
+                let blocosHTML = '';
+                for(let i=1; i<=10; i++) {
+                    let blocoFilled = percentualLimpo >= (i * 10);
+                    let corBloco = blocoFilled ? 'var(--text-main)' : 'var(--hover-bg)';
+                    blocosHTML += `<div class="meta-block" style="background: ${corBloco};"></div>`;
+                }
+
+                container.innerHTML += `
+                    <div class="meta-card">
+                        <button class="btn-delete-card" onclick="excluirMeta(${meta.id})" title="Eliminar Meta"><i class="fa-solid fa-xmark"></i></button>
+                        
+                        <h3><i class="fa-solid fa-bullseye" style="color: var(--danger-color);"></i> ${meta.titulo}</h3>
+                        
+                        <div class="meta-progress-blocks">
+                            ${blocosHTML}
+                            <span class="meta-perc-text">${Math.round(percentualRaw)}%</span>
+                        </div>
+                        
+                        <p class="meta-msg">${textoMotivacional}</p>
+                        
+                        <div class="meta-status-pill" style="background: ${statusBgColor}; color: ${statusTextColor};">
+                            <div style="width: 8px; height: 8px; background: currentColor; border-radius: 50%;"></div>
+                            ${statusBadge}
+                        </div>
+                        
+                        <div class="meta-date-info">
+                            <i class="fa-regular fa-calendar-days"></i> Duração do Desafio:<br>
+                            <span style="font-weight: 600;">@${formatarDataExtenso(meta.dataInicio)} → ${formatarDataExtenso(meta.dataFim)}</span>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // === NOVO: SISTEMA DE SIMULADOS E REDAÇÕES ===
+        function mudarAbaSim(aba) {
+            document.getElementById('tab-s-simulados').classList.remove('active');
+            document.getElementById('tab-s-redacoes').classList.remove('active');
+            document.getElementById('view-s-simulados').classList.add('hidden');
+            document.getElementById('view-s-redacoes').classList.add('hidden');
+            
+            document.getElementById(`tab-s-${aba}`).classList.add('active');
+            document.getElementById(`view-s-${aba}`).classList.remove('hidden');
+        }
+
+        function abrirModalSimulado() {
+            document.getElementById('modal-simulado').classList.remove('hidden');
+            document.getElementById('simulado-titulo').innerText = "Registar Simulado";
+            document.getElementById('sim-edit-id').value = '';
+            
+            const hoje = new Date().toISOString().split('T')[0];
+            document.getElementById('sim-data').value = hoje;
+            document.getElementById('sim-cargo').value = '';
+            document.getElementById('sim-origem').value = '';
+            document.getElementById('sim-estilo').value = 'multipla_escolha';
+            document.getElementById('sim-tempo').value = '';
+            document.getElementById('sim-acertos').value = '';
+            document.getElementById('sim-erros').value = '';
+            document.getElementById('sim-brancos').value = '';
+            document.getElementById('sim-pontos').value = '';
+        }
+
+        function editarSimulado(id) {
+            let sim = simuladosDoUsuario.find(s => s.id === id);
+            if(!sim) return;
+            
+            document.getElementById('modal-simulado').classList.remove('hidden');
+            document.getElementById('simulado-titulo').innerText = "Editar Simulado";
+            document.getElementById('sim-edit-id').value = sim.id;
+            
+            document.getElementById('sim-data').value = sim.data;
+            document.getElementById('sim-cargo').value = sim.cargo;
+            document.getElementById('sim-origem').value = sim.origem;
+            document.getElementById('sim-estilo').value = sim.estilo || 'multipla_escolha';
+            document.getElementById('sim-tempo').value = sim.tempo || '';
+            document.getElementById('sim-acertos').value = sim.acertos;
+            document.getElementById('sim-erros').value = sim.erros;
+            document.getElementById('sim-brancos').value = sim.brancos;
+            document.getElementById('sim-pontos').value = sim.pontos;
+        }
+
+        function fecharModalSimulado() {
+            document.getElementById('modal-simulado').classList.add('hidden');
+        }
+
+        function salvarSimulado() {
+            let editId = document.getElementById('sim-edit-id').value;
+            let cargo = document.getElementById('sim-cargo').value;
+            let origem = document.getElementById('sim-origem').value;
+            let estilo = document.getElementById('sim-estilo').value;
+            let data = document.getElementById('sim-data').value;
+            let tempo = document.getElementById('sim-tempo').value;
+            let acertos = parseInt(document.getElementById('sim-acertos').value) || 0;
+            let erros = parseInt(document.getElementById('sim-erros').value) || 0;
+            let brancos = parseInt(document.getElementById('sim-brancos').value) || 0;
+            let pontosInput = document.getElementById('sim-pontos').value;
+
+            if(!cargo || !data) { alert("Cargo e Data são obrigatórios."); return; }
+
+            // Se pontos não for preenchido manualmente, calcula baseado no estilo
+            let pontosLíquidos = 0;
+            if (pontosInput !== '') {
+                pontosLíquidos = parseFloat(pontosInput);
+            } else {
+                if (estilo === 'cespe') {
+                    pontosLíquidos = acertos - erros;
+                } else {
+                    pontosLíquidos = acertos;
+                }
+            }
+
+            let novoSimulado = {
+                id: editId ? parseInt(editId) : Date.now(),
+                cargo: cargo, origem: origem, estilo: estilo, data: data, tempo: tempo,
+                acertos: acertos, erros: erros, brancos: brancos, pontos: pontosLíquidos
+            };
+
+            if (editId) {
+                let index = simuladosDoUsuario.findIndex(s => s.id === parseInt(editId));
+                if (index > -1) simuladosDoUsuario[index] = novoSimulado;
+            } else {
+                simuladosDoUsuario.unshift(novoSimulado);
+            }
+
+            simuladosDoUsuario.sort((a, b) => new Date(b.data) - new Date(a.data));
+            
+            salvarDadosLocais();
+            renderizarSimulados();
+            fecharModalSimulado();
+        }
+
+        function excluirSimulado(id) {
+            if(confirm("Eliminar este simulado?")) {
+                simuladosDoUsuario = simuladosDoUsuario.filter(s => s.id !== id);
+                salvarDadosLocais();
+                renderizarSimulados();
+            }
+        }
+
+        function renderizarSimulados() {
+            const tbody = document.getElementById('lista-simulados');
+            const painelMelhor = document.getElementById('painel-melhor-simulado');
+            if(!tbody || !painelMelhor) return;
+            
+            tbody.innerHTML = '';
+            
+            if(simuladosDoUsuario.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="11" style="text-align:center; padding: 2rem; color:var(--text-muted);">Nenhum simulado registado.</td></tr>`;
+                painelMelhor.innerHTML = `<p style="color:var(--text-muted); font-size:0.9rem;">Aguardando o seu primeiro teste...</p>`;
+                return;
+            }
+
+            let melhorSimulado = null;
+            let melhorPercentual = -1;
+
+            simuladosDoUsuario.forEach(sim => {
+                let total = sim.acertos + sim.erros + sim.brancos;
+                let perc = total > 0 ? (sim.pontos / total) * 100 : 0;
+                let percLimpo = Math.max(0, Math.min(Math.round(perc), 100)); 
+                
+                if (percLimpo > melhorPercentual) { melhorPercentual = percLimpo; melhorSimulado = sim; }
+
+                let blocosHTML = '';
+                for(let i=1; i<=10; i++) {
+                    let fill = percLimpo >= (i * 10) ? 'filled' : '';
+                    blocosHTML += `<div class="block-progress-item ${fill}"></div>`;
+                }
+
+                let pData = sim.data.split('-');
+                let df = pData.length === 3 ? `${pData[2]}/${pData[1]}/${pData[0]}` : sim.data;
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td style="font-weight:600;"><i class="fa-solid fa-pen-to-square" style="color:var(--text-muted);"></i> ${sim.cargo}</td>
+                        <td>${sim.origem}</td>
+                        <td><i class="fa-regular fa-hourglass-half" style="color:var(--text-muted);"></i> ${sim.tempo || '-'}</td>
+                        <td><i class="fa-regular fa-calendar" style="color:var(--text-muted);"></i> ${df}</td>
+                        <td style="text-align:center; font-weight:bold; color:var(--success-color);">${sim.acertos}</td>
+                        <td style="text-align:center; font-weight:bold; color:var(--danger-color);">${sim.erros}</td>
+                        <td style="text-align:center; font-weight:bold; color:var(--text-muted);">${sim.brancos}</td>
+                        <td style="text-align:center; font-weight:bold; color:var(--primary-color);">${sim.pontos}</td>
+                        <td style="min-width:180px;">
+                            <div class="block-progress-container">
+                                ${blocosHTML} <span style="font-size:0.8rem; font-weight:600; color:var(--text-muted); margin-left:5px;">${percLimpo}%</span>
+                            </div>
+                        </td>
+                        <td style="text-align:center; font-weight:bold;">${total}</td>
+                        <td style="text-align:center; white-space:nowrap;">
+                            <button class="btn-icon" style="padding: 0.3rem 0.6rem; font-size: 0.8rem;" onclick="editarSimulado(${sim.id})" title="Editar"><i class="fa-solid fa-pen"></i></button>
+                            <button class="btn-icon" style="padding: 0.3rem 0.6rem; font-size: 0.8rem; color: var(--danger-color);" onclick="excluirSimulado(${sim.id})" title="Eliminar"><i class="fa-solid fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            // Preenche o card de Melhor Simulado
+            if (melhorSimulado) {
+                let mTotal = melhorSimulado.acertos + melhorSimulado.erros + melhorSimulado.brancos;
+                let mPData = melhorSimulado.data.split('-');
+                let mDf = mPData.length === 3 ? `${mPData[2]}/${mPData[1]}/${mPData[0]}` : melhorSimulado.data;
+                
+                let mBlocosHTML = '';
+                for(let i=1; i<=10; i++) {
+                    let fill = melhorPercentual >= (i * 10) ? 'filled' : '';
+                    mBlocosHTML += `<div class="block-progress-item ${fill}"></div>`;
+                }
+
+                let badgeEstilo = melhorSimulado.estilo === 'cespe' ? '<span class="badge" style="background:var(--icon-red-bg); color:var(--danger-color); margin-bottom:10px;">Cespe (C/E)</span>' : '<span class="badge" style="background:var(--hover-bg); color:var(--text-main); margin-bottom:10px;">Múltipla Escolha</span>';
+
+                painelMelhor.innerHTML = `
+                    <div style="font-weight: 700; font-size: 1.1rem; color: var(--text-main); margin-bottom: 5px;"><i class="fa-solid fa-pen-to-square" style="color:var(--text-muted);"></i> ${melhorSimulado.cargo}</div>
+                    <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 5px;"><i class="fa-regular fa-building"></i> ${melhorSimulado.origem}</div>
+                    ${badgeEstilo}
+                    <br>
+                    <div class="record-pill">Novo Recorde!</div>
+                    
+                    <ul class="record-item-list">
+                        <li><i class="fa-regular fa-calendar"></i> Realizado a ${mDf}</li>
+                        <li><i class="fa-solid fa-trophy" style="color:var(--warning-color);"></i> Obteve <strong style="color:var(--text-main);">${melhorSimulado.pontos}</strong> pontos líquidos</li>
+                        <li style="margin-top: 10px; margin-bottom: 10px;">
+                            <div class="block-progress-container">
+                                ${mBlocosHTML} <span style="font-size:0.8rem; font-weight:600; color:var(--text-muted); margin-left:5px;">${melhorPercentual}%</span>
+                            </div>
+                        </li>
+                        <li><i class="fa-solid fa-list-ol"></i> Total de Questões: <strong style="color:var(--text-main);">${mTotal}</strong></li>
+                        <li><span style="color:var(--success-color);"><i class="fa-solid fa-check"></i> ${melhorSimulado.acertos}</span> &nbsp;|&nbsp; <span style="color:var(--danger-color);"><i class="fa-solid fa-xmark"></i> ${melhorSimulado.erros}</span></li>
+                        <li><i class="fa-regular fa-hourglass-half"></i> Duração: <strong style="color:var(--text-main);">${melhorSimulado.tempo || '-'}</strong></li>
+                    </ul>
+                `;
+            }
+        }
+
+        // REDAÇÕES
+        function abrirModalRedacao() {
+            document.getElementById('modal-redacao').classList.remove('hidden');
+            document.getElementById('redacao-titulo').innerText = "Registar Redação";
+            document.getElementById('red-edit-id').value = '';
+            
+            const hoje = new Date().toISOString().split('T')[0];
+            document.getElementById('red-data').value = hoje;
+            document.getElementById('red-tema').value = '';
+            document.getElementById('red-concurso').value = '';
+            document.getElementById('red-banca').value = '';
+            document.getElementById('red-tempo').value = '';
+            document.getElementById('red-pontos').value = '';
+            document.getElementById('red-consideracoes').value = '';
+        }
+
+        function editarRedacao(id) {
+            let red = redacoesDoUsuario.find(r => r.id === id);
+            if(!red) return;
+
+            document.getElementById('modal-redacao').classList.remove('hidden');
+            document.getElementById('redacao-titulo').innerText = "Editar Redação";
+            document.getElementById('red-edit-id').value = red.id;
+            
+            document.getElementById('red-data').value = red.data;
+            document.getElementById('red-tema').value = red.tema;
+            document.getElementById('red-concurso').value = red.concurso || '';
+            document.getElementById('red-banca').value = red.banca || '';
+            document.getElementById('red-tempo').value = red.tempo || '';
+            document.getElementById('red-pontos').value = red.pontos !== null ? red.pontos : '';
+            document.getElementById('red-consideracoes').value = red.consideracoes || '';
+        }
+
+        function fecharModalRedacao() {
+            document.getElementById('modal-redacao').classList.add('hidden');
+        }
+
+        function salvarRedacao() {
+            let editId = document.getElementById('red-edit-id').value;
+            let tema = document.getElementById('red-tema').value;
+            let concurso = document.getElementById('red-concurso').value;
+            let banca = document.getElementById('red-banca').value;
+            let data = document.getElementById('red-data').value;
+            let tempo = document.getElementById('red-tempo').value;
+            let pontos = document.getElementById('red-pontos').value;
+            let cons = document.getElementById('red-consideracoes').value;
+
+            if(!tema || !data) { alert("Tema e Data são obrigatórios."); return; }
+
+            let novaRedacao = {
+                id: editId ? parseInt(editId) : Date.now(),
+                tema: tema, concurso: concurso, banca: banca,
+                data: data, tempo: tempo, pontos: pontos !== '' ? parseFloat(pontos) : null, consideracoes: cons
+            };
+
+            if (editId) {
+                let index = redacoesDoUsuario.findIndex(r => r.id === parseInt(editId));
+                if (index > -1) redacoesDoUsuario[index] = novaRedacao;
+            } else {
+                redacoesDoUsuario.unshift(novaRedacao);
+            }
+
+            redacoesDoUsuario.sort((a, b) => new Date(b.data) - new Date(a.data));
+            
+            salvarDadosLocais();
+            renderizarRedacoes();
+            fecharModalRedacao();
+        }
+
+        function excluirRedacao(id) {
+            if(confirm("Eliminar esta redação?")) {
+                redacoesDoUsuario = redacoesDoUsuario.filter(r => r.id !== id);
+                salvarDadosLocais();
+                renderizarRedacoes();
+            }
+        }
+
+        function renderizarRedacoes() {
+            const tbody = document.getElementById('lista-redacoes');
+            if(!tbody) return;
+            
+            tbody.innerHTML = '';
+            
+            if(redacoesDoUsuario.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding: 2rem; color:var(--text-muted);">Nenhuma redação registada.</td></tr>`;
+                return;
+            }
+
+            redacoesDoUsuario.forEach(red => {
+                let pData = red.data.split('-');
+                let df = pData.length === 3 ? `${pData[2]}/${pData[1]}/${pData[0]}` : red.data;
+                let pontosStr = red.pontos !== null ? red.pontos : '-';
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td style="font-weight:600; color:var(--text-main);"><i class="fa-regular fa-file-lines" style="color:var(--text-muted);"></i> ${red.tema}</td>
+                        <td>${red.concurso || '-'}</td>
+                        <td><span class="badge" style="background:var(--hover-bg); color:var(--text-muted);">${red.banca || '-'}</span></td>
+                        <td style="text-align:center; font-weight:bold; color:var(--primary-color);">${pontosStr}</td>
+                        <td><i class="fa-regular fa-calendar" style="color:var(--text-muted);"></i> ${df}</td>
+                        <td><i class="fa-regular fa-hourglass-half" style="color:var(--text-muted);"></i> ${red.tempo || '-'}</td>
+                        <td style="font-size:0.8rem;">${red.consideracoes || '-'}</td>
+                        <td style="text-align:center; white-space:nowrap;">
+                            <button class="btn-icon" style="padding: 0.3rem 0.6rem; font-size: 0.8rem;" onclick="editarRedacao(${red.id})" title="Editar"><i class="fa-solid fa-pen"></i></button>
+                            <button class="btn-icon" style="padding: 0.3rem 0.6rem; font-size: 0.8rem; color: var(--danger-color);" onclick="excluirRedacao(${red.id})" title="Eliminar"><i class="fa-solid fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+
+        // 7. INICIALIZAÇÃO DO APP LOCAL (Sem Nuvem)
+        function initApp() {
+            console.log("Iniciando PlanIQ em Modo Local (Offline)");
+            
+            carregarDadosLocais();
+
+            editalDoUsuario.disciplinas.forEach(d => {
+                if(!d.statusDisciplina) d.statusDisciplina = 'ativa';
+                if(d.topicos) {
+                    d.topicos = d.topicos.map(t => {
+                        if (typeof t === 'string') return { nome: t, status: 'nao_iniciado' };
+                        return t;
+                    });
+                }
+            });
+
+            salvarDadosLocais();
+
+            if(!document.getElementById('view-dashboard').classList.contains('hidden')) renderizarDashboard();
+            if(!document.getElementById('view-edital').classList.contains('hidden')) renderizarEdital();
+            if(!document.getElementById('view-cronograma').classList.contains('hidden')) {
+                renderizarHistorico();
+                renderizarViewsCronograma();
+            }
+            if(!document.getElementById('view-revisoes').classList.contains('hidden')) renderizarRevisoes();
+            if(!document.getElementById('view-desempenho').classList.contains('hidden')) renderizarDesempenho();
+            if(!document.getElementById('view-metas').classList.contains('hidden')) renderizarMetas();
+            if(!document.getElementById('view-simulados').classList.contains('hidden')) {
+                renderizarSimulados();
+                renderizarRedacoes();
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', initApp);
+
+        // Exportações globais
+        window.navegarPara = navegarPara;
+        window.mudarAbaEdital = mudarAbaEdital;
+        window.selecionarDisciplinaCard = selecionarDisciplinaCard;
+        window.alternarStatusDisciplina = alternarStatusDisciplina;
+        window.adicionarDisciplina = adicionarDisciplina;
+        window.editarDisciplina = editarDisciplina;
+        window.excluirDisciplina = excluirDisciplina;
+        window.adicionarTopico = adicionarTopico;
+        window.editarTopico = editarTopico;
+        window.excluirTopico = excluirTopico;
+        window.mudarStatusTopico = mudarStatusTopico;
+        window.abrirModalEstudo = abrirModalEstudo;
+        window.fecharModalEstudo = fecharModalEstudo;
+        window.atualizarTopicosEstudo = atualizarTopicosEstudo;
+        window.salvarEstudo = salvarEstudo;
+        window.mudarAbaCronograma = mudarAbaCronograma;
+        window.abrirModalTarefa = abrirModalTarefa;
+        window.fecharModalTarefa = fecharModalTarefa;
+        window.atualizarTopicosTarefa = atualizarTopicosTarefa;
+        window.salvarTarefaPlanejada = salvarTarefaPlanejada;
+        window.alternarStatusTarefaPlanejada = alternarStatusTarefaPlanejada;
+        window.excluirTarefaPlanejada = excluirTarefaPlanejada;
+        window.reiniciarCronograma = reiniciarCronograma;
+        window.reiniciarCiclo = reiniciarCiclo;
+        window.abrirModalEstudoPreenchido = abrirModalEstudoPreenchido;
+        window.mudarMesCalendario = mudarMesCalendario;
+        window.prepararConclusaoRevisao = prepararConclusaoRevisao;
+        window.renderizarDesempenho = renderizarDesempenho;
+        window.toggleDesempenho = toggleDesempenho;
+        window.abrirModalMeta = abrirModalMeta;
+        window.fecharModalMeta = fecharModalMeta;
+        window.atualizarLabelAlvoMeta = atualizarLabelAlvoMeta;
+        window.salvarMeta = salvarMeta;
+        window.excluirMeta = excluirMeta;
+        
+        window.editarRegistroEstudo = editarRegistroEstudo;
+        window.excluirRegistroEstudo = excluirRegistroEstudo;
+        window.excluirTodoHistorico = excluirTodoHistorico;
+        
+        window.dragStartCiclo = dragStartCiclo;
+        window.dragOverCiclo = dragOverCiclo;
+        window.dragLeaveCiclo = dragLeaveCiclo;
+        window.dropCiclo = dropCiclo;
+        window.dragEndCiclo = dragEndCiclo;
+
+        window.mudarAbaSim = mudarAbaSim;
+        window.abrirModalSimulado = abrirModalSimulado;
+        window.editarSimulado = editarSimulado;
+        window.fecharModalSimulado = fecharModalSimulado;
+        window.salvarSimulado = salvarSimulado;
+        window.excluirSimulado = excluirSimulado;
+        window.abrirModalRedacao = abrirModalRedacao;
+        window.editarRedacao = editarRedacao;
+        window.fecharModalRedacao = fecharModalRedacao;
+        window.salvarRedacao = salvarRedacao;
+        window.excluirRedacao = excluirRedacao;
+
+        window.toggleTopicos = function(id) {
+            const lista = document.getElementById(`lista-${id}`);
+            const icone = document.getElementById(`icon-${id}`);
+            if (lista.classList.contains('hidden')) {
+                lista.classList.remove('hidden');
+                icone.classList.remove('fa-chevron-down');
+                icone.classList.add('fa-chevron-up');
+            } else {
+                lista.classList.add('hidden');
+                icone.classList.remove('fa-chevron-up');
+                icone.classList.add('fa-chevron-down');
+            }
+        };
+
+    </script>
+</body>
+</html>
