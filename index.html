@@ -523,7 +523,6 @@
             <div id="lista-metas" style="display: flex; flex-direction: column; gap: 1.5rem;"></div>
         </div>
 
-        <!-- === ECRÃ 8: ADMIN === -->
         <div id="view-admin" class="hidden">
             <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
                 <div><h1 style="margin-bottom: 0;">Painel de Administração</h1><p style="color: var(--text-muted); margin-top: 5px;">Acesso restrito. Ferramentas de gestão de base de dados.</p></div>
@@ -544,7 +543,6 @@
             </div>
         </div>
 
-        <!-- === MODAIS === -->
         <div id="modal-login" class="modal-overlay">
             <div class="modal-content" style="max-width: 400px; text-align: center;">
                 <h2 style="margin-bottom: 10px;"><i class="fa-solid fa-lock" style="color: var(--primary-color);"></i> Acesso Restrito</h2>
@@ -1276,6 +1274,147 @@
         window.prepararConclusaoRevisao = function(disciplina, topico) { window.abrirModalEstudoPreenchido(disciplina, topico); let cbRevisao = document.querySelector('input[name="estudo-categoria"][value="Revisão"]'); if(cbRevisao) cbRevisao.checked = true; document.getElementById('estudo-agendar-revisao').checked = false; };
 
         // =====================================
+        // DESEMPENHO (ACCORDION) E PROTEÇÕES
+        // =====================================
+        window.toggleDesempenhoAccordion = function(id) {
+            const body = document.getElementById(`body-accordion-${id}`);
+            const icon = document.getElementById(`icon-accordion-${id}`);
+            if (body && body.classList.contains('hidden')) {
+                body.classList.remove('hidden');
+                if(icon) { icon.classList.remove('fa-chevron-down'); icon.classList.add('fa-chevron-up'); }
+            } else if(body) {
+                body.classList.add('hidden');
+                if(icon) { icon.classList.remove('fa-chevron-up'); icon.classList.add('fa-chevron-down'); }
+            }
+        };
+
+        window.renderizarDesempenho = function() {
+            try {
+                const container = document.getElementById('lista-desempenho-disciplinas');
+                if (!container) return;
+                container.innerHTML = '';
+
+                let disciplinasAtivas = editalDoUsuario.disciplinas.filter(d => (d.statusDisciplina || 'ativa') === 'ativa');
+
+                if (disciplinasAtivas.length === 0) {
+                    container.innerHTML = '<p style="color:var(--text-muted); padding:1rem;">Nenhuma disciplina ativa no Edital.</p>';
+                    return;
+                }
+
+                let agendaRevisoes = {};
+                try { agendaRevisoes = window.obterMapaProximasRevisoes(); } catch(e) { console.error("Aviso no mapa revisões:", e); }
+
+                let htmlFinal = '';
+
+                disciplinasAtivas.forEach((disc, index) => {
+                    let linhasTopicos = '';
+                    
+                    if (Array.isArray(disc.topicos)) {
+                        disc.topicos.forEach(topicoObj => {
+                            let nomeTopico = typeof topicoObj === 'string' ? topicoObj : topicoObj.nome;
+                            let statusTopico = typeof topicoObj === 'string' ? 'nao_iniciado' : (topicoObj.status || 'nao_iniciado');
+
+                            let tempoTotal = 0;
+                            let acertos = 0;
+                            let erros = 0;
+                            let ultimoContacto = null;
+
+                            if (Array.isArray(registrosDeEstudo)) {
+                                registrosDeEstudo.forEach(reg => {
+                                    if (reg.disciplina === disc.nome && reg.topico === nomeTopico) {
+                                        if (reg.tempo) tempoTotal += (Number(reg.tempo.horas) * 60) + Number(reg.tempo.minutos);
+                                        acertos += Number(reg.questoes?.acertos || 0);
+                                        erros += Number(reg.questoes?.erros || 0);
+                                        if (!ultimoContacto || new Date(reg.data) > new Date(ultimoContacto)) {
+                                            ultimoContacto = reg.data;
+                                        }
+                                    }
+                                });
+                            }
+
+                            let total = acertos + erros;
+                            let perc = total > 0 ? Math.round((acertos / total) * 100) : 0;
+                            let horasTxt = tempoTotal > 0 ? `${Math.floor(tempoTotal/60)}h ${tempoTotal%60}m` : '-';
+                            let dataUltimoTxt = ultimoContacto ? ultimoContacto.split('-').reverse().join('/') : '-';
+
+                            let chaveAgenda = disc.nome + "|||" + nomeTopico;
+                            let dataRevisao = agendaRevisoes[chaveAgenda] || '-';
+
+                            let statusCor = 'var(--status-gray)';
+                            let statusTexto = 'Não iniciado';
+                            if (statusTopico === 'estudando') { statusCor = 'var(--status-blue)'; statusTexto = 'Estudando'; }
+                            if (statusTopico === 'concluido') { statusCor = 'var(--status-green)'; statusTexto = 'Concluído'; }
+                            let statusHtml = `<span style="color:${statusCor}; display:flex; align-items:center; gap:5px; font-size:0.8rem; font-weight:500;"><i class="fa-solid fa-circle" style="font-size:6px;"></i> ${statusTexto}</span>`;
+
+                            let barColor = perc >= 80 ? 'var(--success-color)' : perc >= 60 ? 'var(--warning-color)' : 'var(--danger-color)';
+
+                            linhasTopicos += `
+                                <tr>
+                                    <td style="font-weight:600; color:var(--text-main); font-size:0.85rem;">${nomeTopico}</td>
+                                    <td>${statusHtml}</td>
+                                    <td style="font-size:0.85rem;"><i class="fa-regular fa-clock" style="color:var(--text-muted)"></i> ${horasTxt}</td>
+                                    <td>
+                                        <div style="display:flex; align-items:center; gap:10px;">
+                                            <span style="color:${barColor}; font-weight:bold; font-size:0.85rem; min-width:30px;">${perc}%</span>
+                                            <div class="progress-bar-container" style="width:60px; margin:0; height:4px; background:var(--bg-color);">
+                                                <div class="progress-bar-fill" style="width:${perc}%; background-color:${barColor}"></div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td style="color:var(--text-muted); font-size:0.85rem;">${dataUltimoTxt}</td>
+                                    <td style="color:var(--primary-color); font-weight:600; font-size:0.85rem;">${dataRevisao}</td>
+                                    <td style="color:var(--success-color); font-weight:bold; text-align:center;">${acertos}</td>
+                                    <td style="color:var(--danger-color); font-weight:bold; text-align:center;">${erros}</td>
+                                    <td style="font-weight:bold; text-align:center; color:var(--text-main);">${total}</td>
+                                </tr>
+                            `;
+                        });
+                    }
+
+                    let isFirst = (index === 0); 
+                    let idUsado = disc.id || index;
+                    
+                    htmlFinal += `
+                        <div class="desempenho-card">
+                            <div class="desempenho-header" onclick="window.toggleDesempenhoAccordion('${idUsado}')">
+                                <span><i class="fa-solid fa-book" style="color:var(--primary-color); margin-right:8px;"></i> <span style="color:var(--primary-color); font-size:1.1rem">${disc.nome}</span></span>
+                                <i class="fa-solid ${isFirst ? 'fa-chevron-up' : 'fa-chevron-down'}" id="icon-accordion-${idUsado}" style="color:var(--text-main);"></i>
+                            </div>
+                            <div class="desempenho-body ${isFirst ? '' : 'hidden'}" id="body-accordion-${idUsado}">
+                                <div style="overflow-x: auto;">
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th style="width:25%;">Assunto</th>
+                                                <th>Status</th>
+                                                <th>Horas Estudadas</th>
+                                                <th>Desempenho</th>
+                                                <th>Último Contato</th>
+                                                <th>Revisão</th>
+                                                <th style="text-align:center">Acertos</th>
+                                                <th style="text-align:center">Erros</th>
+                                                <th style="text-align:center">Total</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            ${linhasTopicos || '<tr><td colspan="9" style="text-align:center; color:var(--text-muted); padding:1rem;">Nenhum assunto cadastrado nesta disciplina.</td></tr>'}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>`;
+                });
+                
+                container.innerHTML = htmlFinal;
+
+            } catch(e) {
+                console.error("Erro fatal ao renderizar Desempenho:", e);
+                const container = document.getElementById('lista-desempenho-disciplinas');
+                if(container) container.innerHTML = `<p style="color:var(--danger-color); padding: 1rem;">Ocorreu um erro ao carregar o desempenho. Verifique a consola para mais detalhes.</p>`;
+            }
+        };
+
+        // =====================================
         // EDITAL COM DRAG AND DROP E IMPORTAÇÃO
         // =====================================
         window.mudarAbaEdital = function(aba) { abaAtivaEdital = aba; disciplinaSelecionadaId = null; document.getElementById('tab-ativas').classList.remove('active'); document.getElementById('tab-desativadas').classList.remove('active'); document.getElementById(`tab-${aba}`).classList.add('active'); window.renderizarEdital(); }
@@ -1524,472 +1663,4 @@
             document.getElementById('tarefa-titulo').innerText = contexto === 'Ciclo' ? 'Novo Passo do Ciclo' : `Planejar Atividade para ${contexto}`; 
             document.getElementById('tarefa-tipo').value = 'estudo'; 
             window.toggleCamposTarefa();
-            const selectDisciplina = document.getElementById('tarefa-disciplina'); selectDisciplina.innerHTML = '<option value="">Selecione uma disciplina...</option>'; let disciplinasAtivas = editalDoUsuario.disciplinas.filter(d => (d.statusDisciplina || 'ativa') === 'ativa'); disciplinasAtivas.forEach(d => { const opt = document.createElement('option'); opt.value = d.id; opt.textContent = d.nome; selectDisciplina.appendChild(opt); }); document.getElementById('tarefa-topico').innerHTML = '<option value="">Selecione primeiro a disciplina...</option>'; document.getElementById('tarefa-descricao').value = ''; document.querySelectorAll('input[name="tarefa-categoria"]').forEach(cb => cb.checked = false); document.querySelectorAll('input[name="tarefa-material"]').forEach(cb => cb.checked = false); document.getElementById('tarefa-red-tema').value = ''; document.getElementById('tarefa-red-concurso').value = ''; document.getElementById('tarefa-red-banca').value = ''; document.getElementById('tarefa-red-link').value = ''; document.getElementById('tarefa-sim-cargo').value = ''; document.getElementById('tarefa-sim-origem').value = ''; document.getElementById('tarefa-sim-estilo').value = 'multipla_escolha'; document.getElementById('tarefa-sim-descricao').value = ''; document.getElementById('tarefa-sim-especifico').checked = false; document.getElementById('div-sim-disc').classList.add('hidden');
-        };
-
-        window.editarTarefaPlanejada = function(contexto, id) {
-            let item = null;
-            if(contexto === 'Ciclo') item = planejamentoDoUsuario.ciclo.find(i => i.id === id);
-            else { let d = planejamentoDoUsuario.cronograma.find(d => d.dia === contexto); if(d) item = d.itens.find(i => i.id === id); }
-            if(!item) return;
-
-            document.getElementById('modal-tarefa').classList.remove('hidden');
-            document.getElementById('tarefa-contexto').value = contexto;
-            document.getElementById('tarefa-titulo').innerText = "Editar Planejamento";
-            document.getElementById('tarefa-tipo').value = item.tipo;
-            document.getElementById('tarefa-edit-id').value = id;
-
-            window.toggleCamposTarefa();
-
-            if (item.tipo === 'estudo') {
-                const selectDisciplina = document.getElementById('tarefa-disciplina');
-                selectDisciplina.innerHTML = '<option value="">Selecione uma disciplina...</option>'; 
-                let disciplinasAtivas = editalDoUsuario.disciplinas.filter(d => (d.statusDisciplina || 'ativa') === 'ativa'); 
-                disciplinasAtivas.forEach(d => { const opt = document.createElement('option'); opt.value = d.id; opt.textContent = d.nome; selectDisciplina.appendChild(opt); });
-                
-                let d = editalDoUsuario.disciplinas.find(x => x.nome === item.disciplina);
-                if(d) {
-                    selectDisciplina.value = d.id;
-                    window.atualizarTopicosTarefa();
-                    document.getElementById('tarefa-topico').value = item.topico;
-                }
-                document.getElementById('tarefa-descricao').value = item.descricao || '';
-                document.querySelectorAll('input[name="tarefa-categoria"]').forEach(cb => cb.checked = (item.categorias||[]).includes(cb.value));
-                document.querySelectorAll('input[name="tarefa-material"]').forEach(cb => cb.checked = (item.materiais||[]).includes(cb.value));
-            } else if (item.tipo === 'redacao') {
-                document.getElementById('tarefa-red-tema').value = item.tema || '';
-                document.getElementById('tarefa-red-concurso').value = item.concurso || '';
-                document.getElementById('tarefa-red-banca').value = item.banca || '';
-                document.getElementById('tarefa-red-link').value = item.link || '';
-            } else if (item.tipo === 'simulado') {
-                document.getElementById('tarefa-sim-cargo').value = item.cargo || '';
-                document.getElementById('tarefa-sim-origem').value = item.origem || '';
-                document.getElementById('tarefa-sim-estilo').value = item.estilo || 'multipla_escolha';
-                document.getElementById('tarefa-sim-descricao').value = item.descricao || '';
-                if(item.disciplinaVinculada) {
-                    document.getElementById('tarefa-sim-especifico').checked = true;
-                    document.getElementById('div-sim-disc').classList.remove('hidden');
-                    const selectDisc = document.getElementById('tarefa-sim-disciplina');
-                    selectDisc.innerHTML = '<option value="">Selecione uma disciplina...</option>';
-                    editalDoUsuario.disciplinas.filter(d => (d.statusDisciplina || 'ativa') === 'ativa').forEach(d => { const opt = document.createElement('option'); opt.value = d.id; opt.textContent = d.nome; selectDisc.appendChild(opt); });
-                    selectDisc.value = item.disciplinaVinculada;
-                } else {
-                    document.getElementById('tarefa-sim-especifico').checked = false;
-                    document.getElementById('div-sim-disc').classList.add('hidden');
-                }
-            }
-        };
-
-        window.fecharModalTarefa = function() { document.getElementById('modal-tarefa').classList.add('hidden'); };
-        window.atualizarTopicosTarefa = function() { const disciplinaId = document.getElementById('tarefa-disciplina').value; const selectTopico = document.getElementById('tarefa-topico'); selectTopico.innerHTML = '<option value="">Selecione um tópico...</option>'; if (!disciplinaId) return; const d = editalDoUsuario.disciplinas.find(d => d.id == disciplinaId); if (d && d.topicos) { d.topicos.forEach(topicoObj => { let nome = typeof topicoObj === 'string' ? topicoObj : topicoObj.nome; const opt = document.createElement('option'); opt.value = nome; opt.textContent = nome; selectTopico.appendChild(opt); }); } };
-        
-        window.salvarTarefaPlanejada = function() { 
-            const contexto = document.getElementById('tarefa-contexto').value; 
-            const tipo = document.getElementById('tarefa-tipo').value; 
-            const editId = document.getElementById('tarefa-edit-id').value;
-            let novaTarefa = { id: editId ? parseInt(editId) : Date.now(), tipo: tipo, concluido: false };
-            
-            if (tipo === 'estudo') {
-                const disciplinaId = document.getElementById('tarefa-disciplina').value; const topico = document.getElementById('tarefa-topico').value; if (!disciplinaId || !topico) { alert("Selecione Disciplina e Tópico!"); return; }
-                novaTarefa.disciplina = editalDoUsuario.disciplinas.find(d => d.id == disciplinaId).nome; novaTarefa.topico = topico; novaTarefa.descricao = document.getElementById('tarefa-descricao').value; novaTarefa.categorias = Array.from(document.querySelectorAll('input[name="tarefa-categoria"]:checked')).map(cb => cb.value); novaTarefa.materiais = Array.from(document.querySelectorAll('input[name="tarefa-material"]:checked')).map(cb => cb.value);
-            } else if (tipo === 'redacao') {
-                novaTarefa.tema = document.getElementById('tarefa-red-tema').value; novaTarefa.concurso = document.getElementById('tarefa-red-concurso').value; novaTarefa.banca = document.getElementById('tarefa-red-banca').value; novaTarefa.link = document.getElementById('tarefa-red-link').value; if (!novaTarefa.tema) { alert("Informe pelo menos o Tema da Redação!"); return; }
-            } else if (tipo === 'simulado') {
-                novaTarefa.cargo = document.getElementById('tarefa-sim-cargo').value; novaTarefa.origem = document.getElementById('tarefa-sim-origem').value; novaTarefa.estilo = document.getElementById('tarefa-sim-estilo').value; novaTarefa.descricao = document.getElementById('tarefa-sim-descricao').value; if (!novaTarefa.cargo) { alert("Informe pelo menos o Cargo/Prova do Simulado!"); return; }
-                if(document.getElementById('tarefa-sim-especifico').checked) { let discId = document.getElementById('tarefa-sim-disciplina').value; if(discId) novaTarefa.disciplinaVinculada = editalDoUsuario.disciplinas.find(d => d.id == discId).id; }
-            }
-            
-            if(editId) {
-                if (contexto === 'Ciclo') {
-                    let index = planejamentoDoUsuario.ciclo.findIndex(i => i.id === parseInt(editId));
-                    if (index > -1) { novaTarefa.concluido = planejamentoDoUsuario.ciclo[index].concluido; planejamentoDoUsuario.ciclo[index] = novaTarefa; }
-                } else {
-                    let diaData = planejamentoDoUsuario.cronograma.find(d => d.dia === contexto);
-                    if (diaData) {
-                        let index = diaData.itens.findIndex(i => i.id === parseInt(editId));
-                        if (index > -1) { novaTarefa.concluido = diaData.itens[index].concluido; diaData.itens[index] = novaTarefa; }
-                    }
-                }
-            } else {
-                if (contexto === 'Ciclo') planejamentoDoUsuario.ciclo.push(novaTarefa); else { let diaData = planejamentoDoUsuario.cronograma.find(d => d.dia === contexto); if (diaData) diaData.itens.push(novaTarefa); } 
-            }
-            
-            window.salvarDadosGeraisNaNuvem(); window.salvarDadosLocais(); window.renderizarViewsCronograma(); window.fecharModalTarefa(); 
-        };
-
-        window.abrirModalAcaoTarefa = function(tarefaId, contexto) {
-            let item = null;
-            if (contexto === 'Ciclo') item = planejamentoDoUsuario.ciclo.find(i => i.id === tarefaId);
-            else { let dia = planejamentoDoUsuario.cronograma.find(d => d.dia === contexto); if(dia) item = dia.itens.find(i => i.id === tarefaId); }
-            if(!item) return;
-
-            if (item.tipo === 'estudo') {
-                window.abrirModalEstudo();
-                let d = editalDoUsuario.disciplinas.find(x => x.nome === item.disciplina);
-                if(d) { document.getElementById('select-disciplina').value = d.id; window.atualizarTopicosEstudo(); document.getElementById('select-topico').value = item.topico; }
-                document.getElementById('estudo-tarefa-id-conclusao').value = tarefaId; document.getElementById('estudo-tarefa-context-conclusao').value = contexto;
-                document.querySelectorAll('input[name="estudo-categoria"]').forEach(cb => { cb.checked = (item.categorias || []).includes(cb.value); });
-                document.querySelectorAll('input[name="estudo-material"]').forEach(cb => { cb.checked = (item.materiais || []).includes(cb.value); });
-            } else if (item.tipo === 'redacao') {
-                window.abrirModalRedacao();
-                document.getElementById('red-tema').value = item.tema || ''; document.getElementById('red-concurso').value = item.concurso || ''; document.getElementById('red-banca').value = item.banca || ''; document.getElementById('red-link').value = item.link || '';
-                document.getElementById('red-tarefa-id-conclusao').value = tarefaId; document.getElementById('red-tarefa-context-conclusao').value = contexto;
-            } else if (item.tipo === 'simulado') {
-                window.abrirModalSimulado();
-                document.getElementById('sim-cargo').value = item.cargo || ''; document.getElementById('sim-origem').value = item.origem || ''; document.getElementById('sim-estilo').value = item.estilo || 'multipla_escolha';
-                if(item.disciplinaVinculada) {
-                    document.getElementById('sim-vincular').checked = true; document.getElementById('div-sim-vinc-disc').classList.remove('hidden');
-                    const sDisc = document.getElementById('sim-disciplina-vinculada'); sDisc.innerHTML = '<option value="">Selecione...</option>';
-                    editalDoUsuario.disciplinas.filter(d => (d.statusDisciplina || 'ativa') === 'ativa').forEach(d => { const opt = document.createElement('option'); opt.value = d.id; opt.textContent = d.nome; sDisc.appendChild(opt); });
-                    sDisc.value = item.disciplinaVinculada;
-                }
-                document.getElementById('sim-tarefa-id-conclusao').value = tarefaId; document.getElementById('sim-tarefa-context-conclusao').value = contexto;
-            }
-        };
-
-        window.alternarStatusTarefaPlanejada = function(contexto, itemId, novoStatus) { if (contexto === 'Ciclo') { let item = planejamentoDoUsuario.ciclo.find(i => i.id === itemId); if(item) item.concluido = novoStatus; let arrayPendentes = []; let arrayConcluidos = []; planejamentoDoUsuario.ciclo.forEach(p => { if (p.concluido) arrayConcluidos.push(p); else arrayPendentes.push(p); }); planejamentoDoUsuario.ciclo = [...arrayPendentes, ...arrayConcluidos]; } else { let diaData = planejamentoDoUsuario.cronograma.find(d => d.dia === contexto); if (diaData) { let item = diaData.itens.find(i => i.id === itemId); if(item) item.concluido = novoStatus; } } window.salvarDadosGeraisNaNuvem(); window.salvarDadosLocais(); window.renderizarViewsCronograma(); };
-        window.excluirTarefaPlanejada = function(contexto, itemId) { if(confirm("Deseja realmente eliminar este planejamento?")) { if (contexto === 'Ciclo') { planejamentoDoUsuario.ciclo = planejamentoDoUsuario.ciclo.filter(i => i.id !== itemId); } else { let diaData = planejamentoDoUsuario.cronograma.find(d => d.dia === contexto); if (diaData) diaData.itens = diaData.itens.filter(i => i.id !== itemId); } window.salvarDadosGeraisNaNuvem(); window.salvarDadosLocais(); window.renderizarViewsCronograma(); } };
-        window.abrirModalEstudoPreenchido = function(disciplinaNome, topicoNome) { window.abrirModalEstudo(); let d = editalDoUsuario.disciplinas.find(x => x.nome === disciplinaNome); if(d) { document.getElementById('select-disciplina').value = d.id; window.atualizarTopicosEstudo(); document.getElementById('select-topico').value = topicoNome; } };
-        
-        window.reiniciarCronograma = function() { if (confirm("Reiniciar o Cronograma Semanal? Isto irá desmarcar todos os itens estudados nesta semana.")) { planejamentoDoUsuario.cronograma.forEach(dia => { dia.itens.forEach(item => item.concluido = false); }); window.salvarDadosGeraisNaNuvem(); window.salvarDadosLocais(); window.renderizarViewsCronograma(); } };
-        window.limparCronograma = function() { 
-            if (confirm("ATENÇÃO: Deseja apagar TODOS os cartões do seu Cronograma Semanal? Esta ação não pode ser desfeita e terá de inserir novas atividades.")) { 
-                planejamentoDoUsuario.cronograma.forEach(dia => { dia.itens = []; }); 
-                window.salvarDadosGeraisNaNuvem(); 
-                window.salvarDadosLocais(); 
-                window.renderizarViewsCronograma(); 
-            } 
-        };
-        
-        window.reiniciarCiclo = function() { if (confirm("Reiniciar o Ciclo de Estudos? Todos os passos voltarão a ficar pendentes.")) { planejamentoDoUsuario.ciclo.forEach(passo => passo.concluido = false); window.salvarDadosGeraisNaNuvem(); window.salvarDadosLocais(); window.renderizarViewsCronograma(); } };
-
-        // HISTÓRICO DE ESTUDO BASE
-        window.renderizarHistorico = function() {
-            const container = document.getElementById('lista-historico'); if (!container) return; container.innerHTML = '';
-            if (registrosDeEstudo.length === 0) { container.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-muted); padding: 2rem;">Nenhum estudo registado ainda.</td></tr>`; return; }
-            registrosDeEstudo.forEach(registro => {
-                const tr = document.createElement('tr'); const pData = registro.data.split('-'); const df = pData.length === 3 ? `${pData[2]}/${pData[1]}/${pData[0]}` : registro.data; const catHTML = (registro.categorias || []).map(cat => `<span class="badge">${cat}</span>`).join('');
-                let perfHTML = '-'; let acertosErrosHTML = '-'; const acertos = registro.questoes && registro.questoes.acertos ? registro.questoes.acertos : 0; const erros = registro.questoes && registro.questoes.erros ? registro.questoes.erros : 0; const totalQ = acertos + erros;
-                if (totalQ > 0) { acertosErrosHTML = `<span style="color: var(--success-color); font-weight: bold;">${acertos}</span> / <span style="color: var(--danger-color); font-weight: bold;">${erros}</span>`; const aproveitamento = Math.round((acertos / totalQ) * 100); let cor = '#dc2626'; if (aproveitamento >= 80) cor = 'var(--success-color)'; else if (aproveitamento >= 60) cor = 'var(--warning-color)'; perfHTML = `<span style="color: ${cor}; font-weight: bold;">${aproveitamento}%</span>`; }
-                let tempoTexto = '-'; if (registro.tempo) { let h = registro.tempo.horas > 0 ? `${registro.tempo.horas}h ` : ''; let m = registro.tempo.minutos > 0 ? `${registro.tempo.minutos}m` : ''; tempoTexto = (h + m).trim() || '-'; }
-                tr.innerHTML = `<td>${df}</td><td style="font-weight: 600;">${registro.disciplina}</td><td>${registro.topico}</td><td><span style="color: var(--text-muted); font-size: 0.85rem;"><i class="fa-regular fa-clock"></i> ${tempoTexto}</span></td><td>${catHTML}</td><td style="text-align: center;">${acertosErrosHTML}</td><td>${perfHTML}</td><td style="text-align: center; white-space: nowrap;"><button class="btn-icon" style="padding: 0.3rem 0.6rem; font-size: 0.8rem;" onclick="window.editarRegistroEstudo('${registro.idDoc || registro.timestamp}')" title="Editar"><i class="fa-solid fa-pen"></i></button><button class="btn-icon" style="padding: 0.3rem 0.6rem; font-size: 0.8rem; color: var(--danger-color);" onclick="window.excluirRegistroEstudo('${registro.idDoc || registro.timestamp}')" title="Eliminar"><i class="fa-solid fa-trash"></i></button></td>`;
-                container.appendChild(tr);
-            });
-        };
-
-        window.abrirModalEstudo = function() {
-            document.getElementById('modal-estudo').classList.remove('hidden'); document.getElementById('modal-estudo-titulo').innerText = "Registar Estudo Finalizado"; document.getElementById('estudo-edit-doc-id').value = '';
-            const hoje = new Date().toISOString().split('T')[0]; document.getElementById('estudo-data').value = hoje;
-            const selectDisciplina = document.getElementById('select-disciplina'); selectDisciplina.innerHTML = '<option value="">Selecione uma disciplina...</option>';
-            let disciplinasAtivas = editalDoUsuario.disciplinas.filter(d => (d.statusDisciplina || 'ativa') === 'ativa');
-            disciplinasAtivas.forEach(d => { const opt = document.createElement('option'); opt.value = d.id; opt.textContent = d.nome; selectDisciplina.appendChild(opt); });
-            document.getElementById('select-topico').innerHTML = '<option value="">Selecione primeiro a disciplina...</option>';
-            document.getElementById('estudo-horas').value = ''; document.getElementById('estudo-minutos').value = ''; document.getElementById('estudo-acertos').value = ''; document.getElementById('estudo-erros').value = ''; document.getElementById('estudo-comentario').value = '';
-            document.querySelectorAll('input[name^="estudo-"]:not(#estudo-agendar-revisao)').forEach(cb => { if(cb.type==='checkbox') cb.checked = false; }); document.getElementById('estudo-agendar-revisao').checked = true; 
-        };
-
-        window.fecharModalEstudo = function() { document.getElementById('modal-estudo').classList.add('hidden'); };
-
-        window.atualizarTopicosEstudo = function() {
-            const disciplinaId = document.getElementById('select-disciplina').value; const selectTopico = document.getElementById('select-topico'); selectTopico.innerHTML = '<option value="">Selecione um tópico...</option>'; if (!disciplinaId) return;
-            const d = editalDoUsuario.disciplinas.find(d => d.id == disciplinaId); if (d && d.topicos) { d.topicos.forEach(topicoObj => { let nome = typeof topicoObj === 'string' ? topicoObj : topicoObj.nome; const opt = document.createElement('option'); opt.value = nome; opt.textContent = nome; selectTopico.appendChild(opt); }); }
-        };
-
-        window.editarRegistroEstudo = function(idReference) {
-            const registro = registrosDeEstudo.find(r => r.idDoc === idReference || r.timestamp == idReference); if (!registro) return;
-            window.abrirModalEstudo(); document.getElementById('modal-estudo-titulo').innerText = "Editar Registo de Estudo"; document.getElementById('estudo-edit-doc-id').value = idReference;
-            document.getElementById('estudo-data').value = registro.data;
-            let d = editalDoUsuario.disciplinas.find(x => x.nome === registro.disciplina);
-            if(d) { document.getElementById('select-disciplina').value = d.id; window.atualizarTopicosEstudo(); document.getElementById('select-topico').value = registro.topico; }
-            document.getElementById('estudo-horas').value = registro.tempo?.horas || ''; document.getElementById('estudo-minutos').value = registro.tempo?.minutos || ''; document.getElementById('estudo-acertos').value = registro.questoes?.acertos || ''; document.getElementById('estudo-erros').value = registro.questoes?.erros || ''; document.getElementById('estudo-comentario').value = registro.comentario || ''; document.getElementById('estudo-agendar-revisao').checked = registro.agendarRevisao;
-            document.querySelectorAll('input[name="estudo-categoria"]').forEach(cb => { cb.checked = (registro.categorias || []).includes(cb.value); }); document.querySelectorAll('input[name="estudo-material"]').forEach(cb => { cb.checked = (registro.materiais || []).includes(cb.value); });
-        }
-
-        window.excluirRegistroEstudo = async function(idReference) {
-            if (confirm("Tem certeza que deseja eliminar este registo de estudo?")) {
-                if(currentUser && !currentUser.isAnonymous && typeof idReference === 'string') {
-                    try { await deleteDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'registros_estudos', idReference)); } catch(e) { console.error("Erro ao deletar:", e); }
-                } else { registrosDeEstudo = registrosDeEstudo.filter(r => r.timestamp != idReference); window.salvarDadosLocais(); window.atualizarTodasAsTelas(); }
-            }
-        }
-
-        window.excluirTodoHistorico = async function() {
-            if (confirm("ATENÇÃO CRÍTICA: Deseja eliminar TODO o seu histórico de estudos?")) {
-                if(currentUser && !currentUser.isAnonymous && db) {
-                    try { for(let r of registrosDeEstudo) { if(r.idDoc) await deleteDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'registros_estudos', r.idDoc)); } } catch(e) { console.error(e); }
-                } else { registrosDeEstudo = []; window.salvarDadosLocais(); window.atualizarTodasAsTelas(); }
-            }
-        }
-
-        window.salvarEstudo = async function() {
-            const data = document.getElementById('estudo-data').value; const disciplinaId = document.getElementById('select-disciplina').value; const topico = document.getElementById('select-topico').value; const horas = document.getElementById('estudo-horas').value; const minutos = document.getElementById('estudo-minutos').value; const acertos = document.getElementById('estudo-acertos').value; const erros = document.getElementById('estudo-erros').value; const comentario = document.getElementById('estudo-comentario').value; const querAgendar = document.getElementById('estudo-agendar-revisao').checked; const editId = document.getElementById('estudo-edit-doc-id').value;
-            const tarIdConc = document.getElementById('estudo-tarefa-id-conclusao').value; const tarCtxConc = document.getElementById('estudo-tarefa-context-conclusao').value;
-            const categorias = Array.from(document.querySelectorAll('input[name="estudo-categoria"]:checked')).map(cb => cb.value); const materiais = Array.from(document.querySelectorAll('input[name="estudo-material"]:checked')).map(cb => cb.value);
-
-            if (!data || !disciplinaId || !topico) { alert("Preencha Data, Disciplina e Tópico!"); return; }
-
-            const disciplinaNome = editalDoUsuario.disciplinas.find(d => d.id == disciplinaId).nome;
-            const isLocalMode = (!currentUser || currentUser.isAnonymous || !db);
-            let timestampUsado = isLocalMode && editId ? parseInt(editId) : Date.now();
-
-            const novoRegistro = { data: data, disciplina: disciplinaNome, topico: topico, tempo: { horas: parseInt(horas) || 0, minutos: parseInt(minutos) || 0 }, categorias: categorias, materiais: materiais, agendarRevisao: querAgendar, questoes: { acertos: parseInt(acertos) || 0, erros: parseInt(erros) || 0 }, comentario: comentario, timestamp: timestampUsado };
-
-            if (!isLocalMode) {
-                try {
-                    if (editId && typeof editId === 'string') { await setDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'registros_estudos', editId), novoRegistro); } 
-                    else { const colRef = collection(db, 'artifacts', appId, 'users', currentUser.uid, 'registros_estudos'); await addDoc(colRef, novoRegistro); }
-                    if (tarIdConc && tarCtxConc) window.alternarStatusTarefaPlanejada(tarCtxConc, parseInt(tarIdConc), true);
-                    window.fecharModalEstudo();
-                } catch(e) { console.error("Erro ao salvar estudo na nuvem:", e); }
-            } else {
-                if (editId) { let index = registrosDeEstudo.findIndex(r => r.timestamp == editId); if (index !== -1) registrosDeEstudo[index] = novoRegistro; } 
-                else { registrosDeEstudo.unshift(novoRegistro); }
-                registrosDeEstudo.sort((a, b) => b.timestamp - a.timestamp);
-                if (tarIdConc && tarCtxConc) window.alternarStatusTarefaPlanejada(tarCtxConc, parseInt(tarIdConc), true);
-                window.salvarDadosLocais(); window.atualizarTodasAsTelas(); window.fecharModalEstudo();
-            }
-        };
-
-        // SIMULADOS E REDAÇÕES
-        window.mudarAbaSim = function(aba) { document.getElementById('tab-s-simulados').classList.remove('active'); document.getElementById('tab-s-redacoes').classList.remove('active'); document.getElementById('view-s-simulados').classList.add('hidden'); document.getElementById('view-s-redacoes').classList.add('hidden'); document.getElementById(`tab-s-${aba}`).classList.add('active'); document.getElementById(`view-s-${aba}`).classList.remove('hidden'); }
-        window.abrirModalSimulado = function() { 
-            document.getElementById('modal-simulado').classList.remove('hidden'); document.getElementById('simulado-titulo').innerText = "Registar Simulado"; document.getElementById('sim-edit-id').value = ''; 
-            const hoje = new Date().toISOString().split('T')[0]; document.getElementById('sim-data').value = hoje; document.getElementById('sim-cargo').value = ''; document.getElementById('sim-origem').value = ''; document.getElementById('sim-estilo').value = 'multipla_escolha'; document.getElementById('sim-tempo').value = ''; document.getElementById('sim-acertos').value = ''; document.getElementById('sim-erros').value = ''; document.getElementById('sim-brancos').value = ''; document.getElementById('sim-pontos').value = ''; document.getElementById('sim-vincular').checked = false; document.getElementById('div-sim-vinc-disc').classList.add('hidden');
-            const sDisc = document.getElementById('sim-disciplina-vinculada'); sDisc.innerHTML = '<option value="">Selecione...</option>';
-            editalDoUsuario.disciplinas.filter(d => (d.statusDisciplina || 'ativa') === 'ativa').forEach(d => { const opt = document.createElement('option'); opt.value = d.id; opt.textContent = d.nome; sDisc.appendChild(opt); });
-        }
-        window.editarSimulado = function(id) { 
-            let sim = simuladosDoUsuario.find(s => s.id === id); if(!sim) return; document.getElementById('modal-simulado').classList.remove('hidden'); document.getElementById('simulado-titulo').innerText = "Editar Simulado"; document.getElementById('sim-edit-id').value = sim.id; document.getElementById('sim-data').value = sim.data; document.getElementById('sim-cargo').value = sim.cargo; document.getElementById('sim-origem').value = sim.origem; document.getElementById('sim-estilo').value = sim.estilo || 'multipla_escolha'; document.getElementById('sim-tempo').value = sim.tempo || ''; document.getElementById('sim-acertos').value = sim.acertos; document.getElementById('sim-erros').value = sim.erros; document.getElementById('sim-brancos').value = sim.brancos; document.getElementById('sim-pontos').value = sim.pontos; document.getElementById('sim-vincular').checked = false; document.getElementById('div-sim-vinc-disc').classList.add('hidden'); 
-        }
-        window.fecharModalSimulado = function() { document.getElementById('modal-simulado').classList.add('hidden'); }
-        
-        window.salvarSimulado = async function() {
-            let editId = document.getElementById('sim-edit-id').value; let cargo = document.getElementById('sim-cargo').value; let origem = document.getElementById('sim-origem').value; let estilo = document.getElementById('sim-estilo').value; let data = document.getElementById('sim-data').value; let tempo = document.getElementById('sim-tempo').value; let acertos = parseInt(document.getElementById('sim-acertos').value) || 0; let erros = parseInt(document.getElementById('sim-erros').value) || 0; let brancos = parseInt(document.getElementById('sim-brancos').value) || 0; let pontosInput = document.getElementById('sim-pontos').value;
-            const tarIdConc = document.getElementById('sim-tarefa-id-conclusao').value; const tarCtxConc = document.getElementById('sim-tarefa-context-conclusao').value;
-            let vincular = document.getElementById('sim-vincular').checked; let discVinculadaId = document.getElementById('sim-disciplina-vinculada').value;
-
-            if(!cargo || !data) { alert("Cargo e Data são obrigatórios."); return; }
-            let pontosLíquidos = 0; if (pontosInput !== '') { pontosLíquidos = parseFloat(pontosInput); } else { if (estilo === 'cespe') { pontosLíquidos = acertos - erros; } else { pontosLíquidos = acertos; } }
-            let novoSimulado = { id: editId ? parseInt(editId) : Date.now(), cargo: cargo, origem: origem, estilo: estilo, data: data, tempo: tempo, acertos: acertos, erros: erros, brancos: brancos, pontos: pontosLíquidos };
-            if (editId) { let index = simuladosDoUsuario.findIndex(s => s.id === parseInt(editId)); if (index > -1) simuladosDoUsuario[index] = novoSimulado; } else { simuladosDoUsuario.unshift(novoSimulado); }
-            simuladosDoUsuario.sort((a, b) => new Date(b.data) - new Date(a.data)); 
-
-            if (vincular && discVinculadaId && !editId) {
-                let d = editalDoUsuario.disciplinas.find(x => x.id == discVinculadaId);
-                if(d) {
-                    let tIndex = d.topicos.findIndex(t => (typeof t === 'string' ? t : t.nome) === "Simulados e outras questões");
-                    if (tIndex === -1) d.topicos.push({ nome: "Simulados e outras questões", status: 'concluido' });
-                    let mins = window.parseTempoToMinutos(tempo);
-                    let fakeReg = { data: data, disciplina: d.nome, topico: "Simulados e outras questões", tempo: { horas: Math.floor(mins/60), minutos: mins%60 }, categorias: ["Simulado"], materiais: [], agendarRevisao: false, questoes: { acertos: acertos, erros: erros }, comentario: "Simulado: " + cargo, timestamp: Date.now() + 1 };
-                    if (currentUser && !currentUser.isAnonymous && db) { await addDoc(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'registros_estudos'), fakeReg); } 
-                    else { registrosDeEstudo.unshift(fakeReg); registrosDeEstudo.sort((a, b) => b.timestamp - a.timestamp); }
-                }
-            }
-
-            if (tarIdConc && tarCtxConc) window.alternarStatusTarefaPlanejada(tarCtxConc, parseInt(tarIdConc), true);
-            window.salvarDadosGeraisNaNuvem(); window.salvarDadosLocais(); window.atualizarTodasAsTelas(); window.fecharModalSimulado();
-        }
-        
-        window.excluirSimulado = function(id) { if(confirm("Eliminar este simulado?")) { simuladosDoUsuario = simuladosDoUsuario.filter(s => s.id !== id); window.salvarDadosGeraisNaNuvem(); window.salvarDadosLocais(); window.atualizarTodasAsTelas(); } }
-        
-        window.renderizarSimulados = function() {
-            const tbody = document.getElementById('lista-simulados'); const painelMelhor = document.getElementById('painel-melhor-simulado'); if(!tbody || !painelMelhor) return; tbody.innerHTML = '';
-            if(simuladosDoUsuario.length === 0) { tbody.innerHTML = `<tr><td colspan="11" style="text-align:center; padding: 2rem; color:var(--text-muted);">Nenhum simulado registado.</td></tr>`; painelMelhor.innerHTML = `<p style="color:var(--text-muted); font-size:0.9rem;">Aguardando o seu primeiro teste...</p>`; return; }
-            let melhorSimulado = null; let melhorPercentual = -1;
-            simuladosDoUsuario.forEach(sim => {
-                let total = sim.acertos + sim.erros + sim.brancos; let perc = total > 0 ? (sim.pontos / total) * 100 : 0; let percLimpo = Math.max(0, Math.min(Math.round(perc), 100)); 
-                if (percLimpo > melhorPercentual) { melhorPercentual = percLimpo; melhorSimulado = sim; }
-                let blocosHTML = ''; for(let i=1; i<=10; i++) { let fill = percLimpo >= (i * 10) ? 'filled' : ''; blocosHTML += `<div class="block-progress-item ${fill}"></div>`; }
-                let pData = sim.data.split('-'); let df = pData.length === 3 ? `${pData[2]}/${pData[1]}/${pData[0]}` : sim.data;
-                tbody.innerHTML += `<tr><td style="font-weight:600;"><i class="fa-solid fa-pen-to-square" style="color:var(--text-muted);"></i> ${sim.cargo}</td><td>${sim.origem}</td><td><i class="fa-regular fa-hourglass-half" style="color:var(--text-muted);"></i> ${sim.tempo || '-'}</td><td><i class="fa-regular fa-calendar" style="color:var(--text-muted);"></i> ${df}</td><td style="text-align:center; font-weight:bold; color:var(--success-color);">${sim.acertos}</td><td style="text-align:center; font-weight:bold; color:var(--danger-color);">${sim.erros}</td><td style="text-align:center; font-weight:bold; color:var(--text-muted);">${sim.brancos}</td><td style="text-align:center; font-weight:bold; color:var(--primary-color);">${sim.pontos}</td><td style="min-width:180px;"><div class="block-progress-container">${blocosHTML} <span style="font-size:0.8rem; font-weight:600; color:var(--text-muted); margin-left:5px;">${percLimpo}%</span></div></td><td style="text-align:center; font-weight:bold;">${total}</td><td style="text-align:center; white-space:nowrap;"><button class="btn-icon" style="padding: 0.3rem 0.6rem; font-size: 0.8rem;" onclick="window.editarSimulado(${sim.id})" title="Editar"><i class="fa-solid fa-pen"></i></button><button class="btn-icon" style="padding: 0.3rem 0.6rem; font-size: 0.8rem; color: var(--danger-color);" onclick="window.excluirSimulado(${sim.id})" title="Eliminar"><i class="fa-solid fa-trash"></i></button></td></tr>`;
-            });
-            if (melhorSimulado) {
-                let mTotal = melhorSimulado.acertos + melhorSimulado.erros + melhorSimulado.brancos; let mPData = melhorSimulado.data.split('-'); let mDf = mPData.length === 3 ? `${mPData[2]}/${mPData[1]}/${mPData[0]}` : melhorSimulado.data; let mBlocosHTML = ''; for(let i=1; i<=10; i++) { let fill = melhorPercentual >= (i * 10) ? 'filled' : ''; mBlocosHTML += `<div class="block-progress-item ${fill}"></div>`; }
-                let badgeEstilo = melhorSimulado.estilo === 'cespe' ? '<span class="badge" style="background:var(--icon-red-bg); color:var(--danger-color); margin-bottom:10px;">Cespe (C/E)</span>' : '<span class="badge" style="background:var(--hover-bg); color:var(--text-main); margin-bottom:10px;">Múltipla Escolha</span>';
-                painelMelhor.innerHTML = `<div style="font-weight: 700; font-size: 1.1rem; color: var(--text-main); margin-bottom: 5px;"><i class="fa-solid fa-pen-to-square" style="color:var(--text-muted);"></i> ${melhorSimulado.cargo}</div><div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 5px;"><i class="fa-regular fa-building"></i> ${melhorSimulado.origem}</div>${badgeEstilo}<br><div class="record-pill">Novo Recorde!</div><ul class="record-item-list"><li><i class="fa-regular fa-calendar"></i> Realizado a ${mDf}</li><li><i class="fa-solid fa-trophy" style="color:var(--warning-color);"></i> Obteve <strong style="color:var(--text-main);">${melhorSimulado.pontos}</strong> pontos líquidos</li><li style="margin-top: 10px; margin-bottom: 10px;"><div class="block-progress-container">${mBlocosHTML} <span style="font-size:0.8rem; font-weight:600; color:var(--text-muted); margin-left:5px;">${melhorPercentual}%</span></div></li><li><i class="fa-solid fa-list-ol"></i> Total de Questões: <strong style="color:var(--text-main);">${mTotal}</strong></li><li><span style="color:var(--success-color);"><i class="fa-solid fa-check"></i> ${melhorSimulado.acertos}</span> &nbsp;|&nbsp; <span style="color:var(--danger-color);"><i class="fa-solid fa-xmark"></i> ${melhorSimulado.erros}</span></li><li><i class="fa-regular fa-hourglass-half"></i> Duração: <strong style="color:var(--text-main);">${melhorSimulado.tempo || '-'}</strong></li></ul>`;
-            }
-        }
-
-        window.abrirModalRedacao = function() { document.getElementById('modal-redacao').classList.remove('hidden'); document.getElementById('redacao-titulo').innerText = "Registar Redação"; document.getElementById('red-edit-id').value = ''; const hoje = new Date().toISOString().split('T')[0]; document.getElementById('red-data').value = hoje; document.getElementById('red-tema').value = ''; document.getElementById('red-concurso').value = ''; document.getElementById('red-banca').value = ''; document.getElementById('red-link').value = ''; document.getElementById('red-tempo').value = ''; document.getElementById('red-pontos').value = ''; document.getElementById('red-consideracoes').value = ''; }
-        window.editarRedacao = function(id) { let red = redacoesDoUsuario.find(r => r.id === id); if(!red) return; document.getElementById('modal-redacao').classList.remove('hidden'); document.getElementById('redacao-titulo').innerText = "Editar Redação"; document.getElementById('red-edit-id').value = red.id; document.getElementById('red-data').value = red.data; document.getElementById('red-tema').value = red.tema; document.getElementById('red-concurso').value = red.concurso || ''; document.getElementById('red-banca').value = red.banca || ''; document.getElementById('red-link').value = red.link || ''; document.getElementById('red-tempo').value = red.tempo || ''; document.getElementById('red-pontos').value = red.pontos !== null ? red.pontos : ''; document.getElementById('red-consideracoes').value = red.consideracoes || ''; }
-        window.fecharModalRedacao = function() { document.getElementById('modal-redacao').classList.add('hidden'); }
-        window.salvarRedacao = function() {
-            let editId = document.getElementById('red-edit-id').value; let tema = document.getElementById('red-tema').value; let concurso = document.getElementById('red-concurso').value; let banca = document.getElementById('red-banca').value; let link = document.getElementById('red-link').value; let data = document.getElementById('red-data').value; let tempo = document.getElementById('red-tempo').value; let pontos = document.getElementById('red-pontos').value; let cons = document.getElementById('red-consideracoes').value;
-            const tarIdConc = document.getElementById('red-tarefa-id-conclusao').value; const tarCtxConc = document.getElementById('red-tarefa-context-conclusao').value;
-            if(!tema || !data) { alert("Tema e Data são obrigatórios."); return; }
-            let novaRedacao = { id: editId ? parseInt(editId) : Date.now(), tema: tema, concurso: concurso, banca: banca, link: link, data: data, tempo: tempo, pontos: pontos !== '' ? parseFloat(pontos) : null, consideracoes: cons };
-            if (editId) { let index = redacoesDoUsuario.findIndex(r => r.id === parseInt(editId)); if (index > -1) redacoesDoUsuario[index] = novaRedacao; } else { redacoesDoUsuario.unshift(novaRedacao); }
-            redacoesDoUsuario.sort((a, b) => new Date(b.data) - new Date(a.data)); 
-            
-            if (tarIdConc && tarCtxConc) window.alternarStatusTarefaPlanejada(tarCtxConc, parseInt(tarIdConc), true);
-            window.salvarDadosGeraisNaNuvem(); window.salvarDadosLocais(); window.atualizarTodasAsTelas(); window.fecharModalRedacao();
-        }
-        window.excluirRedacao = function(id) { if(confirm("Eliminar esta redação?")) { redacoesDoUsuario = redacoesDoUsuario.filter(r => r.id !== id); window.salvarDadosGeraisNaNuvem(); window.salvarDadosLocais(); window.atualizarTodasAsTelas(); } }
-        window.renderizarRedacoes = function() {
-            const tbody = document.getElementById('lista-redacoes'); if(!tbody) return; tbody.innerHTML = '';
-            if(redacoesDoUsuario.length === 0) { tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding: 2rem; color:var(--text-muted);">Nenhuma redação registada.</td></tr>`; return; }
-            redacoesDoUsuario.forEach(red => {
-                let pData = red.data.split('-'); let df = pData.length === 3 ? `${pData[2]}/${pData[1]}/${pData[0]}` : red.data; let pontosStr = red.pontos !== null ? red.pontos : '-';
-                let linkIcon = red.link ? `<a href="${red.link}" target="_blank" style="color:var(--primary-color);" title="Abrir Redação"><i class="fa-solid fa-arrow-up-right-from-square"></i></a>` : '-';
-                tbody.innerHTML += `<tr><td style="font-weight:600; color:var(--text-main);"><i class="fa-regular fa-file-lines" style="color:var(--text-muted);"></i> ${red.tema}</td><td>${red.concurso || '-'}</td><td><span class="badge" style="background:var(--hover-bg); color:var(--text-muted);">${red.banca || '-'}</span></td><td style="text-align:center; font-weight:bold; color:var(--primary-color);">${pontosStr}</td><td><i class="fa-regular fa-calendar" style="color:var(--text-muted);"></i> ${df}</td><td><i class="fa-regular fa-hourglass-half" style="color:var(--text-muted);"></i> ${red.tempo || '-'}</td><td style="font-size:0.8rem;">${red.consideracoes || '-'}</td><td style="text-align:center;">${linkIcon}</td><td style="text-align:center; white-space:nowrap;"><button class="btn-icon" style="padding: 0.3rem 0.6rem; font-size: 0.8rem;" onclick="window.editarRedacao(${red.id})" title="Editar"><i class="fa-solid fa-pen"></i></button><button class="btn-icon" style="padding: 0.3rem 0.6rem; font-size: 0.8rem; color: var(--danger-color);" onclick="window.excluirRedacao(${red.id})" title="Eliminar"><i class="fa-solid fa-trash"></i></button></td></tr>`;
-            });
-        }
-
-        // =========================================================================
-        // === LOGIN, ADMIN E SINCRONIZAÇÃO ===
-        // =========================================================================
-        window.abrirModalLogin = function() { document.getElementById('modal-login').classList.remove('hidden'); }
-        window.fecharModalLogin = function() { document.getElementById('modal-login').classList.add('hidden'); }
-        
-        window.fazerLogin = async function() {
-            const email = document.getElementById('login-email').value;
-            const senha = document.getElementById('login-senha').value;
-            if(!email || !senha) { alert("Preencha e-mail e senha para entrar."); return; }
-            if(!auth) { alert("Firebase offline."); return; }
-            
-            try {
-                await signInWithEmailAndPassword(auth, email, senha);
-                alert("Login efetuado! A sincronizar dados com a nuvem...");
-                window.fecharModalLogin();
-            } catch (error) {
-                alert("Acesso negado. Credenciais inválidas ou conta inexistente. Apenas o administrador pode criar novas contas.");
-            }
-        }
-
-        window.fazerLogout = async function() {
-            if(confirm("Deseja sair da sua conta?")) {
-                try {
-                    if(auth) await signOut(auth); 
-                    localStorage.clear(); 
-                    window.location.reload();
-                } catch(e) { console.error("Erro no logout", e); }
-            }
-        }
-
-        window.importarHistoricoJson = function() {
-            const fileInput = document.getElementById('file-historico');
-            if(!fileInput.files.length) return alert("Selecione um ficheiro JSON.");
-            const file = fileInput.files[0];
-            const reader = new FileReader();
-            reader.onload = async function(e) {
-                try {
-                    const dados = JSON.parse(e.target.result);
-                    if(!Array.isArray(dados)) return alert("O JSON deve ser uma lista (array) de registos.");
-                    if(confirm(`Tem a certeza que deseja importar ${dados.length} registos de estudo para a sua conta?`)) {
-                        for(let reg of dados) {
-                            if (!reg.timestamp) reg.timestamp = Date.now() + Math.floor(Math.random() * 1000);
-                            if(currentUser && !currentUser.isAnonymous && db) {
-                                await addDoc(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'registros_estudos'), reg);
-                            } else {
-                                registrosDeEstudo.unshift(reg);
-                            }
-                        }
-                        if(currentUser && !currentUser.isAnonymous && db) {
-                             alert("Importação para a nuvem concluída!");
-                        } else {
-                             window.salvarDadosLocais();
-                             window.atualizarTodasAsTelas();
-                             alert("Importação local concluída!");
-                        }
-                        fileInput.value = '';
-                    }
-                } catch(err) { alert("Erro ao processar JSON: " + err.message); }
-            };
-            reader.readAsText(file);
-        };
-
-        window.importarEditalJson = function() {
-            const fileInput = document.getElementById('file-edital');
-            if(!fileInput.files.length) return alert("Selecione um ficheiro JSON.");
-            const file = fileInput.files[0];
-            const reader = new FileReader();
-            reader.onload = async function(e) {
-                try {
-                    const dados = JSON.parse(e.target.result);
-                    if(!dados.nome || !Array.isArray(dados.disciplinas)) return alert("JSON inválido. Deve conter 'nome' e 'disciplinas'.");
-                    if(!db) return alert("Apenas disponível com ligação ao Firebase.");
-                    if(confirm(`Deseja importar o edital "${dados.nome}" para a base de dados global (pública)?`)) {
-                        const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'editais_base');
-                        await addDoc(colRef, dados);
-                        alert("Edital base público adicionado com sucesso!");
-                        fileInput.value = '';
-                    }
-                } catch(err) { alert("Erro ao processar JSON: " + err.message); }
-            };
-            reader.readAsText(file);
-        };
-
-        const initAuth = async () => {
-            if(!auth) return;
-            try {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
-            } catch(e) { console.error("Autenticação inicial falhou:", e); }
-        };
-        initAuth();
-
-        if(auth) {
-            onAuthStateChanged(auth, (user) => {
-                if (user) {
-                    document.getElementById('modal-login').classList.add('hidden');
-                    currentUser = user;
-                    
-                    // Lógica para revelar botão Admin
-                    if (user.email && ADMIN_EMAILS.includes(user.email)) {
-                        document.getElementById('btn-nav-admin').classList.remove('hidden');
-                    } else {
-                        document.getElementById('btn-nav-admin').classList.add('hidden');
-                    }
-                    
-                    const docRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'config', 'dadosGerais');
-                    onSnapshot(docRef, (docSnap) => {
-                        if (docSnap.exists()) {
-                            const data = docSnap.data();
-                            if (data.edital) editalDoUsuario = data.edital;
-                            if (data.planejamento) planejamentoDoUsuario = data.planejamento;
-                            if (data.metas) metasDoUsuario = data.metas;
-                            if (data.simulados) simuladosDoUsuario = data.simulados;
-                            if (data.redacoes) redacoesDoUsuario = data.redacoes;
-                            
-                            window.sanitizarDados();
-                            window.atualizarTodasAsTelas();
-                        } else if (!user.isAnonymous) {
-                            window.salvarDadosGeraisNaNuvem();
-                        }
-                    }, (error) => { console.error("Erro na leitura Config:", error); });
-
-                    const colRef = collection(db, 'artifacts', appId, 'users', currentUser.uid, 'registros_estudos');
-                    onSnapshot(colRef, (snap) => {
-                        registrosDeEstudo = [];
-                        snap.forEach(d => registrosDeEstudo.push({ idDoc: d.id, ...d.data() }));
-                        registrosDeEstudo.sort((a,b) => b.timestamp - a.timestamp);
-                        window.sanitizarDados();
-                        window.atualizarTodasAsTelas();
-                    }, (error) => { console.error("Erro leitura Registros:", error); });
-
-                } else {
-                    document.getElementById('modal-login').classList.remove('hidden');
-                    currentUser = null;
-                    document.getElementById('btn-nav-admin').classList.add('hidden');
-                }
-            });
-        }
-
-        // =========================================================================
-        // === ARRANQUE DA APLICAÇÃO ===
-        // =========================================================================
-        document.addEventListener('DOMContentLoaded', () => {
-            try { 
-                window.carregarDadosLocais();
-                window.sanitizarDados(); 
-                window.salvarDadosLocais();
-                window.atualizarTodasAsTelas(); 
-            } catch(e) { console.error("Erro fatal no arranque:", e); }
-        });
-
-    </script>
-</body>
-</html>
+            const selectDisciplina = document.getElementById('tarefa-disciplina'); selectDisciplina.innerHTML = '<option value="">Selecione uma disciplina...</option>'; let disciplinasAtivas = editalDoUsuario.disciplinas.filter(d => (d.statusDisciplina || 'ativa') === 'ativa'); disciplinasAtivas.forEach(d => { const opt = document.createElement('option'); opt.value = d.id; opt.textContent = d.nome; selectDisciplina.appendChild(opt); }); document.getElementById('tarefa-topico').innerHTML = '<option value="">Selecione primeiro a disciplina...</option>'; document.getElementById('tarefa-descricao').value = ''; document.querySelectorAll('input[name="tarefa-categoria"]').forEach(cb => cb.checked = false); document.querySelectorAll('input[name="tarefa-material"]').forEach(cb => cb.checked = false); document.getElementById('tarefa-red-tema').value = ''; document.getElementById('tarefa-red-concurso').value = ''; document.getElementById('tarefa-red-banca').value = ''; document.getElementById('tarefa-red-link').value = ''; document.getElementById('tarefa-sim-cargo').value = ''; document.getElementById('tarefa-sim-origem').value = ''; document.getElementById('tarefa-sim-estilo').value = 'multipla_escolha'; document.getElementById('tarefa-sim-descricao').value = ''; document.getElementById('tarefa-sim-especifico').checked = false; document.getElementById('div-sim-disc').classList
