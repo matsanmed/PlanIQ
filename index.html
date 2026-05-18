@@ -2137,6 +2137,49 @@
             } catch(e) { console.error("Erro no logout", e); }
         }
 
+        // =========================================================================
+        // === PUXAR DADOS DO FIREBASE (NOVO) ===
+        // =========================================================================
+        let unsubDadosGerais = null;
+        let unsubRegistros = null;
+
+        window.carregarDadosDaNuvem = function() {
+            if (!currentUser || currentUser.isAnonymous || !db) return;
+
+            // 1. Puxar Configurações Gerais (Edital, Cronograma, Metas, Simulados, etc.)
+            const docGeraisRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'config', 'dadosGerais');
+            if (unsubDadosGerais) unsubDadosGerais(); // Limpa o listener anterior se existir
+            unsubDadosGerais = onSnapshot(docGeraisRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    if(data.edital) editalDoUsuario = data.edital;
+                    if(data.planejamento) planejamentoDoUsuario = data.planejamento;
+                    if(data.metas) metasDoUsuario = data.metas;
+                    if(data.simulados) simuladosDoUsuario = data.simulados;
+                    if(data.redacoes) redacoesDoUsuario = data.redacoes;
+                    
+                    window.sanitizarDados();
+                    window.atualizarTodasAsTelas();
+                }
+            }, (error) => console.error("Erro ao puxar dados gerais do Firebase:", error));
+
+            // 2. Puxar Histórico de Estudos (Registos individuais)
+            const colRegistrosRef = collection(db, 'artifacts', appId, 'users', currentUser.uid, 'registros_estudos');
+            if (unsubRegistros) unsubRegistros(); // Limpa o listener anterior se existir
+            unsubRegistros = onSnapshot(colRegistrosRef, (querySnapshot) => {
+                registrosDeEstudo = [];
+                querySnapshot.forEach((docSnap) => {
+                    let reg = docSnap.data();
+                    reg.idDoc = docSnap.id; // Guarda a referência do Firestore localmente
+                    registrosDeEstudo.push(reg);
+                });
+                
+                // Ordenar do mais recente para o mais antigo
+                registrosDeEstudo.sort((a, b) => b.timestamp - a.timestamp);
+                window.atualizarTodasAsTelas();
+            }, (error) => console.error("Erro ao puxar registos de estudo do Firebase:", error));
+        };
+
         window.importarHistoricoJson = function() {
             const fileInput = document.getElementById('file-historico');
             if(!fileInput.files.length) return window.mostrarAlerta("Selecione um ficheiro JSON.");
@@ -2212,11 +2255,11 @@
             reader.readAsText(file);
         };
 
-        // Carregar dados locais (fallback offline)
+        // Carregar dados locais inicialmente (fallback offline)
         window.carregarDadosLocais();
         window.atualizarTodasAsTelas();
 
-        // Monitorizar estado da autenticação
+        // Monitorizar estado da autenticação e Puxar Dados
         if (auth) {
             onAuthStateChanged(auth, (user) => {
                 currentUser = user;
@@ -2225,11 +2268,21 @@
                         const adminBtn = document.getElementById('btn-nav-admin');
                         if (adminBtn) adminBtn.classList.remove('hidden');
                     }
+                    // Fecha a modal de login se o login for válido
+                    window.fecharModalLogin();
+                    
+                    // === EXECUTA A FUNÇÃO QUE PUXA OS DADOS DO FIRESTORE ===
+                    window.carregarDadosDaNuvem(); 
                 } else {
                     const adminBtn = document.getElementById('btn-nav-admin');
                     if (adminBtn) adminBtn.classList.add('hidden');
+                    // Exige login obrigatório para utilizadores não autenticados
+                    window.abrirModalLogin();
                 }
             });
+        } else {
+            // Se o Firebase falhar ao carregar, abre o modal de login por segurança
+            window.abrirModalLogin();
         }
 
     </script>
