@@ -66,7 +66,13 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
         body { display: flex; height: 100vh; background-color: var(--bg-color); color: var(--text-main); overflow: hidden; transition: background-color 0.3s, color 0.3s; }
 
-        .sidebar { width: 260px; background-color: var(--sidebar-bg); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; padding: 1.5rem 0; transition: background-color 0.3s; z-index: 10;}
+        /* HEADER MOBILE E RESPONSIVIDADE */
+        .mobile-header { display: none; background: var(--sidebar-bg); padding: 1rem 1.5rem; border-bottom: 1px solid var(--border-color); align-items: center; justify-content: space-between; z-index: 20;}
+        .mobile-header-logo { font-size: 1.2rem; font-weight: 800; color: var(--primary-color); display: flex; align-items: center; gap: 8px;}
+        .mobile-menu-btn { background: none; border: none; font-size: 1.5rem; color: var(--text-main); cursor: pointer; }
+        .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; backdrop-filter: blur(2px); }
+
+        .sidebar { width: 260px; background-color: var(--sidebar-bg); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; padding: 1.5rem 0; transition: left 0.3s ease; z-index: 1000;}
         .logo { font-size: 1.5rem; font-weight: 800; padding: 0 1.5rem; margin-bottom: 2rem; color: var(--primary-color); }
         .nav-menu { list-style: none; flex: 1; overflow-y: auto;}
         .nav-menu::-webkit-scrollbar { width: 5px; }
@@ -92,7 +98,7 @@
 
         .btn-primary { background-color: var(--primary-color); color: white; border: none; padding: 0.75rem; width: 100%; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; transition: all 0.2s; }
         .btn-primary:hover { filter: brightness(1.1); }
-        .btn-icon { background: var(--hover-bg); border: 1px solid var(--border-color); border-radius: 4px; padding: 0.4rem 0.8rem; cursor: pointer; color: var(--text-main); transition: all 0.2s; }
+        .btn-icon { background: var(--hover-bg); border: 1px solid var(--border-color); border-radius: 4px; padding: 0.4rem 0.8rem; cursor: pointer; color: var(--text-main); transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; }
         .btn-icon:hover { filter: brightness(1.2); }
         .btn-danger-outline { background: var(--icon-red-bg); color: var(--danger-color); border: 1px solid var(--danger-color); border-radius: 4px; padding: 0.4rem 0.8rem; cursor: pointer; }
         .btn-danger-outline:hover { filter: brightness(1.2); }
@@ -209,6 +215,11 @@
         .kanban-card.dragging { opacity: 0.5; border: 2px dashed var(--primary-color); }
         .kanban-card h4 { font-size: 0.95rem; color: var(--text-main); padding-right: 20px; }
         .kanban-card p { font-size: 0.8rem; color: var(--text-muted); line-height: 1.4; }
+        
+        .card-actions { position: absolute; top: 10px; right: 10px; display: flex; gap: 8px; }
+        .card-actions .btn-delete-card { position: static; background: none; border: none; color: var(--text-muted); cursor: pointer; transition: color 0.2s; }
+        .card-actions .btn-delete-card:hover { color: var(--danger-color); }
+
         .tag-row { display: flex; gap: 5px; flex-wrap: wrap; }
         .mini-tag { font-size: 0.65rem; padding: 2px 6px; border-radius: 4px; background: var(--hover-bg); color: var(--text-muted); font-weight: 600; }
         .add-card-btn { background: transparent; border: 1px dashed var(--border-color); color: var(--text-muted); padding: 0.8rem; border-radius: 6px; cursor: pointer; font-weight: 500; transition: all 0.2s; }
@@ -221,9 +232,7 @@
         .ciclo-step.dragging { opacity: 0.5; border: 2px dashed var(--primary-color); }
         .ciclo-step.drag-over { border-left-width: 10px; border-left-color: var(--primary-color); transform: scale(1.02); background: var(--hover-bg); }
         .ciclo-step-number { position: absolute; top: -10px; left: -10px; width: 28px; height: 28px; background: var(--primary-color); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.8rem; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
-        .btn-delete-card { position: absolute; top: 10px; right: 10px; background: none; border: none; color: var(--text-muted); cursor: pointer; transition: color 0.2s; }
-        .btn-delete-card:hover { color: var(--danger-color); }
-
+        
         .meta-card { background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 2px 4px rgba(0,0,0,0.05); position: relative; }
         .meta-card h3 { font-size: 1.2rem; color: var(--text-main); margin-bottom: 1rem; display: flex; align-items: center; gap: 8px; }
         .meta-progress-blocks { display: flex; gap: 4px; margin-bottom: 1rem; align-items: center; }
@@ -242,12 +251,43 @@
         .record-pill { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; background: var(--icon-red-bg); color: var(--danger-color); font-weight: 600; margin-bottom: 10px; }
         .record-item-list { list-style: none; font-size: 0.85rem; color: var(--text-muted); margin-top: 15px; }
         .record-item-list li { margin-bottom: 8px; display: flex; align-items: center; gap: 5px; }
+        
+        .bar-hover:hover { filter: brightness(1.2); cursor: pointer; }
+
+        /* REGRAS PARA DISPOSITIVOS MÓVEIS (RESPONSIVO) */
+        @media (max-width: 768px) {
+            body { flex-direction: column; overflow: auto; }
+            .mobile-header { display: flex; }
+            .sidebar { position: fixed; left: -100%; top: 0; height: 100%; width: 280px; transition: left 0.3s ease; box-shadow: 2px 0 10px rgba(0,0,0,0.5); z-index: 1000; }
+            .sidebar.open { left: 0; }
+            .sidebar-overlay.active { display: block; }
+            .main-content { padding: 1rem; overflow-y: visible; height: auto; }
+            .dash-cards-grid { grid-template-columns: 1fr; gap: 1rem;}
+            .dashboard-main-grid { grid-template-columns: 1fr; }
+            .grid-2-cols { grid-template-columns: 1fr; }
+            header { flex-direction: column; align-items: flex-start !important; gap: 15px; margin-bottom: 1rem !important; }
+            header div { width: 100%; }
+            header .btn-primary, header .btn-icon { width: 100%; justify-content: center; margin-top: 10px;}
+            .edital-tabs { flex-wrap: wrap; }
+            .modal-content { padding: 1.5rem; width: 95%; max-height: 85vh;}
+            .kanban-board { flex-direction: row; overflow-x: auto; scroll-snap-type: x mandatory;}
+            .kanban-col { scroll-snap-align: start; min-width: 85vw; }
+            .ciclo-grid { grid-template-columns: 1fr; }
+            .revisoes-horizontal-scroll { scroll-snap-type: x mandatory; }
+            .revisao-card { scroll-snap-align: start; min-width: 85vw; }
+        }
     </style>
 </head>
 <body>
     <script>
         if (localStorage.getItem('planiq-theme') === 'light') { document.body.classList.add('light-theme'); }
     </script>
+
+    <div class="mobile-header">
+        <div class="mobile-header-logo"><i class="fa-solid fa-graduation-cap"></i> PlanIQ</div>
+        <button class="mobile-menu-btn" onclick="window.toggleMobileMenu()"><i class="fa-solid fa-bars"></i></button>
+    </div>
+    <div class="sidebar-overlay" id="sidebar-overlay" onclick="window.toggleMobileMenu()"></div>
 
     <aside class="sidebar">
         <div class="logo"><i class="fa-solid fa-graduation-cap"></i> PlanIQ</div>
@@ -309,7 +349,16 @@
                         <h2 class="panel-title">Resumo por Disciplina</h2>
                         <div style="overflow-x: auto;">
                             <table>
-                                <thead><tr><th>Disciplina</th><th>Horas</th><th>Questões</th><th>Acertos %</th></tr></thead>
+                                <thead>
+                                    <tr>
+                                        <th>Disciplinas</th>
+                                        <th style="text-align:center;">Tempo</th>
+                                        <th style="text-align:center; color: var(--success-color);"><i class="fa-solid fa-check"></i></th>
+                                        <th style="text-align:center; color: var(--danger-color);"><i class="fa-solid fa-xmark"></i></th>
+                                        <th style="text-align:center;"><i class="fa-solid fa-pen-to-square"></i></th>
+                                        <th style="text-align:center;">%</th>
+                                    </tr>
+                                </thead>
                                 <tbody id="tabela-disciplinas"></tbody>
                             </table>
                         </div>
@@ -326,9 +375,22 @@
                         <p style="font-size: 0.9rem; color: var(--text-muted); font-weight: 500;"><i class="fa-solid fa-check-double" style="color:var(--success-color);"></i> <span id="dash-hoje-q">0</span> questões resolvidas</p>
                     </div>
                     <div class="panel" style="margin-bottom: 1.5rem; text-align: center;">
-                        <h3 style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">Esta Semana</h3>
-                        <p style="font-weight: 800; font-size: 1.5rem; margin: 10px 0; color: var(--text-main);"><i class="fa-regular fa-clock" style="color:var(--primary-color);"></i> <span id="dash-semana-h">0h 0m</span></p>
-                        <p style="font-size: 0.9rem; color: var(--text-muted); font-weight: 500;"><i class="fa-solid fa-check-double" style="color:var(--success-color);"></i> <span id="dash-semana-q">0</span> questões resolvidas</p>
+                        <h3 style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; display:flex; justify-content:space-between; align-items:center;">
+                            <span>Esta Semana</span>
+                            <div style="display:flex; gap:5px; font-size:0.7rem;">
+                                <button id="btn-chart-tempo" class="btn-primary" style="padding: 2px 8px; font-size: 0.7rem; border-radius:10px; width:auto;" onclick="window.mudarGraficoSemana('tempo')">Tempo</button>
+                                <button id="btn-chart-questoes" class="btn-icon" style="padding: 2px 8px; font-size: 0.7rem; border-radius:10px;" onclick="window.mudarGraficoSemana('questoes')">Questões</button>
+                            </div>
+                        </h3>
+                        
+                        <p style="font-weight: 800; font-size: 1.5rem; margin: 10px 0 5px; color: var(--text-main);"><i class="fa-regular fa-clock" style="color:var(--primary-color);"></i> <span id="dash-semana-h">0h 0m</span></p>
+                        <p style="font-size: 0.9rem; color: var(--text-muted); font-weight: 500; margin-bottom: 15px;"><i class="fa-solid fa-check-double" style="color:var(--success-color);"></i> <span id="dash-semana-q">0</span> questões resolvidas</p>
+                        
+                        <div id="chart-semana" style="height: 120px; display: flex; align-items: flex-end; gap: 8px; justify-content: space-between; border-bottom: 1px solid var(--border-color); padding-bottom: 5px; margin-top: 10px;">
+                            </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 0.65rem; color: var(--text-muted); margin-top: 5px; font-weight:bold;">
+                            <span>D</span><span>S</span><span>T</span><span>Q</span><span>Q</span><span>S</span><span>S</span>
+                        </div>
                     </div>
                     <div class="panel" style="margin-bottom: 1.5rem; text-align: center;">
                         <h3 style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">Este Mês</h3>
@@ -350,7 +412,7 @@
                     <p style="color: var(--primary-color); font-weight: 600; font-size: 0.9rem; margin-top: 5px;" id="nome-edital-ativo">Edital Atual: Base</p>
                     <p style="color: var(--text-muted); margin-top: 2px;">Arraste para reordenar as disciplinas e os assuntos.</p>
                 </div>
-                <div style="display: flex; gap: 10px;">
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
                     <button class="btn-icon" style="width: auto; padding: 0.6rem 1.2rem; border-color: var(--primary-color); color: var(--primary-color);" onclick="window.abrirModalImportarEdital()"><i class="fa-solid fa-cloud-arrow-down"></i> Importar do Banco</button>
                     <button class="btn-primary" style="width: auto; padding: 0.6rem 1.2rem;" onclick="window.adicionarDisciplina()"><i class="fa-solid fa-plus"></i> Nova Disciplina</button>
                 </div>
@@ -367,14 +429,14 @@
 
         <div id="view-cronograma" class="hidden">
             <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-                <div><h1 style="margin-bottom: 0;">Planeamento de Estudos</h1><p style="color: var(--text-muted); margin-top: 5px;">Organize a sua rotina via Cronograma ou Ciclo de Estudos.</p></div>
+                <div><h1 style="margin-bottom: 0;">Planejamento de Estudos</h1><p style="color: var(--text-muted); margin-top: 5px;">Organize a sua rotina via Cronograma ou Ciclo de Estudos.</p></div>
             </header>
             <div class="edital-tabs" style="margin-bottom: 1rem;">
                 <button id="tab-c-semanal" class="active" onclick="window.mudarAbaCronograma('semanal')"><i class="fa-regular fa-calendar-week"></i> Cronograma Semanal</button>
                 <button id="tab-c-ciclo" onclick="window.mudarAbaCronograma('ciclo')"><i class="fa-solid fa-arrows-spin"></i> Ciclo de Estudos</button>
             </div>
             <div id="view-c-semanal">
-                <div style="margin-bottom: 1.5rem; display: flex; justify-content: flex-end; gap: 10px;">
+                <div style="margin-bottom: 1.5rem; display: flex; justify-content: flex-end; gap: 10px; flex-wrap: wrap;">
                     <button class="btn-danger-outline btn-icon" onclick="window.limparCronograma()"><i class="fa-solid fa-trash-can"></i> Limpar Semana</button>
                     <button class="btn-danger-outline btn-icon" onclick="window.reiniciarCronograma()"><i class="fa-solid fa-rotate-left"></i> Reiniciar Semana</button>
                 </div>
@@ -385,9 +447,9 @@
                 <div id="ciclo-container"></div>
             </div>
             <div style="margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--border-color);">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 10px;">
                     <h2 class="panel-title" style="margin:0; border:none; font-size:1.3rem;">Histórico de Estudos</h2>
-                    <div style="display: flex; gap: 10px;">
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
                         <button class="btn-danger-outline" style="width: auto; padding: 0.6rem 1.2rem; font-weight: 600;" onclick="window.excluirTodoHistorico()"><i class="fa-solid fa-trash"></i> Excluir Histórico</button>
                         <button class="btn-primary" style="width: auto; padding: 0.6rem 1.2rem;" onclick="window.abrirModalEstudo()"><i class="fa-solid fa-plus"></i> Adicionar Estudo Direto</button>
                     </div>
@@ -430,7 +492,7 @@
         <div id="view-simulados" class="hidden">
             <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
                 <div><h1 style="margin-bottom: 0;">Simulados & Redações</h1><p style="color: var(--text-muted); margin-top: 5px;">Registe os seus testes e treinos discursivos.</p></div>
-                <div style="display: flex; gap: 10px;">
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
                     <button class="btn-primary" style="width: auto; padding: 0.6rem 1.2rem; background-color: var(--primary-color);" onclick="window.abrirModalSimulado()"><i class="fa-solid fa-list-check"></i> Novo Simulado</button>
                     <button class="btn-primary" style="width: auto; padding: 0.6rem 1.2rem; background-color: var(--success-color);" onclick="window.abrirModalRedacao()"><i class="fa-solid fa-pen-nib"></i> Nova Redação</button>
                 </div>
@@ -473,10 +535,11 @@
         <div id="modal-tarefa" class="modal-overlay hidden">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h2 id="tarefa-titulo">Planear Atividade</h2>
+                    <h2 id="tarefa-titulo">Planejar Atividade</h2>
                     <button class="btn-close" onclick="window.fecharModalTarefa()"><i class="fa-solid fa-xmark"></i></button>
                 </div>
                 <input type="hidden" id="tarefa-contexto"> 
+                <input type="hidden" id="tarefa-edit-id"> 
                 <div class="form-group">
                     <label>Tipo de Atividade</label>
                     <select id="tarefa-tipo" class="form-control" onchange="window.toggleCamposTarefa()">
@@ -490,7 +553,7 @@
                     <div class="form-group"><label>Tópico</label><select id="tarefa-topico" class="form-control"></select></div>
                     <div class="form-group"><label>Descrição Rápida</label><input type="text" id="tarefa-descricao" class="form-control" placeholder="Ex: Teoria + 15 Questões..."></div>
                     <div class="form-group"><label>Categoria</label><div class="checkbox-group"><label class="checkbox-item"><input type="checkbox" name="tarefa-categoria" value="Teoria"> Teoria</label><label class="checkbox-item"><input type="checkbox" name="tarefa-categoria" value="Questão"> Questão</label><label class="checkbox-item"><input type="checkbox" name="tarefa-categoria" value="Revisão"> Revisão</label><label class="checkbox-item"><input type="checkbox" name="tarefa-categoria" value="Leitura de Lei"> Leitura de Lei</label></div></div>
-                    <div class="form-group"><label>Material</label><div class="checkbox-group"><label class="checkbox-item"><input type="checkbox" name="tarefa-material" value="Vídeo Aula"> Vídeo Aula</label><label class="checkbox-item"><input type="checkbox" name="tarefa-material" value="PDF"> PDF</label><label class="checkbox-item"><input type="checkbox" name="tarefa-material" value="Site de questões"> Site de questões</label></div></div>
+                    <div class="form-group"><label>Material</label><div class="checkbox-group"><label class="checkbox-item"><input type="checkbox" name="tarefa-material" value="Vídeo Aula"> Vídeo Aula</label><label class="checkbox-item"><input type="checkbox" name="tarefa-material" value="PDF"> PDF</label><label class="checkbox-item"><input type="checkbox" name="tarefa-material" value="Site de questões"> Site de questões</label><label class="checkbox-item"><input type="checkbox" name="tarefa-material" value="Resumo"> Resumo</label><label class="checkbox-item"><input type="checkbox" name="tarefa-material" value="Lei Seca"> Lei Seca</label></div></div>
                 </div>
                 <div id="campos-tarefa-redacao" class="hidden">
                     <div class="form-group"><label>Tema da Redação</label><input type="text" id="tarefa-red-tema" class="form-control" placeholder="Tema..."></div>
@@ -499,9 +562,17 @@
                 </div>
                 <div id="campos-tarefa-simulado" class="hidden">
                     <div class="form-group grid-2-cols"><div><label>Cargo / Prova</label><input type="text" id="tarefa-sim-cargo" class="form-control" placeholder="Ex: PF"></div><div><label>Origem / Banca</label><input type="text" id="tarefa-sim-origem" class="form-control" placeholder="Ex: Gran"></div></div>
+                    <div class="form-group">
+                        <label>Estilo de Prova</label>
+                        <select id="tarefa-sim-estilo" class="form-control">
+                            <option value="multipla_escolha">Múltipla Escolha</option>
+                            <option value="cespe">Cespe (Certo/Errado)</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Descrição Rápida</label><input type="text" id="tarefa-sim-descricao" class="form-control" placeholder="Ex: Fazer com cronômetro de 4 horas..."></div>
                     <div class="form-group" style="margin-top:15px; padding:15px; border:1px solid var(--border-color); border-radius:6px; background:var(--bg-color);"><label class="checkbox-item" style="font-weight:600;"><input type="checkbox" id="tarefa-sim-especifico" onchange="document.getElementById('div-sim-disc').classList.toggle('hidden', !this.checked)"> Simulado Específico de Matéria?</label><div id="div-sim-disc" class="hidden" style="margin-top:10px;"><select id="tarefa-sim-disciplina" class="form-control"></select></div></div>
                 </div>
-                <button class="btn-primary" style="margin-top:20px;" onclick="window.salvarTarefaPlanejada()"><i class="fa-solid fa-calendar-plus"></i> Adicionar ao Planeamento</button>
+                <button class="btn-primary" style="margin-top:20px;" onclick="window.salvarTarefaPlanejada()"><i class="fa-solid fa-calendar-plus"></i> Adicionar ao Planejamento</button>
             </div>
         </div>
 
@@ -515,7 +586,7 @@
                 <div class="form-group grid-2-cols"><div><label>Horas Estudadas</label><input type="number" id="estudo-horas" class="form-control" min="0"></div><div><label>Minutos Estudados</label><input type="number" id="estudo-minutos" class="form-control" min="0" max="59"></div></div>
                 <div class="form-group" style="background-color: var(--icon-green-bg); padding: 10px; border: 1px solid var(--icon-green-text); border-radius: 6px;"><label class="checkbox-item" style="font-weight: 600; color: var(--success-color); margin-bottom: 0;"><input type="checkbox" id="estudo-agendar-revisao" checked> <i class="fa-solid fa-bolt" style="margin-right: 5px;"></i> Agendar revisão inteligente após este estudo?</label></div>
                 <div class="form-group"><label>Categoria</label><div class="checkbox-group"><label class="checkbox-item"><input type="checkbox" name="estudo-categoria" value="Teoria"> Teoria</label><label class="checkbox-item"><input type="checkbox" name="estudo-categoria" value="Questão"> Questão</label><label class="checkbox-item"><input type="checkbox" name="estudo-categoria" value="Revisão"> Revisão</label><label class="checkbox-item"><input type="checkbox" name="estudo-categoria" value="Leitura de Lei"> Leitura de Lei</label></div></div>
-                <div class="form-group"><label>Material Utilizado</label><div class="checkbox-group"><label class="checkbox-item"><input type="checkbox" name="estudo-material" value="Vídeo Aula"> Vídeo Aula</label><label class="checkbox-item"><input type="checkbox" name="estudo-material" value="PDF"> PDF</label><label class="checkbox-item"><input type="checkbox" name="estudo-material" value="Site de questões"> Site de questões</label></div></div>
+                <div class="form-group"><label>Material Utilizado</label><div class="checkbox-group"><label class="checkbox-item"><input type="checkbox" name="estudo-material" value="Vídeo Aula"> Vídeo Aula</label><label class="checkbox-item"><input type="checkbox" name="estudo-material" value="PDF"> PDF</label><label class="checkbox-item"><input type="checkbox" name="estudo-material" value="Site de questões"> Site de questões</label><label class="checkbox-item"><input type="checkbox" name="estudo-material" value="Resumo"> Resumo</label><label class="checkbox-item"><input type="checkbox" name="estudo-material" value="Lei Seca"> Lei Seca</label></div></div>
                 <div class="form-group grid-2-cols"><div><label style="color: var(--success-color);">Questões Acertadas</label><input type="number" id="estudo-acertos" class="form-control" min="0"></div><div><label style="color: var(--danger-color);">Questões Erradas</label><input type="number" id="estudo-erros" class="form-control" min="0"></div></div>
                 <div class="form-group"><label>Comentário</label><textarea id="estudo-comentario" class="form-control" rows="3"></textarea></div>
                 <button class="btn-success" onclick="window.salvarEstudo()"><i class="fa-solid fa-save"></i> Registar e Concluir</button>
@@ -580,7 +651,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, collection, onSnapshot, addDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, updateDoc, collection, onSnapshot, addDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCcweqqOKak3jQVng2lyE1l2_YStpDpXg0",
@@ -627,6 +698,11 @@
         let disciplinaSelecionadaId = null; 
         let mesAtualExibicao = new Date().getMonth(); 
         let anoAtualExibicao = new Date().getFullYear(); 
+
+        window.toggleMobileMenu = function() {
+            document.querySelector('.sidebar').classList.toggle('open');
+            document.getElementById('sidebar-overlay').classList.toggle('active');
+        };
 
         // =====================================
         // TEMA MODO CLARO / ESCURO
@@ -762,6 +838,9 @@
                 else if (tela === 'desempenho') { document.getElementById('view-desempenho').classList.remove('hidden'); menuItems[4].classList.add('active'); window.renderizarDesempenho(); } 
                 else if (tela === 'simulados') { document.getElementById('view-simulados').classList.remove('hidden'); menuItems[5].classList.add('active'); window.renderizarSimulados(); window.renderizarRedacoes(); } 
                 else if (tela === 'metas') { document.getElementById('view-metas').classList.remove('hidden'); menuItems[6].classList.add('active'); window.renderizarMetas(); }
+                
+                document.querySelector('.sidebar').classList.remove('open');
+                document.getElementById('sidebar-overlay').classList.remove('active');
             } catch(e) { console.error("Falha ao navegar:", e); }
         };
 
@@ -791,7 +870,7 @@
         }
 
         // =====================================
-        // DASHBOARD
+        // DASHBOARD E GRÁFICOS
         // =====================================
         window.renderizarDashboard = function() {
             let totais = { min: 0, acertos: 0, erros: 0, q: 0 }; 
@@ -799,6 +878,11 @@
             let semana = { min: 0, q: 0 }; 
             let mes = { min: 0, q: 0 }; 
             let porDisciplina = {};
+            
+            let weekStats = {
+                0: { min: 0, q: 0 }, 1: { min: 0, q: 0 }, 2: { min: 0, q: 0 },
+                3: { min: 0, q: 0 }, 4: { min: 0, q: 0 }, 5: { min: 0, q: 0 }, 6: { min: 0, q: 0 }
+            };
 
             editalDoUsuario.disciplinas.forEach(d => { 
                 if (d.statusDisciplina !== 'desativada') porDisciplina[d.nome] = { min: 0, a: 0, e: 0, q: 0 }; 
@@ -821,7 +905,12 @@
                     let isM = dReg.getMonth() === td.getMonth() && dReg.getFullYear() === td.getFullYear();
 
                     if (isTod) { hoje.min += min; hoje.q += q; } 
-                    if (isW) { semana.min += min; semana.q += q; } 
+                    if (isW) { 
+                        semana.min += min; semana.q += q; 
+                        let dOfWeek = dReg.getDay();
+                        weekStats[dOfWeek].min += min;
+                        weekStats[dOfWeek].q += q;
+                    } 
                     if (isM) { mes.min += min; mes.q += q; }
                 }
                 
@@ -832,6 +921,8 @@
                     porDisciplina[reg.disciplina].q += q; 
                 }
             });
+
+            window.dashWeekStats = weekStats;
 
             document.getElementById('dash-horas-totais').innerText = `${Math.floor(totais.min / 60)}h ${totais.min % 60}m`;
             let percGeral = totais.q > 0 ? Math.round((totais.acertos / totais.q) * 100) : 0;
@@ -864,14 +955,23 @@
             let objEntries = Object.entries(porDisciplina);
             
             if(objEntries.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--text-muted); padding: 1rem;">Nenhum estudo registado.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:var(--text-muted); padding: 1rem;">Nenhum estudo registado.</td></tr>';
             } else { 
                 objEntries.sort((a,b) => b[1].min - a[1].min).forEach(([nome, dados]) => { 
                     let h = Math.floor(dados.min / 60); let m = dados.min % 60; 
-                    let timeStr = `${h > 0 ? h+'h ' : ''}${m}m`.trim() || '0m'; 
+                    let timeStr = `${h > 0 ? h+'h' : ''}${m}min`.trim() || '-'; 
                     let p = dados.q > 0 ? Math.round((dados.a / dados.q)*100) : 0; 
                     let pColor = p >= 80 ? 'var(--success-color)' : p >= 60 ? 'var(--warning-color)' : 'var(--danger-color)'; 
-                    tbody.innerHTML += `<tr><td style="font-weight: 500;">${nome}</td><td>${timeStr}</td><td>${dados.q}</td><td style="color: ${pColor}; font-weight: bold;">${p}%</td></tr>`; 
+                    let pBadge = dados.q > 0 ? `<span style="background:${pColor}; color:white; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; font-weight:bold;">${p}%</span>` : '-';
+                    
+                    tbody.innerHTML += `<tr>
+                        <td style="font-weight: 500; color: var(--primary-color);">${nome}</td>
+                        <td style="text-align:center;">${timeStr}</td>
+                        <td style="text-align:center; color:var(--success-color); font-weight:bold;">${dados.a}</td>
+                        <td style="text-align:center; color:var(--danger-color); font-weight:bold;">${dados.e}</td>
+                        <td style="text-align:center; font-weight:bold;">${dados.q}</td>
+                        <td style="text-align:center;">${pBadge}</td>
+                    </tr>`; 
                 }); 
             }
 
@@ -881,6 +981,8 @@
             document.getElementById('dash-semana-q').innerText = semana.q; 
             document.getElementById('dash-mes-h').innerText = `${Math.floor(mes.min / 60)}h ${mes.min % 60}m`; 
             document.getElementById('dash-mes-q').innerText = mes.q;
+
+            window.mudarGraficoSemana('tempo'); // renderiza grafico default
 
             let metasContainer = document.getElementById('dash-metas-container'); 
             metasContainer.innerHTML = '';
@@ -903,6 +1005,40 @@
                 });
             }
             window.atualizarProximaAtividade();
+        }
+
+        window.mudarGraficoSemana = function(tipo) {
+            const btnTempo = document.getElementById('btn-chart-tempo');
+            const btnQuestoes = document.getElementById('btn-chart-questoes');
+            const chart = document.getElementById('chart-semana');
+            if(!chart || !window.dashWeekStats) return;
+
+            if(tipo === 'tempo') {
+                btnTempo.className = 'btn-primary';
+                btnTempo.style.padding = '2px 8px'; btnTempo.style.width = 'auto'; btnTempo.style.fontSize = '0.7rem'; btnTempo.style.borderRadius = '10px';
+                btnQuestoes.className = 'btn-icon';
+                btnQuestoes.style.padding = '2px 8px'; btnQuestoes.style.fontSize = '0.7rem'; btnQuestoes.style.borderRadius = '10px';
+            } else {
+                btnQuestoes.className = 'btn-primary';
+                btnQuestoes.style.padding = '2px 8px'; btnQuestoes.style.width = 'auto'; btnQuestoes.style.fontSize = '0.7rem'; btnQuestoes.style.borderRadius = '10px';
+                btnTempo.className = 'btn-icon';
+                btnTempo.style.padding = '2px 8px'; btnTempo.style.fontSize = '0.7rem'; btnTempo.style.borderRadius = '10px';
+            }
+
+            let maxVal = 0;
+            for(let i=0; i<=6; i++) {
+                let val = tipo === 'tempo' ? window.dashWeekStats[i].min : window.dashWeekStats[i].q;
+                if(val > maxVal) maxVal = val;
+            }
+
+            chart.innerHTML = '';
+            for(let i=0; i<=6; i++) {
+                let val = tipo === 'tempo' ? window.dashWeekStats[i].min : window.dashWeekStats[i].q;
+                let perc = maxVal > 0 ? (val / maxVal) * 100 : 0;
+                if(perc > 0 && perc < 10) perc = 10;
+                let tooltip = tipo === 'tempo' ? `${Math.floor(val/60)}h ${val%60}m` : `${val} questões`;
+                chart.innerHTML += `<div class="bar-hover" style="flex:1; background-color: var(--primary-color); height: ${perc}%; border-radius: 4px 4px 0 0; min-height:4px; transition: height 0.4s;" title="${tooltip}"></div>`;
+            }
         }
 
         // =====================================
@@ -931,10 +1067,13 @@
                     else if (perf < 1.00) diasParaPular = 15; 
                     else if (perf === 1.00) diasParaPular = 30;
                     
-                    let pData = (reg.data || window.formatarDataLocalParaISO(new Date())).split('-'); 
+                    let baseDateStr = reg.dataRevisaoManual || reg.data || window.formatarDataLocalParaISO(new Date());
+                    let pData = baseDateStr.split('-'); 
                     if (pData.length === 3) {
                         let dataIdeal = new Date(pData[0], pData[1] - 1, pData[2]); 
-                        dataIdeal.setDate(dataIdeal.getDate() + diasParaPular);
+                        if (!reg.dataRevisaoManual) {
+                            dataIdeal.setDate(dataIdeal.getDate() + diasParaPular);
+                        }
                         
                         if (dataIdeal.getDay() === 6) dataIdeal.setDate(dataIdeal.getDate() + 2); 
                         if (dataIdeal.getDay() === 0) dataIdeal.setDate(dataIdeal.getDate() + 1); 
@@ -1037,7 +1176,7 @@
                     let cIcon = proximoCiclo.tipo === 'redacao' ? 'fa-pen-nib' : (proximoCiclo.tipo === 'simulado' ? 'fa-list-check' : 'fa-book');
                     htmlContent += `<div style="background: var(--bg-color); padding: 10px; border-radius: 6px; border-left: 3px solid var(--primary-color);"><p style="font-size: 0.75rem; color: var(--primary-color); font-weight: 700; margin-bottom: 3px; text-transform: uppercase;"><i class="fa-solid fa-arrows-spin"></i> Ciclo (Passo ${numPassoReal})</p><p style="font-weight: 600; color: var(--text-main); font-size: 0.9rem; margin-bottom: 2px;"><i class="fa-solid ${cIcon}" style="color:var(--text-muted); font-size:0.8rem;"></i> ${proximoCiclo.disciplina || proximoCiclo.cargo || proximoCiclo.concurso}</p><p style="font-size: 0.8rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${proximoCiclo.topico || proximoCiclo.tema || 'Simulado'}</p></div>`;
                 }
-                htmlContent += `</div><button class="btn-primary" onclick="window.navegarPara('cronograma')">Ir para Planeamento</button>`;
+                htmlContent += `</div><button class="btn-primary" onclick="window.navegarPara('cronograma')">Ir para Planejamento</button>`;
             }
             painel.innerHTML = htmlContent;
         };
@@ -1045,9 +1184,49 @@
         window.criarCartaoRevisaoHTML = function(rev, dataFormatada = null, ehCalendario = false) {
             let perc = Math.round(rev.perf * 100); let classeCor = 'normal'; let classeBadge = 'badge-normal';
             if (perc <= 50) { classeCor = 'urgente'; classeBadge = 'badge-urgente'; } else if (perc <= 75) { classeCor = 'alerta'; classeBadge = 'badge-alerta'; }
+            let idUsado = rev.registroOriginal.idDoc || rev.registroOriginal.timestamp;
             if(ehCalendario) return `<div class="cal-review-item ${classeCor}" onclick="window.prepararConclusaoRevisao('${rev.disciplina}', '${rev.topico}')" title="${rev.disciplina}: ${rev.topico}"><i class="fa-solid fa-book-open"></i> ${rev.disciplina.substring(0, 10)}...</div>`;
-            return `<div class="revisao-card ${classeCor}"><div><span class="revisao-badge ${classeBadge}"><i class="fa-solid fa-bullseye"></i> ${perc}%</span>${dataFormatada ? `<span style="font-size: 0.75rem; color: var(--text-muted); float: right;"><i class="fa-regular fa-calendar"></i> ${dataFormatada}</span>` : ''}<h4 class="revisao-card-title"><i class="fa-solid fa-bars-staggered" style="color: var(--text-muted); margin-right:5px;"></i> ${rev.topico}</h4><p class="revisao-card-subtitle"><i class="fa-regular fa-folder"></i> ${rev.disciplina}</p></div><button class="btn-primary" style="padding: 0.5rem; font-size: 0.85rem;" onclick="window.prepararConclusaoRevisao('${rev.disciplina}', '${rev.topico}')"><i class="fa-solid fa-check"></i> Revisar</button></div>`;
+            return `<div class="revisao-card ${classeCor}"><div><span class="revisao-badge ${classeBadge}"><i class="fa-solid fa-bullseye"></i> ${perc}%</span>${dataFormatada ? `<span style="font-size: 0.75rem; color: var(--text-muted); float: right;"><i class="fa-regular fa-calendar"></i> ${dataFormatada}</span>` : ''}<h4 class="revisao-card-title"><i class="fa-solid fa-bars-staggered" style="color: var(--text-muted); margin-right:5px;"></i> ${rev.topico}</h4><p class="revisao-card-subtitle"><i class="fa-regular fa-folder"></i> ${rev.disciplina}</p></div><div style="display:flex; gap: 5px; margin-top: 10px;"><button class="btn-primary" style="padding: 0.5rem; font-size: 0.85rem; flex: 1;" onclick="window.prepararConclusaoRevisao('${rev.disciplina}', '${rev.topico}')"><i class="fa-solid fa-check"></i> Revisar</button><button class="btn-icon" style="padding: 0.5rem; color: var(--warning-color); border-color: var(--warning-color);" onclick="window.pularRevisao('${idUsado}')" title="Pular revisão para amanhã"><i class="fa-solid fa-forward-step"></i></button><button class="btn-icon" style="padding: 0.5rem; color: var(--danger-color); border-color: var(--danger-color);" onclick="window.excluirRevisao('${idUsado}')" title="Excluir revisão"><i class="fa-solid fa-trash"></i></button></div></div>`;
         }
+
+        window.pularRevisao = async function(idStr) {
+            if(confirm("Deseja pular esta revisão? Ela será reagendada para amanhã.")) {
+                let reg = registrosDeEstudo.find(r => r.idDoc === idStr || r.timestamp == idStr);
+                if(reg) {
+                    let amanha = new Date();
+                    amanha.setDate(amanha.getDate() + 1);
+                    reg.dataRevisaoManual = window.formatarDataLocalParaISO(amanha);
+
+                    if(currentUser && !currentUser.isAnonymous && db && reg.idDoc) {
+                        try {
+                            await updateDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'registros_estudos', reg.idDoc), { dataRevisaoManual: reg.dataRevisaoManual });
+                        } catch(e) { console.error("Erro pular:", e); }
+                    } else {
+                        window.salvarDadosLocais();
+                    }
+                    window.renderizarRevisoes();
+                    window.atualizarProximaAtividade();
+                }
+            }
+        };
+
+        window.excluirRevisao = async function(idStr) {
+            if(confirm("Deseja remover esta revisão? Ela não aparecerá mais na agenda.")) {
+                let reg = registrosDeEstudo.find(r => r.idDoc === idStr || r.timestamp == idStr);
+                if(reg) {
+                    reg.agendarRevisao = false;
+                    if(currentUser && !currentUser.isAnonymous && db && reg.idDoc) {
+                        try {
+                            await updateDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'registros_estudos', reg.idDoc), { agendarRevisao: false });
+                        } catch(e) { console.error("Erro excluir:", e); }
+                    } else {
+                        window.salvarDadosLocais();
+                    }
+                    window.renderizarRevisoes();
+                    window.atualizarProximaAtividade();
+                }
+            }
+        };
 
         window.mudarMesCalendario = function(delta) { mesAtualExibicao += delta; if (mesAtualExibicao > 11) { mesAtualExibicao = 0; anoAtualExibicao++; } if (mesAtualExibicao < 0) { mesAtualExibicao = 11; anoAtualExibicao--; } window.renderizarRevisoes(); }
         
@@ -1069,7 +1248,7 @@
         window.prepararConclusaoRevisao = function(disciplina, topico) { window.abrirModalEstudoPreenchido(disciplina, topico); let cbRevisao = document.querySelector('input[name="estudo-categoria"][value="Revisão"]'); if(cbRevisao) cbRevisao.checked = true; document.getElementById('estudo-agendar-revisao').checked = false; };
 
         // =====================================
-        // EDITAL COM DRAG AND DROP
+        // EDITAL COM DRAG AND DROP E IMPORTAÇÃO
         // =====================================
         window.mudarAbaEdital = function(aba) { abaAtivaEdital = aba; disciplinaSelecionadaId = null; document.getElementById('tab-ativas').classList.remove('active'); document.getElementById('tab-desativadas').classList.remove('active'); document.getElementById(`tab-${aba}`).classList.add('active'); window.renderizarEdital(); }
         window.selecionarDisciplinaCard = function(id) { disciplinaSelecionadaId = id; window.renderizarEdital(); setTimeout(() => { const painel = document.getElementById('disciplina-detalhes'); if(painel && !painel.classList.contains('hidden')) painel.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }, 100); }
@@ -1139,7 +1318,7 @@
                     if(topicosHTML.trim() === '') topicosHTML = '<li class="topico-item text-muted">Nenhum assunto registado nesta matéria.</li>';
                     
                     let botoesStatusHtml = isDesativada ? `<button class="btn-success-outline btn-icon" onclick="window.alternarStatusDisciplina(${d.id})"><i class="fa-solid fa-power-off"></i> Reativar Disciplina</button>` : `<button class="btn-danger-outline btn-icon" onclick="window.alternarStatusDisciplina(${d.id})"><i class="fa-solid fa-power-off"></i> Desativar Disciplina</button>`;
-                    detailContainer.innerHTML = `<div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--border-color); padding-bottom: 15px; margin-bottom: 15px;"><h2 style="font-size: 1.5rem; color: var(--primary-color);"><i class="fa-solid fa-book"></i> ${d.nome}</h2><div style="display: flex; gap: 10px;">${botoesStatusHtml}<button class="btn-icon" onclick="window.editarDisciplina(${d.id})" title="Renomear Disciplina"><i class="fa-solid fa-pen"></i></button><button class="btn-icon" style="color: var(--danger-color); border-color: var(--danger-color);" onclick="window.excluirDisciplina(${d.id})" title="Excluir Definitivamente"><i class="fa-solid fa-trash"></i></button><button class="btn-primary" style="padding: 0.5rem 1rem; width: auto;" onclick="window.adicionarTopico(${d.id})"><i class="fa-solid fa-plus"></i> Novo Assunto</button></div></div><div class="stats-grid-detail"><div><span style="color: var(--text-muted);">Estado da disciplina:</span> <strong style="color: ${isDesativada ? 'var(--danger-color)' : 'var(--success-color)'};">${isDesativada ? 'Desativada' : 'Ativa'}</strong></div><div><span style="color: var(--text-muted);">Horas estudadas:</span> <strong>${textoTempo}</strong></div><div><span style="color: var(--text-muted);">Acertos:</span> <strong style="color: var(--success-color);">${acertosTotais}</strong></div><div><span style="color: var(--text-muted);">Erros:</span> <strong style="color: var(--danger-color);">${errosTotais}</strong></div><div><span style="color: var(--text-muted);">Total de questões:</span> <strong>${totalQuestoes}</strong></div><div><span style="color: var(--text-muted);">Progresso do Edital:</span> <strong>${progressoGeral}%</strong></div></div><div class="progress-bar-container" style="margin-bottom: 25px;"><div class="progress-bar-fill" style="width: ${progressoGeral}%"></div></div><h3 style="margin-bottom: 10px; font-size: 1.1rem;">Assuntos da Matéria</h3><ul class="topicos-list">${topicosHTML}</ul>`;
+                    detailContainer.innerHTML = `<div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--border-color); padding-bottom: 15px; margin-bottom: 15px; flex-wrap:wrap; gap: 10px;"><h2 style="font-size: 1.5rem; color: var(--primary-color);"><i class="fa-solid fa-book"></i> ${d.nome}</h2><div style="display: flex; gap: 10px; flex-wrap:wrap;">${botoesStatusHtml}<button class="btn-icon" onclick="window.editarDisciplina(${d.id})" title="Renomear Disciplina"><i class="fa-solid fa-pen"></i></button><button class="btn-icon" style="color: var(--danger-color); border-color: var(--danger-color);" onclick="window.excluirDisciplina(${d.id})" title="Excluir Definitivamente"><i class="fa-solid fa-trash"></i></button><button class="btn-primary" style="padding: 0.5rem 1rem; width: auto;" onclick="window.adicionarTopico(${d.id})"><i class="fa-solid fa-plus"></i> Novo Assunto</button></div></div><div class="stats-grid-detail"><div><span style="color: var(--text-muted);">Estado da disciplina:</span> <strong style="color: ${isDesativada ? 'var(--danger-color)' : 'var(--success-color)'};">${isDesativada ? 'Desativada' : 'Ativa'}</strong></div><div><span style="color: var(--text-muted);">Horas estudadas:</span> <strong>${textoTempo}</strong></div><div><span style="color: var(--text-muted);">Acertos:</span> <strong style="color: var(--success-color);">${acertosTotais}</strong></div><div><span style="color: var(--text-muted);">Erros:</span> <strong style="color: var(--danger-color);">${errosTotais}</strong></div><div><span style="color: var(--text-muted);">Total de questões:</span> <strong>${totalQuestoes}</strong></div><div><span style="color: var(--text-muted);">Progresso do Edital:</span> <strong>${progressoGeral}%</strong></div></div><div class="progress-bar-container" style="margin-bottom: 25px;"><div class="progress-bar-fill" style="width: ${progressoGeral}%"></div></div><h3 style="margin-bottom: 10px; font-size: 1.1rem;">Assuntos da Matéria</h3><ul class="topicos-list">${topicosHTML}</ul>`;
                 }
             }
         };
@@ -1171,7 +1350,7 @@
                 if (snap.empty) {
                     const seedData = { nome: "Edital Base Padrão", disciplinas: EDITAL_BASE };
                     await addDoc(colRef, seedData);
-                    window.abrirModalImportarEdital(); // Recarrega para mostrar o que acabou de criar
+                    window.abrirModalImportarEdital(); 
                     return;
                 }
 
@@ -1248,7 +1427,7 @@
                     else if (item.tipo === 'simulado') { tagsHTML = `<span class="mini-tag" style="background:var(--icon-yellow-bg); color:var(--icon-yellow-text);">Simulado</span> <span class="mini-tag">${item.origem}</span>`; }
                     let chkBox = item.concluido ? 'checked' : ''; let cIcon = item.tipo === 'redacao' ? 'fa-pen-nib' : (item.tipo === 'simulado' ? 'fa-list-check' : 'fa-book'); let btnText = item.tipo === 'redacao' ? 'Registar Redação' : (item.tipo === 'simulado' ? 'Registar Simulado' : 'Registar Estudo');
                     let mainTitle = item.tipo === 'estudo' ? item.disciplina : (item.tipo === 'redacao' ? item.concurso : item.cargo); let subTitle = item.tipo === 'estudo' ? item.topico : (item.tipo === 'redacao' ? item.tema : 'Simulado / Prova');
-                    cardsHTML += `<div class="kanban-card" draggable="true" ondragstart="window.dragStartKanban(event, '${diaData.dia}', ${item.id})" ondrop="window.dropOnCardKanban(event, '${diaData.dia}', ${index})" ondragover="window.dragOverCardKanban(event)" ondragleave="window.dragLeaveCardKanban(event)" ondragend="window.dragEndKanban(event)"><button class="btn-delete-card" onclick="window.excluirTarefaPlanejada('${diaData.dia}', ${item.id})" title="Eliminar"><i class="fa-solid fa-xmark"></i></button><h4 style="display:flex; align-items:center; gap:5px;"><i class="fa-solid ${cIcon}" style="color:var(--text-muted);"></i> ${mainTitle}</h4><p><strong><i class="fa-solid fa-bars-staggered" style="font-size:0.8rem;"></i> ${subTitle}</strong></p>${item.descricao ? `<p>${item.descricao}</p>` : ''}<div class="tag-row">${tagsHTML}</div><div style="display:flex; align-items:center; gap:5px; margin-top: 5px;"><input type="checkbox" ${chkBox} onchange="window.alternarStatusTarefaPlanejada('${diaData.dia}', ${item.id}, this.checked)"> <span style="font-size:0.8rem; font-weight:600; color: ${item.concluido ? 'var(--success-color)' : 'var(--text-main)'};">Estudado</span></div><button class="btn-primary" style="margin-top:5px; font-size:0.8rem;" onclick="window.abrirModalAcaoTarefa(${item.id}, '${diaData.dia}')">${btnText}</button></div>`;
+                    cardsHTML += `<div class="kanban-card" draggable="true" ondragstart="window.dragStartKanban(event, '${diaData.dia}', ${item.id})" ondrop="window.dropOnCardKanban(event, '${diaData.dia}', ${index})" ondragover="window.dragOverCardKanban(event)" ondragleave="window.dragLeaveCardKanban(event)" ondragend="window.dragEndKanban(event)"><div class="card-actions"><button class="btn-delete-card" onclick="window.editarTarefaPlanejada('${diaData.dia}', ${item.id})" title="Editar"><i class="fa-solid fa-pen"></i></button><button class="btn-delete-card" onclick="window.excluirTarefaPlanejada('${diaData.dia}', ${item.id})" title="Eliminar"><i class="fa-solid fa-xmark"></i></button></div><h4 style="display:flex; align-items:center; gap:5px;"><i class="fa-solid ${cIcon}" style="color:var(--text-muted);"></i> ${mainTitle}</h4><p><strong><i class="fa-solid fa-bars-staggered" style="font-size:0.8rem;"></i> ${subTitle}</strong></p>${item.descricao ? `<p>${item.descricao}</p>` : ''}<div class="tag-row">${tagsHTML}</div><div style="display:flex; align-items:center; gap:5px; margin-top: 5px;"><input type="checkbox" ${chkBox} onchange="window.alternarStatusTarefaPlanejada('${diaData.dia}', ${item.id}, this.checked)"> <span style="font-size:0.8rem; font-weight:600; color: ${item.concluido ? 'var(--success-color)' : 'var(--text-main)'};">Estudado</span></div><button class="btn-primary" style="margin-top:5px; font-size:0.8rem;" onclick="window.abrirModalAcaoTarefa(${item.id}, '${diaData.dia}')">${btnText}</button></div>`;
                 });
                 kContainer.innerHTML += `<div class="kanban-col"><div class="kanban-col-header" style="border-top: 4px solid ${diaData.corBorda};">${diaData.dia}</div><div class="kanban-col-body" ondragover="window.dragOverKanban(event)" ondragleave="window.dragLeaveKanban(event)" ondrop="window.dropKanban(event, '${diaData.dia}')">${cardsHTML}<button class="add-card-btn" onclick="window.abrirModalTarefa('${diaData.dia}')"><i class="fa-solid fa-plus"></i> Nova página</button></div></div>`;
             });
@@ -1263,7 +1442,7 @@
                 else if (item.tipo === 'redacao') { tagsHTML = `<span class="mini-tag" style="background:var(--icon-purple-bg); color:var(--icon-purple-text);">Discursiva</span> <span class="mini-tag">${item.banca}</span>`; } 
                 else if (item.tipo === 'simulado') { tagsHTML = `<span class="mini-tag" style="background:var(--icon-yellow-bg); color:var(--icon-yellow-text);">Simulado</span> <span class="mini-tag">${item.origem}</span>`; }
                 let numPassoReal = planejamentoDoUsuario.ciclo.findIndex(p => p.id === item.id) + 1; let cIcon = item.tipo === 'redacao' ? 'fa-pen-nib' : (item.tipo === 'simulado' ? 'fa-list-check' : 'fa-book'); let btnText = item.tipo === 'redacao' ? 'Registar Redação' : (item.tipo === 'simulado' ? 'Registar Simulado' : 'Registar Estudo'); let mainTitle = item.tipo === 'estudo' ? item.disciplina : (item.tipo === 'redacao' ? item.concurso : item.cargo); let subTitle = item.tipo === 'estudo' ? item.topico : (item.tipo === 'redacao' ? item.tema : 'Simulado / Prova');
-                pendentesHTML += `<div class="ciclo-step" draggable="true" ondragstart="window.dragStartCiclo(event, ${pendenteIndex})" ondragover="window.dragOverCiclo(event)" ondragleave="window.dragLeaveCiclo(event)" ondrop="window.dropCiclo(event, ${pendenteIndex})" ondragend="window.dragEndCiclo(event)"><button class="btn-delete-card" onclick="window.excluirTarefaPlanejada('Ciclo', ${item.id})" title="Eliminar"><i class="fa-solid fa-xmark"></i></button><div class="ciclo-step-number">${numPassoReal}</div><h4 style="font-size: 1.1rem; color: var(--text-main); margin-top:10px;"><i class="fa-solid ${cIcon}" style="color:var(--text-muted);"></i> ${mainTitle}</h4><div style="font-size: 0.85rem; color: var(--text-main); font-weight:600;"><i class="fa-solid fa-bars-staggered"></i> ${subTitle}</div>${item.descricao ? `<p style="font-size: 0.8rem; color: var(--text-muted);">${item.descricao}</p>` : ''}<div class="tag-row">${tagsHTML}</div><div style="font-size: 0.9rem; font-weight: bold; color: var(--text-muted); margin-top:10px; display:flex; align-items:center; gap:5px; cursor:pointer;" onclick="window.alternarStatusTarefaPlanejada('Ciclo', ${item.id}, true)"><i class="fa-regular fa-circle"></i> Pendente</div><button class="btn-primary" style="margin-top:10px; font-size:0.8rem;" onclick="window.abrirModalAcaoTarefa(${item.id}, 'Ciclo')">${btnText}</button></div>`;
+                pendentesHTML += `<div class="ciclo-step" draggable="true" ondragstart="window.dragStartCiclo(event, ${pendenteIndex})" ondragover="window.dragOverCiclo(event)" ondragleave="window.dragLeaveCiclo(event)" ondrop="window.dropCiclo(event, ${pendenteIndex})" ondragend="window.dragEndCiclo(event)"><div class="card-actions"><button class="btn-delete-card" onclick="window.editarTarefaPlanejada('Ciclo', ${item.id})" title="Editar"><i class="fa-solid fa-pen"></i></button><button class="btn-delete-card" onclick="window.excluirTarefaPlanejada('Ciclo', ${item.id})" title="Eliminar"><i class="fa-solid fa-xmark"></i></button></div><div class="ciclo-step-number">${numPassoReal}</div><h4 style="font-size: 1.1rem; color: var(--text-main); margin-top:10px;"><i class="fa-solid ${cIcon}" style="color:var(--text-muted);"></i> ${mainTitle}</h4><div style="font-size: 0.85rem; color: var(--text-main); font-weight:600;"><i class="fa-solid fa-bars-staggered"></i> ${subTitle}</div>${item.descricao ? `<p style="font-size: 0.8rem; color: var(--text-muted);">${item.descricao}</p>` : ''}<div class="tag-row">${tagsHTML}</div><div style="font-size: 0.9rem; font-weight: bold; color: var(--text-muted); margin-top:10px; display:flex; align-items:center; gap:5px; cursor:pointer;" onclick="window.alternarStatusTarefaPlanejada('Ciclo', ${item.id}, true)"><i class="fa-regular fa-circle"></i> Pendente</div><button class="btn-primary" style="margin-top:10px; font-size:0.8rem;" onclick="window.abrirModalAcaoTarefa(${item.id}, 'Ciclo')">${btnText}</button></div>`;
             });
             
             arrayConcluidos.forEach((item) => {
@@ -1272,7 +1451,7 @@
                 else if (item.tipo === 'redacao') { tagsHTML = `<span class="mini-tag" style="background:var(--icon-purple-bg); color:var(--icon-purple-text);">Discursiva</span> <span class="mini-tag">${item.banca}</span>`; } 
                 else if (item.tipo === 'simulado') { tagsHTML = `<span class="mini-tag" style="background:var(--icon-yellow-bg); color:var(--icon-yellow-text);">Simulado</span> <span class="mini-tag">${item.origem}</span>`; }
                 let numPassoReal = planejamentoDoUsuario.ciclo.findIndex(p => p.id === item.id) + 1; let cIcon = item.tipo === 'redacao' ? 'fa-pen-nib' : (item.tipo === 'simulado' ? 'fa-list-check' : 'fa-book'); let mainTitle = item.tipo === 'estudo' ? item.disciplina : (item.tipo === 'redacao' ? item.concurso : item.cargo); let subTitle = item.tipo === 'estudo' ? item.topico : (item.tipo === 'redacao' ? item.tema : 'Simulado / Prova');
-                concluidosHTML += `<div class="ciclo-step" style="border-left-color: var(--success-color);"><button class="btn-delete-card" onclick="window.excluirTarefaPlanejada('Ciclo', ${item.id})" title="Eliminar"><i class="fa-solid fa-xmark"></i></button><div class="ciclo-step-number" style="background: var(--success-color);">${numPassoReal}</div><h4 style="font-size: 1.1rem; color: var(--text-main); margin-top:10px;"><i class="fa-solid ${cIcon}" style="color:var(--text-muted);"></i> ${mainTitle}</h4><div style="font-size: 0.85rem; color: var(--text-main); font-weight:600;"><i class="fa-solid fa-bars-staggered"></i> ${subTitle}</div>${item.descricao ? `<p style="font-size: 0.8rem; color: var(--text-muted);">${item.descricao}</p>` : ''}<div class="tag-row">${tagsHTML}</div><div style="font-size: 0.9rem; font-weight: bold; color: var(--success-color); margin-top:10px; display:flex; align-items:center; gap:5px; cursor:pointer;" onclick="window.alternarStatusTarefaPlanejada('Ciclo', ${item.id}, false)"><i class="fa-solid fa-circle-check"></i> Concluído no ciclo atual</div></div>`;
+                concluidosHTML += `<div class="ciclo-step" style="border-left-color: var(--success-color);"><div class="card-actions"><button class="btn-delete-card" onclick="window.excluirTarefaPlanejada('Ciclo', ${item.id})" title="Eliminar"><i class="fa-solid fa-xmark"></i></button></div><div class="ciclo-step-number" style="background: var(--success-color);">${numPassoReal}</div><h4 style="font-size: 1.1rem; color: var(--text-main); margin-top:10px;"><i class="fa-solid ${cIcon}" style="color:var(--text-muted);"></i> ${mainTitle}</h4><div style="font-size: 0.85rem; color: var(--text-main); font-weight:600;"><i class="fa-solid fa-bars-staggered"></i> ${subTitle}</div>${item.descricao ? `<p style="font-size: 0.8rem; color: var(--text-muted);">${item.descricao}</p>` : ''}<div class="tag-row">${tagsHTML}</div><div style="font-size: 0.9rem; font-weight: bold; color: var(--success-color); margin-top:10px; display:flex; align-items:center; gap:5px; cursor:pointer;" onclick="window.alternarStatusTarefaPlanejada('Ciclo', ${item.id}, false)"><i class="fa-solid fa-circle-check"></i> Concluído no ciclo atual</div></div>`;
             });
             
             let addBtnHTML = `<div class="ciclo-step" style="justify-content:center; align-items:center; border: 1px dashed var(--border-color); background:transparent; cursor:pointer; min-height: 200px;" onmouseover="this.style.borderColor='var(--primary-color)'" onmouseout="this.style.borderColor='var(--border-color)'" onclick="window.abrirModalTarefa('Ciclo')"><i class="fa-solid fa-plus" style="font-size:1.5rem; color:var(--text-muted);"></i><span style="font-weight:600; color:var(--text-muted); margin-top:5px;">Adicionar Passo</span></div>`;
@@ -1311,24 +1490,102 @@
         window.dragEndCiclo = function(e) { e.target.classList.remove('dragging'); window.dragStartIndexCiclo = null; }
 
         window.abrirModalTarefa = function(contexto) { 
-            document.getElementById('modal-tarefa').classList.remove('hidden'); document.getElementById('tarefa-contexto').value = contexto; document.getElementById('tarefa-titulo').innerText = contexto === 'Ciclo' ? 'Novo Passo do Ciclo' : `Planear Atividade para ${contexto}`; document.getElementById('tarefa-tipo').value = 'estudo'; window.toggleCamposTarefa();
-            const selectDisciplina = document.getElementById('tarefa-disciplina'); selectDisciplina.innerHTML = '<option value="">Selecione uma disciplina...</option>'; let disciplinasAtivas = editalDoUsuario.disciplinas.filter(d => (d.statusDisciplina || 'ativa') === 'ativa'); disciplinasAtivas.forEach(d => { const opt = document.createElement('option'); opt.value = d.id; opt.textContent = d.nome; selectDisciplina.appendChild(opt); }); document.getElementById('tarefa-topico').innerHTML = '<option value="">Selecione primeiro a disciplina...</option>'; document.getElementById('tarefa-descricao').value = ''; document.querySelectorAll('input[name="tarefa-categoria"]').forEach(cb => cb.checked = false); document.querySelectorAll('input[name="tarefa-material"]').forEach(cb => cb.checked = false); document.getElementById('tarefa-red-tema').value = ''; document.getElementById('tarefa-red-concurso').value = ''; document.getElementById('tarefa-red-banca').value = ''; document.getElementById('tarefa-red-link').value = ''; document.getElementById('tarefa-sim-cargo').value = ''; document.getElementById('tarefa-sim-origem').value = ''; document.getElementById('tarefa-sim-especifico').checked = false; document.getElementById('div-sim-disc').classList.add('hidden');
+            document.getElementById('modal-tarefa').classList.remove('hidden'); 
+            document.getElementById('tarefa-contexto').value = contexto; 
+            document.getElementById('tarefa-edit-id').value = '';
+            document.getElementById('tarefa-titulo').innerText = contexto === 'Ciclo' ? 'Novo Passo do Ciclo' : `Planejar Atividade para ${contexto}`; 
+            document.getElementById('tarefa-tipo').value = 'estudo'; 
+            window.toggleCamposTarefa();
+            const selectDisciplina = document.getElementById('tarefa-disciplina'); selectDisciplina.innerHTML = '<option value="">Selecione uma disciplina...</option>'; let disciplinasAtivas = editalDoUsuario.disciplinas.filter(d => (d.statusDisciplina || 'ativa') === 'ativa'); disciplinasAtivas.forEach(d => { const opt = document.createElement('option'); opt.value = d.id; opt.textContent = d.nome; selectDisciplina.appendChild(opt); }); document.getElementById('tarefa-topico').innerHTML = '<option value="">Selecione primeiro a disciplina...</option>'; document.getElementById('tarefa-descricao').value = ''; document.querySelectorAll('input[name="tarefa-categoria"]').forEach(cb => cb.checked = false); document.querySelectorAll('input[name="tarefa-material"]').forEach(cb => cb.checked = false); document.getElementById('tarefa-red-tema').value = ''; document.getElementById('tarefa-red-concurso').value = ''; document.getElementById('tarefa-red-banca').value = ''; document.getElementById('tarefa-red-link').value = ''; document.getElementById('tarefa-sim-cargo').value = ''; document.getElementById('tarefa-sim-origem').value = ''; document.getElementById('tarefa-sim-estilo').value = 'multipla_escolha'; document.getElementById('tarefa-sim-descricao').value = ''; document.getElementById('tarefa-sim-especifico').checked = false; document.getElementById('div-sim-disc').classList.add('hidden');
         };
+
+        window.editarTarefaPlanejada = function(contexto, id) {
+            let item = null;
+            if(contexto === 'Ciclo') item = planejamentoDoUsuario.ciclo.find(i => i.id === id);
+            else { let d = planejamentoDoUsuario.cronograma.find(d => d.dia === contexto); if(d) item = d.itens.find(i => i.id === id); }
+            if(!item) return;
+
+            document.getElementById('modal-tarefa').classList.remove('hidden');
+            document.getElementById('tarefa-contexto').value = contexto;
+            document.getElementById('tarefa-titulo').innerText = "Editar Planejamento";
+            document.getElementById('tarefa-tipo').value = item.tipo;
+            document.getElementById('tarefa-edit-id').value = id;
+
+            window.toggleCamposTarefa();
+
+            if (item.tipo === 'estudo') {
+                const selectDisciplina = document.getElementById('tarefa-disciplina');
+                selectDisciplina.innerHTML = '<option value="">Selecione uma disciplina...</option>'; 
+                let disciplinasAtivas = editalDoUsuario.disciplinas.filter(d => (d.statusDisciplina || 'ativa') === 'ativa'); 
+                disciplinasAtivas.forEach(d => { const opt = document.createElement('option'); opt.value = d.id; opt.textContent = d.nome; selectDisciplina.appendChild(opt); });
+                
+                let d = editalDoUsuario.disciplinas.find(x => x.nome === item.disciplina);
+                if(d) {
+                    selectDisciplina.value = d.id;
+                    window.atualizarTopicosTarefa();
+                    document.getElementById('tarefa-topico').value = item.topico;
+                }
+                document.getElementById('tarefa-descricao').value = item.descricao || '';
+                document.querySelectorAll('input[name="tarefa-categoria"]').forEach(cb => cb.checked = (item.categorias||[]).includes(cb.value));
+                document.querySelectorAll('input[name="tarefa-material"]').forEach(cb => cb.checked = (item.materiais||[]).includes(cb.value));
+            } else if (item.tipo === 'redacao') {
+                document.getElementById('tarefa-red-tema').value = item.tema || '';
+                document.getElementById('tarefa-red-concurso').value = item.concurso || '';
+                document.getElementById('tarefa-red-banca').value = item.banca || '';
+                document.getElementById('tarefa-red-link').value = item.link || '';
+            } else if (item.tipo === 'simulado') {
+                document.getElementById('tarefa-sim-cargo').value = item.cargo || '';
+                document.getElementById('tarefa-sim-origem').value = item.origem || '';
+                document.getElementById('tarefa-sim-estilo').value = item.estilo || 'multipla_escolha';
+                document.getElementById('tarefa-sim-descricao').value = item.descricao || '';
+                if(item.disciplinaVinculada) {
+                    document.getElementById('tarefa-sim-especifico').checked = true;
+                    document.getElementById('div-sim-disc').classList.remove('hidden');
+                    const selectDisc = document.getElementById('tarefa-sim-disciplina');
+                    selectDisc.innerHTML = '<option value="">Selecione uma disciplina...</option>';
+                    editalDoUsuario.disciplinas.filter(d => (d.statusDisciplina || 'ativa') === 'ativa').forEach(d => { const opt = document.createElement('option'); opt.value = d.id; opt.textContent = d.nome; selectDisc.appendChild(opt); });
+                    selectDisc.value = item.disciplinaVinculada;
+                } else {
+                    document.getElementById('tarefa-sim-especifico').checked = false;
+                    document.getElementById('div-sim-disc').classList.add('hidden');
+                }
+            }
+        };
+
         window.fecharModalTarefa = function() { document.getElementById('modal-tarefa').classList.add('hidden'); };
         window.atualizarTopicosTarefa = function() { const disciplinaId = document.getElementById('tarefa-disciplina').value; const selectTopico = document.getElementById('tarefa-topico'); selectTopico.innerHTML = '<option value="">Selecione um tópico...</option>'; if (!disciplinaId) return; const d = editalDoUsuario.disciplinas.find(d => d.id == disciplinaId); if (d && d.topicos) { d.topicos.forEach(topicoObj => { let nome = typeof topicoObj === 'string' ? topicoObj : topicoObj.nome; const opt = document.createElement('option'); opt.value = nome; opt.textContent = nome; selectTopico.appendChild(opt); }); } };
         
         window.salvarTarefaPlanejada = function() { 
-            const contexto = document.getElementById('tarefa-contexto').value; const tipo = document.getElementById('tarefa-tipo').value; let novaTarefa = { id: Date.now(), tipo: tipo, concluido: false };
+            const contexto = document.getElementById('tarefa-contexto').value; 
+            const tipo = document.getElementById('tarefa-tipo').value; 
+            const editId = document.getElementById('tarefa-edit-id').value;
+            let novaTarefa = { id: editId ? parseInt(editId) : Date.now(), tipo: tipo, concluido: false };
+            
             if (tipo === 'estudo') {
                 const disciplinaId = document.getElementById('tarefa-disciplina').value; const topico = document.getElementById('tarefa-topico').value; if (!disciplinaId || !topico) { alert("Selecione Disciplina e Tópico!"); return; }
                 novaTarefa.disciplina = editalDoUsuario.disciplinas.find(d => d.id == disciplinaId).nome; novaTarefa.topico = topico; novaTarefa.descricao = document.getElementById('tarefa-descricao').value; novaTarefa.categorias = Array.from(document.querySelectorAll('input[name="tarefa-categoria"]:checked')).map(cb => cb.value); novaTarefa.materiais = Array.from(document.querySelectorAll('input[name="tarefa-material"]:checked')).map(cb => cb.value);
             } else if (tipo === 'redacao') {
                 novaTarefa.tema = document.getElementById('tarefa-red-tema').value; novaTarefa.concurso = document.getElementById('tarefa-red-concurso').value; novaTarefa.banca = document.getElementById('tarefa-red-banca').value; novaTarefa.link = document.getElementById('tarefa-red-link').value; if (!novaTarefa.tema) { alert("Informe pelo menos o Tema da Redação!"); return; }
             } else if (tipo === 'simulado') {
-                novaTarefa.cargo = document.getElementById('tarefa-sim-cargo').value; novaTarefa.origem = document.getElementById('tarefa-sim-origem').value; if (!novaTarefa.cargo) { alert("Informe pelo menos o Cargo/Prova do Simulado!"); return; }
+                novaTarefa.cargo = document.getElementById('tarefa-sim-cargo').value; novaTarefa.origem = document.getElementById('tarefa-sim-origem').value; novaTarefa.estilo = document.getElementById('tarefa-sim-estilo').value; novaTarefa.descricao = document.getElementById('tarefa-sim-descricao').value; if (!novaTarefa.cargo) { alert("Informe pelo menos o Cargo/Prova do Simulado!"); return; }
                 if(document.getElementById('tarefa-sim-especifico').checked) { let discId = document.getElementById('tarefa-sim-disciplina').value; if(discId) novaTarefa.disciplinaVinculada = editalDoUsuario.disciplinas.find(d => d.id == discId).id; }
             }
-            if (contexto === 'Ciclo') planejamentoDoUsuario.ciclo.push(novaTarefa); else { let diaData = planejamentoDoUsuario.cronograma.find(d => d.dia === contexto); if (diaData) diaData.itens.push(novaTarefa); } 
+            
+            if(editId) {
+                if (contexto === 'Ciclo') {
+                    let index = planejamentoDoUsuario.ciclo.findIndex(i => i.id === parseInt(editId));
+                    if (index > -1) { novaTarefa.concluido = planejamentoDoUsuario.ciclo[index].concluido; planejamentoDoUsuario.ciclo[index] = novaTarefa; }
+                } else {
+                    let diaData = planejamentoDoUsuario.cronograma.find(d => d.dia === contexto);
+                    if (diaData) {
+                        let index = diaData.itens.findIndex(i => i.id === parseInt(editId));
+                        if (index > -1) { novaTarefa.concluido = diaData.itens[index].concluido; diaData.itens[index] = novaTarefa; }
+                    }
+                }
+            } else {
+                if (contexto === 'Ciclo') planejamentoDoUsuario.ciclo.push(novaTarefa); else { let diaData = planejamentoDoUsuario.cronograma.find(d => d.dia === contexto); if (diaData) diaData.itens.push(novaTarefa); } 
+            }
+            
             window.salvarDadosGeraisNaNuvem(); window.salvarDadosLocais(); window.renderizarViewsCronograma(); window.fecharModalTarefa(); 
         };
 
@@ -1351,7 +1608,7 @@
                 document.getElementById('red-tarefa-id-conclusao').value = tarefaId; document.getElementById('red-tarefa-context-conclusao').value = contexto;
             } else if (item.tipo === 'simulado') {
                 window.abrirModalSimulado();
-                document.getElementById('sim-cargo').value = item.cargo || ''; document.getElementById('sim-origem').value = item.origem || '';
+                document.getElementById('sim-cargo').value = item.cargo || ''; document.getElementById('sim-origem').value = item.origem || ''; document.getElementById('sim-estilo').value = item.estilo || 'multipla_escolha';
                 if(item.disciplinaVinculada) {
                     document.getElementById('sim-vincular').checked = true; document.getElementById('div-sim-vinc-disc').classList.remove('hidden');
                     const sDisc = document.getElementById('sim-disciplina-vinculada'); sDisc.innerHTML = '<option value="">Selecione...</option>';
@@ -1363,7 +1620,7 @@
         };
 
         window.alternarStatusTarefaPlanejada = function(contexto, itemId, novoStatus) { if (contexto === 'Ciclo') { let item = planejamentoDoUsuario.ciclo.find(i => i.id === itemId); if(item) item.concluido = novoStatus; let arrayPendentes = []; let arrayConcluidos = []; planejamentoDoUsuario.ciclo.forEach(p => { if (p.concluido) arrayConcluidos.push(p); else arrayPendentes.push(p); }); planejamentoDoUsuario.ciclo = [...arrayPendentes, ...arrayConcluidos]; } else { let diaData = planejamentoDoUsuario.cronograma.find(d => d.dia === contexto); if (diaData) { let item = diaData.itens.find(i => i.id === itemId); if(item) item.concluido = novoStatus; } } window.salvarDadosGeraisNaNuvem(); window.salvarDadosLocais(); window.renderizarViewsCronograma(); };
-        window.excluirTarefaPlanejada = function(contexto, itemId) { if(confirm("Deseja realmente eliminar este planeamento?")) { if (contexto === 'Ciclo') { planejamentoDoUsuario.ciclo = planejamentoDoUsuario.ciclo.filter(i => i.id !== itemId); } else { let diaData = planejamentoDoUsuario.cronograma.find(d => d.dia === contexto); if (diaData) diaData.itens = diaData.itens.filter(i => i.id !== itemId); } window.salvarDadosGeraisNaNuvem(); window.salvarDadosLocais(); window.renderizarViewsCronograma(); } };
+        window.excluirTarefaPlanejada = function(contexto, itemId) { if(confirm("Deseja realmente eliminar este planejamento?")) { if (contexto === 'Ciclo') { planejamentoDoUsuario.ciclo = planejamentoDoUsuario.ciclo.filter(i => i.id !== itemId); } else { let diaData = planejamentoDoUsuario.cronograma.find(d => d.dia === contexto); if (diaData) diaData.itens = diaData.itens.filter(i => i.id !== itemId); } window.salvarDadosGeraisNaNuvem(); window.salvarDadosLocais(); window.renderizarViewsCronograma(); } };
         window.abrirModalEstudoPreenchido = function(disciplinaNome, topicoNome) { window.abrirModalEstudo(); let d = editalDoUsuario.disciplinas.find(x => x.nome === disciplinaNome); if(d) { document.getElementById('select-disciplina').value = d.id; window.atualizarTopicosEstudo(); document.getElementById('select-topico').value = topicoNome; } };
         
         window.reiniciarCronograma = function() { if (confirm("Reiniciar o Cronograma Semanal? Isto irá desmarcar todos os itens estudados nesta semana.")) { planejamentoDoUsuario.cronograma.forEach(dia => { dia.itens.forEach(item => item.concluido = false); }); window.salvarDadosGeraisNaNuvem(); window.salvarDadosLocais(); window.renderizarViewsCronograma(); } };
@@ -1639,7 +1896,7 @@
 
                 container.innerHTML += `
                     <div class="meta-card">
-                        <button class="btn-delete-card" onclick="window.excluirMeta(${meta.id})"><i class="fa-solid fa-trash"></i></button>
+                        <div class="card-actions"><button class="btn-delete-card" onclick="window.excluirMeta(${meta.id})"><i class="fa-solid fa-trash"></i></button></div>
                         <h3>${meta.tipo === 'horas' ? '<i class="fa-regular fa-clock" style="color:var(--warning-color);"></i>' : '<i class="fa-solid fa-list-check" style="color:var(--success-color);"></i>'} ${meta.titulo}</h3>
                         ${statusPill}
                         <div style="display:flex; justify-content:space-between; margin-bottom:5px; font-size:0.9rem;">
@@ -1746,7 +2003,7 @@
                     `;
                 });
 
-                let isFirst = disc.id === disciplinasAtivas[0].id; // Deixa o primeiro aberto por defeito
+                let isFirst = disc.id === disciplinasAtivas[0].id; 
                 
                 container.innerHTML += `
                     <div class="desempenho-card">
@@ -1755,24 +2012,26 @@
                             <i class="fa-solid ${isFirst ? 'fa-chevron-up' : 'fa-chevron-down'}" id="icon-accordion-${disc.id}" style="color:var(--text-main);"></i>
                         </div>
                         <div class="desempenho-body ${isFirst ? '' : 'hidden'}" id="body-accordion-${disc.id}">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th style="width:25%;">Assunto</th>
-                                        <th>Status</th>
-                                        <th>Horas Estudadas</th>
-                                        <th>Desempenho</th>
-                                        <th>Último Contacto</th>
-                                        <th>Revisão</th>
-                                        <th style="text-align:center">Acertos</th>
-                                        <th style="text-align:center">Erros</th>
-                                        <th style="text-align:center">Total</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    ${linhasTopicos || '<tr><td colspan="9" style="text-align:center; color:var(--text-muted); padding:1rem;">Nenhum assunto cadastrado nesta disciplina.</td></tr>'}
-                                </tbody>
-                            </table>
+                            <div style="overflow-x: auto;">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th style="width:25%;">Assunto</th>
+                                            <th>Status</th>
+                                            <th>Horas Estudadas</th>
+                                            <th>Desempenho</th>
+                                            <th>Último Contato</th>
+                                            <th>Revisão</th>
+                                            <th style="text-align:center">Acertos</th>
+                                            <th style="text-align:center">Erros</th>
+                                            <th style="text-align:center">Total</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${linhasTopicos || '<tr><td colspan="9" style="text-align:center; color:var(--text-muted); padding:1rem;">Nenhum assunto cadastrado nesta disciplina.</td></tr>'}
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>`;
             });
