@@ -300,6 +300,7 @@
             <button class="nav-item" onclick="window.navegarPara('desempenho')"><i class="fa-solid fa-chart-simple" style="width:20px;"></i> Desempenho</button>
             <button class="nav-item" onclick="window.navegarPara('simulados')"><i class="fa-solid fa-file-pen" style="width:20px;"></i> Simulados e Redação</button>
             <button class="nav-item" onclick="window.navegarPara('metas')"><i class="fa-solid fa-bullseye" style="width:20px;"></i> Metas</button>
+            <button class="nav-item hidden" id="btn-nav-admin" onclick="window.navegarPara('admin')"><i class="fa-solid fa-crown" style="width:20px; color:var(--warning-color);"></i> Admin</button>
         </nav>
 
         <div class="sidebar-footer">
@@ -522,6 +523,28 @@
             <div id="lista-metas" style="display: flex; flex-direction: column; gap: 1.5rem;"></div>
         </div>
 
+        <!-- === ECRÃ 8: ADMIN === -->
+        <div id="view-admin" class="hidden">
+            <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <div><h1 style="margin-bottom: 0;">Painel de Administração</h1><p style="color: var(--text-muted); margin-top: 5px;">Acesso restrito. Ferramentas de gestão de base de dados.</p></div>
+            </header>
+            <div class="dashboard-grid grid-2-cols">
+                <div class="panel">
+                    <h2 class="panel-title"><i class="fa-solid fa-file-import"></i> Importar Histórico de Estudos (JSON)</h2>
+                    <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:15px;">Faça upload de um ficheiro JSON contendo o histórico de estudos para adicionar à sua conta atual.</p>
+                    <input type="file" id="file-historico" accept=".json" class="form-control" style="margin-bottom:15px; background: var(--hover-bg);">
+                    <button class="btn-primary" onclick="window.importarHistoricoJson()"><i class="fa-solid fa-upload"></i> Enviar Histórico</button>
+                </div>
+                <div class="panel">
+                    <h2 class="panel-title"><i class="fa-solid fa-file-import"></i> Importar Edital Base Pública (JSON)</h2>
+                    <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:15px;">Faça upload de um edital no formato JSON para disponibilizar na base de dados global e pública para todos os utilizadores.</p>
+                    <input type="file" id="file-edital" accept=".json" class="form-control" style="margin-bottom:15px; background: var(--hover-bg);">
+                    <button class="btn-primary" onclick="window.importarEditalJson()"><i class="fa-solid fa-upload"></i> Enviar Edital Público</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- === MODAIS === -->
         <div id="modal-login" class="modal-overlay">
             <div class="modal-content" style="max-width: 400px; text-align: center;">
                 <h2 style="margin-bottom: 10px;"><i class="fa-solid fa-lock" style="color: var(--primary-color);"></i> Acesso Restrito</h2>
@@ -662,6 +685,9 @@
             appId: "1:807146839769:web:129aa2c940d82e67e9e8c8"
         };
         const appId = 'planiq-producao';
+        
+        // Altere este e-mail para o e-mail de Administrador que desejar.
+        const ADMIN_EMAILS = ['matsanmed@gmail.com']; 
 
         let app, auth, db;
         try {
@@ -827,6 +853,7 @@
                 document.getElementById('view-desempenho').classList.add('hidden'); 
                 document.getElementById('view-metas').classList.add('hidden'); 
                 document.getElementById('view-simulados').classList.add('hidden');
+                document.getElementById('view-admin').classList.add('hidden');
                 
                 const menuItems = document.querySelectorAll('.nav-menu .nav-item'); 
                 menuItems.forEach(i => i.classList.remove('active'));
@@ -838,6 +865,7 @@
                 else if (tela === 'desempenho') { document.getElementById('view-desempenho').classList.remove('hidden'); menuItems[4].classList.add('active'); window.renderizarDesempenho(); } 
                 else if (tela === 'simulados') { document.getElementById('view-simulados').classList.remove('hidden'); menuItems[5].classList.add('active'); window.renderizarSimulados(); window.renderizarRedacoes(); } 
                 else if (tela === 'metas') { document.getElementById('view-metas').classList.remove('hidden'); menuItems[6].classList.add('active'); window.renderizarMetas(); }
+                else if (tela === 'admin') { document.getElementById('view-admin').classList.remove('hidden'); document.getElementById('btn-nav-admin').classList.add('active'); }
                 
                 document.querySelector('.sidebar').classList.remove('open');
                 document.getElementById('sidebar-overlay').classList.remove('active');
@@ -1807,238 +1835,8 @@
             });
         }
 
-        // =====================================
-        // METAS
-        // =====================================
-        window.abrirModalMeta = function() {
-            document.getElementById('modal-meta').classList.remove('hidden');
-            document.getElementById('meta-titulo').value = '';
-            document.getElementById('meta-tipo').value = 'horas';
-            document.getElementById('meta-alvo').value = '';
-            const hoje = new Date().toISOString().split('T')[0];
-            document.getElementById('meta-inicio').value = hoje;
-            document.getElementById('meta-fim').value = '';
-            window.atualizarLabelAlvoMeta();
-        };
-
-        window.fecharModalMeta = function() { document.getElementById('modal-meta').classList.add('hidden'); };
-
-        window.atualizarLabelAlvoMeta = function() {
-            const tipo = document.getElementById('meta-tipo').value;
-            document.getElementById('label-meta-alvo').innerText = tipo === 'horas' ? 'Quantidade (em Horas)' : 'Quantidade (em Questões)';
-        };
-
-        window.salvarMeta = function() {
-            const titulo = document.getElementById('meta-titulo').value;
-            const tipo = document.getElementById('meta-tipo').value;
-            const alvo = parseInt(document.getElementById('meta-alvo').value);
-            const inicio = document.getElementById('meta-inicio').value;
-            const fim = document.getElementById('meta-fim').value;
-
-            if(!titulo || !alvo || !inicio || !fim) { alert("Por favor, preencha todos os campos da meta."); return; }
-            if(inicio > fim) { alert("A data final deve ser posterior à data de início."); return; }
-
-            const novaMeta = { id: Date.now(), titulo: titulo, tipo: tipo, alvo: alvo, dataInicio: inicio, dataFim: fim };
-            metasDoUsuario.push(novaMeta);
-            
-            window.salvarDadosGeraisNaNuvem();
-            window.salvarDadosLocais();
-            window.atualizarTodasAsTelas();
-            window.fecharModalMeta();
-        };
-
-        window.excluirMeta = function(id) {
-            if(confirm("Deseja realmente eliminar esta meta?")) {
-                metasDoUsuario = metasDoUsuario.filter(m => m.id !== id);
-                window.salvarDadosGeraisNaNuvem();
-                window.salvarDadosLocais();
-                window.atualizarTodasAsTelas();
-            }
-        };
-
-        window.renderizarMetas = function() {
-            const container = document.getElementById('lista-metas');
-            if(!container) return;
-            container.innerHTML = '';
-            
-            if(metasDoUsuario.length === 0) {
-                container.innerHTML = '<p style="color:var(--text-muted); padding: 1rem;">Nenhuma meta criada. Desafie-se e crie a sua primeira meta!</p>';
-                return;
-            }
-            
-            metasDoUsuario.forEach(meta => {
-                let progressoAtual = 0;
-                registrosDeEstudo.forEach(reg => {
-                    if (reg.data && reg.data >= meta.dataInicio && reg.data <= meta.dataFim) {
-                        if (meta.tipo === 'horas' && reg.tempo) progressoAtual += (reg.tempo.horas * 60) + reg.tempo.minutos;
-                        else if (meta.tipo === 'questoes' && reg.questoes) progressoAtual += (reg.questoes.acertos || 0) + (reg.questoes.erros || 0);
-                    }
-                });
-                
-                let atualFormatado = progressoAtual;
-                let alvoFormatado = meta.alvo;
-                
-                if (meta.tipo === 'horas') {
-                    progressoAtual = progressoAtual / 60; 
-                    atualFormatado = `${Math.floor(progressoAtual)}h ${Math.round((progressoAtual % 1) * 60)}m`;
-                    alvoFormatado = `${meta.alvo}h`;
-                } else {
-                    atualFormatado = `${progressoAtual} q.`;
-                    alvoFormatado = `${meta.alvo} q.`;
-                }
-
-                let percentualRaw = (progressoAtual / meta.alvo) * 100;
-                let percentualLimpo = Math.min(Math.max(Math.round(percentualRaw || 0), 0), 100);
-                let dFim = meta.dataFim.split('-').reverse().join('/');
-                let statusPill = percentualLimpo >= 100 
-                    ? `<span class="meta-status-pill" style="background:var(--icon-green-bg); color:var(--success-color);"><i class="fa-solid fa-trophy"></i> Meta Atingida!</span>` 
-                    : `<span class="meta-status-pill" style="background:var(--icon-blue-bg); color:var(--icon-blue-text);"><i class="fa-solid fa-person-running"></i> Em andamento</span>`;
-
-                container.innerHTML += `
-                    <div class="meta-card">
-                        <div class="card-actions"><button class="btn-delete-card" onclick="window.excluirMeta(${meta.id})"><i class="fa-solid fa-trash"></i></button></div>
-                        <h3>${meta.tipo === 'horas' ? '<i class="fa-regular fa-clock" style="color:var(--warning-color);"></i>' : '<i class="fa-solid fa-list-check" style="color:var(--success-color);"></i>'} ${meta.titulo}</h3>
-                        ${statusPill}
-                        <div style="display:flex; justify-content:space-between; margin-bottom:5px; font-size:0.9rem;">
-                            <span style="color:var(--text-muted);">Progresso: <strong style="color:var(--text-main);">${atualFormatado}</strong> de ${alvoFormatado}</span>
-                            <span style="font-weight:bold; color:var(--primary-color);">${percentualLimpo}%</span>
-                        </div>
-                        <div class="progress-bar-container" style="height:10px; margin-bottom:15px;">
-                            <div class="progress-bar-fill" style="width: ${percentualLimpo}%; background-color: ${percentualLimpo >= 100 ? 'var(--success-color)' : 'var(--primary-color)'};"></div>
-                        </div>
-                        <div class="meta-date-info"><i class="fa-regular fa-calendar-xmark"></i> Prazo: até ${dFim}</div>
-                    </div>`;
-            });
-        };
-
-        // =====================================
-        // DESEMPENHO (ACCORDION)
-        // =====================================
-        window.toggleDesempenhoAccordion = function(id) {
-            const body = document.getElementById(`body-accordion-${id}`);
-            const icon = document.getElementById(`icon-accordion-${id}`);
-            if (body.classList.contains('hidden')) {
-                body.classList.remove('hidden');
-                icon.classList.remove('fa-chevron-down');
-                icon.classList.add('fa-chevron-up');
-            } else {
-                body.classList.add('hidden');
-                icon.classList.remove('fa-chevron-up');
-                icon.classList.add('fa-chevron-down');
-            }
-        };
-
-        window.renderizarDesempenho = function() {
-            const container = document.getElementById('lista-desempenho-disciplinas');
-            if (!container) return;
-            container.innerHTML = '';
-
-            let disciplinasAtivas = editalDoUsuario.disciplinas.filter(d => (d.statusDisciplina || 'ativa') === 'ativa');
-
-            if (disciplinasAtivas.length === 0) {
-                container.innerHTML = '<p style="color:var(--text-muted); padding:1rem;">Nenhuma disciplina ativa no Edital.</p>';
-                return;
-            }
-
-            const agendaRevisoes = window.obterMapaProximasRevisoes();
-
-            disciplinasAtivas.forEach(disc => {
-                let linhasTopicos = '';
-                
-                disc.topicos.forEach(topicoObj => {
-                    let nomeTopico = typeof topicoObj === 'string' ? topicoObj : topicoObj.nome;
-                    let statusTopico = typeof topicoObj === 'string' ? 'nao_iniciado' : (topicoObj.status || 'nao_iniciado');
-
-                    let tempoTotal = 0;
-                    let acertos = 0;
-                    let erros = 0;
-                    let ultimoContacto = null;
-
-                    registrosDeEstudo.forEach(reg => {
-                        if (reg.disciplina === disc.nome && reg.topico === nomeTopico) {
-                            if (reg.tempo) tempoTotal += (reg.tempo.horas * 60) + reg.tempo.minutos;
-                            acertos += (reg.questoes?.acertos || 0);
-                            erros += (reg.questoes?.erros || 0);
-                            if (!ultimoContacto || new Date(reg.data) > new Date(ultimoContacto)) {
-                                ultimoContacto = reg.data;
-                            }
-                        }
-                    });
-
-                    let total = acertos + erros;
-                    let perc = total > 0 ? Math.round((acertos / total) * 100) : 0;
-                    let horasTxt = tempoTotal > 0 ? `${Math.floor(tempoTotal/60)}h ${tempoTotal%60}m` : '-';
-                    let dataUltimoTxt = ultimoContacto ? ultimoContacto.split('-').reverse().join('/') : '-';
-
-                    let chaveAgenda = disc.nome + "|||" + nomeTopico;
-                    let dataRevisao = agendaRevisoes[chaveAgenda] || '-';
-
-                    let statusCor = 'var(--status-gray)';
-                    let statusTexto = 'Não iniciado';
-                    if (statusTopico === 'estudando') { statusCor = 'var(--status-blue)'; statusTexto = 'Estudando'; }
-                    if (statusTopico === 'concluido') { statusCor = 'var(--status-green)'; statusTexto = 'Concluído'; }
-                    let statusHtml = `<span style="color:${statusCor}; display:flex; align-items:center; gap:5px; font-size:0.8rem; font-weight:500;"><i class="fa-solid fa-circle" style="font-size:6px;"></i> ${statusTexto}</span>`;
-
-                    let barColor = perc >= 80 ? 'var(--success-color)' : perc >= 60 ? 'var(--warning-color)' : 'var(--danger-color)';
-
-                    linhasTopicos += `
-                        <tr>
-                            <td style="font-weight:600; color:var(--text-main); font-size:0.85rem;">${nomeTopico}</td>
-                            <td>${statusHtml}</td>
-                            <td style="font-size:0.85rem;"><i class="fa-regular fa-clock" style="color:var(--text-muted)"></i> ${horasTxt}</td>
-                            <td>
-                                <div style="display:flex; align-items:center; gap:10px;">
-                                    <span style="color:${barColor}; font-weight:bold; font-size:0.85rem; min-width:30px;">${perc}%</span>
-                                    <div class="progress-bar-container" style="width:60px; margin:0; height:4px; background:var(--bg-color);">
-                                        <div class="progress-bar-fill" style="width:${perc}%; background-color:${barColor}"></div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td style="color:var(--text-muted); font-size:0.85rem;">${dataUltimoTxt}</td>
-                            <td style="color:var(--primary-color); font-weight:600; font-size:0.85rem;">${dataRevisao}</td>
-                            <td style="color:var(--success-color); font-weight:bold; text-align:center;">${acertos}</td>
-                            <td style="color:var(--danger-color); font-weight:bold; text-align:center;">${erros}</td>
-                            <td style="font-weight:bold; text-align:center; color:var(--text-main);">${total}</td>
-                        </tr>
-                    `;
-                });
-
-                let isFirst = disc.id === disciplinasAtivas[0].id; 
-                
-                container.innerHTML += `
-                    <div class="desempenho-card">
-                        <div class="desempenho-header" onclick="window.toggleDesempenhoAccordion(${disc.id})">
-                            <span><i class="fa-solid fa-book" style="color:var(--primary-color); margin-right:8px;"></i> <span style="color:var(--primary-color); font-size:1.1rem">${disc.nome}</span></span>
-                            <i class="fa-solid ${isFirst ? 'fa-chevron-up' : 'fa-chevron-down'}" id="icon-accordion-${disc.id}" style="color:var(--text-main);"></i>
-                        </div>
-                        <div class="desempenho-body ${isFirst ? '' : 'hidden'}" id="body-accordion-${disc.id}">
-                            <div style="overflow-x: auto;">
-                                <table>
-                                    <thead>
-                                        <tr>
-                                            <th style="width:25%;">Assunto</th>
-                                            <th>Status</th>
-                                            <th>Horas Estudadas</th>
-                                            <th>Desempenho</th>
-                                            <th>Último Contato</th>
-                                            <th>Revisão</th>
-                                            <th style="text-align:center">Acertos</th>
-                                            <th style="text-align:center">Erros</th>
-                                            <th style="text-align:center">Total</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        ${linhasTopicos || '<tr><td colspan="9" style="text-align:center; color:var(--text-muted); padding:1rem;">Nenhum assunto cadastrado nesta disciplina.</td></tr>'}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>`;
-            });
-        };
-
         // =========================================================================
-        // === LOGIN E SINCRONIZAÇÃO ===
+        // === LOGIN, ADMIN E SINCRONIZAÇÃO ===
         // =========================================================================
         window.abrirModalLogin = function() { document.getElementById('modal-login').classList.remove('hidden'); }
         window.fecharModalLogin = function() { document.getElementById('modal-login').classList.add('hidden'); }
@@ -2068,6 +1866,59 @@
             }
         }
 
+        window.importarHistoricoJson = function() {
+            const fileInput = document.getElementById('file-historico');
+            if(!fileInput.files.length) return alert("Selecione um ficheiro JSON.");
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                try {
+                    const dados = JSON.parse(e.target.result);
+                    if(!Array.isArray(dados)) return alert("O JSON deve ser uma lista (array) de registos.");
+                    if(confirm(`Tem a certeza que deseja importar ${dados.length} registos de estudo para a sua conta?`)) {
+                        for(let reg of dados) {
+                            if (!reg.timestamp) reg.timestamp = Date.now() + Math.floor(Math.random() * 1000);
+                            if(currentUser && !currentUser.isAnonymous && db) {
+                                await addDoc(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'registros_estudos'), reg);
+                            } else {
+                                registrosDeEstudo.unshift(reg);
+                            }
+                        }
+                        if(currentUser && !currentUser.isAnonymous && db) {
+                             alert("Importação para a nuvem concluída!");
+                        } else {
+                             window.salvarDadosLocais();
+                             window.atualizarTodasAsTelas();
+                             alert("Importação local concluída!");
+                        }
+                        fileInput.value = '';
+                    }
+                } catch(err) { alert("Erro ao processar JSON: " + err.message); }
+            };
+            reader.readAsText(file);
+        };
+
+        window.importarEditalJson = function() {
+            const fileInput = document.getElementById('file-edital');
+            if(!fileInput.files.length) return alert("Selecione um ficheiro JSON.");
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                try {
+                    const dados = JSON.parse(e.target.result);
+                    if(!dados.nome || !Array.isArray(dados.disciplinas)) return alert("JSON inválido. Deve conter 'nome' e 'disciplinas'.");
+                    if(!db) return alert("Apenas disponível com ligação ao Firebase.");
+                    if(confirm(`Deseja importar o edital "${dados.nome}" para a base de dados global (pública)?`)) {
+                        const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'editais_base');
+                        await addDoc(colRef, dados);
+                        alert("Edital base público adicionado com sucesso!");
+                        fileInput.value = '';
+                    }
+                } catch(err) { alert("Erro ao processar JSON: " + err.message); }
+            };
+            reader.readAsText(file);
+        };
+
         const initAuth = async () => {
             if(!auth) return;
             try {
@@ -2085,6 +1936,13 @@
                 if (user) {
                     document.getElementById('modal-login').classList.add('hidden');
                     currentUser = user;
+                    
+                    // Lógica para revelar botão Admin
+                    if (user.email && ADMIN_EMAILS.includes(user.email)) {
+                        document.getElementById('btn-nav-admin').classList.remove('hidden');
+                    } else {
+                        document.getElementById('btn-nav-admin').classList.add('hidden');
+                    }
                     
                     const docRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'config', 'dadosGerais');
                     onSnapshot(docRef, (docSnap) => {
@@ -2115,6 +1973,7 @@
                 } else {
                     document.getElementById('modal-login').classList.remove('hidden');
                     currentUser = null;
+                    document.getElementById('btn-nav-admin').classList.add('hidden');
                 }
             });
         }
