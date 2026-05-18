@@ -300,15 +300,11 @@
             <button class="nav-item" onclick="window.navegarPara('desempenho')"><i class="fa-solid fa-chart-simple" style="width:20px;"></i> Desempenho</button>
             <button class="nav-item" onclick="window.navegarPara('simulados')"><i class="fa-solid fa-file-pen" style="width:20px;"></i> Simulados e Redação</button>
             <button class="nav-item" onclick="window.navegarPara('metas')"><i class="fa-solid fa-bullseye" style="width:20px;"></i> Metas</button>
-            <button class="nav-item hidden" id="btn-nav-admin" onclick="window.navegarPara('admin')"><i class="fa-solid fa-crown" style="width:20px; color:var(--warning-color);"></i> Admin</button>
         </nav>
 
         <div class="sidebar-footer">
-            <button onclick="window.toggleTheme()" class="nav-item" style="width: 100%; border: none; background: transparent; cursor: pointer; text-align: left; padding: 0.5rem 1.5rem;">
-                <i class="fa-solid fa-sun" id="theme-icon" style="width: 20px;"></i> <span id="theme-text">Modo Claro</span>
-            </button>
-            <button class="nav-item" style="width: 100%; border: none; background: transparent; cursor: pointer; text-align: left; padding: 0.5rem 1.5rem;" onclick="window.abrirModalLogin()">
-                <i class="fa-solid fa-right-to-bracket" style="width: 20px; color: var(--success-color);"></i> <span style="color: var(--success-color); font-weight: 600;">Entrar / Login</span>
+            <button id="btn-nav-config" class="nav-item" style="width: 100%; border: none; background: transparent; cursor: pointer; text-align: left; padding: 0.5rem 1.5rem;" onclick="window.navegarPara('configuracoes')">
+                <i class="fa-solid fa-gear" style="width: 20px; color: var(--text-muted);"></i> <span style="font-weight: 600;">Configurações</span>
             </button>
             <button class="nav-item" style="width: 100%; border: none; background: transparent; cursor: pointer; text-align: left; padding: 0.5rem 1.5rem;" onclick="window.fazerLogout()">
                 <i class="fa-solid fa-arrow-right-from-bracket" style="width: 20px; color: var(--danger-color);"></i> <span style="color: var(--danger-color); font-weight: 600;">Sair / Logout</span>
@@ -533,28 +529,50 @@
             <div id="lista-metas" style="display: flex; flex-direction: column; gap: 1.5rem;"></div>
         </div>
 
-        <!-- === ECRÃ 8: ADMIN === -->
-        <div id="view-admin" class="hidden">
+        <!-- === ECRÃ 8: CONFIGURAÇÕES === -->
+        <div id="view-configuracoes" class="hidden">
             <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-                <div><h1 style="margin-bottom: 0;">Painel de Administração</h1><p style="color: var(--text-muted); margin-top: 5px;">Acesso restrito. Ferramentas de gestão de base de dados.</p></div>
+                <div><h1 style="margin-bottom: 0;">Configurações</h1><p style="color: var(--text-muted); margin-top: 5px;">Preferências do sistema e ferramentas avançadas.</p></div>
             </header>
-            <div class="dashboard-grid grid-2-cols">
-                <div class="panel">
-                    <h2 class="panel-title"><i class="fa-solid fa-file-import"></i> Importar Histórico de Estudos (JSON)</h2>
-                    <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:15px;">Faça upload de um ficheiro JSON contendo o histórico de estudos para adicionar à sua conta atual.</p>
-                    <input type="file" id="file-historico" accept=".json" class="form-control" style="margin-bottom:15px; background: var(--hover-bg);">
-                    <button class="btn-primary" onclick="window.importarHistoricoJson()"><i class="fa-solid fa-upload"></i> Enviar Histórico</button>
+            
+            <div class="panel" style="margin-bottom: 1.5rem;">
+                <h2 class="panel-title"><i class="fa-solid fa-palette"></i> Aparência</h2>
+                <div style="display: flex; align-items: center; justify-content: space-between; padding: 15px; background: var(--hover-bg); border-radius: 6px; border: 1px solid var(--border-color);">
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <div style="background: var(--bg-color); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border-color);">
+                            <i class="fa-solid fa-sun" id="config-theme-icon" style="font-size: 1.2rem; color: var(--text-main);"></i>
+                        </div>
+                        <div>
+                            <p style="font-weight: 600; color: var(--text-main); font-size: 1rem;" id="config-theme-text">Modo Claro</p>
+                            <p style="font-size: 0.85rem; color: var(--text-muted);">Altere o esquema de cores da aplicação de acordo com a sua preferência.</p>
+                        </div>
+                    </div>
+                    <button class="btn-primary" style="width: auto; padding: 0.5rem 1.2rem;" onclick="window.toggleTheme()"><i class="fa-solid fa-repeat"></i> Alternar</button>
                 </div>
-                <div class="panel">
-                    <h2 class="panel-title"><i class="fa-solid fa-file-import"></i> Importar Edital Base Pública (JSON)</h2>
-                    <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:15px;">Faça upload de um edital no formato JSON para disponibilizar na base de dados global e pública para todos os utilizadores.</p>
-                    <input type="file" id="file-edital" accept=".json" class="form-control" style="margin-bottom:15px; background: var(--hover-bg);">
-                    <button class="btn-primary" onclick="window.importarEditalJson()"><i class="fa-solid fa-upload"></i> Enviar Edital Público</button>
+            </div>
+
+            <div id="config-admin-panel" class="hidden">
+                <div class="panel" style="border: 2px solid var(--warning-color);">
+                    <h2 class="panel-title" style="color: var(--warning-color); border-bottom-color: var(--warning-color);"><i class="fa-solid fa-crown"></i> Painel de Administração (Acesso Restrito)</h2>
+                    <div class="dashboard-grid grid-2-cols" style="margin-top: 15px;">
+                        <div style="background: var(--bg-color); padding: 15px; border-radius: 6px; border: 1px solid var(--border-color);">
+                            <h3 style="font-size: 1rem; margin-bottom: 10px; color: var(--text-main);"><i class="fa-solid fa-file-import"></i> Importar Histórico de Estudos (JSON)</h3>
+                            <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:15px;">Faça upload de um ficheiro JSON contendo o histórico de estudos para adicionar à sua conta atual.</p>
+                            <input type="file" id="file-historico" accept=".json" class="form-control" style="margin-bottom:15px; background: var(--hover-bg);">
+                            <button class="btn-primary" onclick="window.importarHistoricoJson()"><i class="fa-solid fa-upload"></i> Enviar Histórico</button>
+                        </div>
+                        <div style="background: var(--bg-color); padding: 15px; border-radius: 6px; border: 1px solid var(--border-color);">
+                            <h3 style="font-size: 1rem; margin-bottom: 10px; color: var(--text-main);"><i class="fa-solid fa-file-import"></i> Importar Edital Base Pública (JSON)</h3>
+                            <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:15px;">Faça upload de um edital no formato JSON para disponibilizar na base de dados global e pública para todos os utilizadores.</p>
+                            <input type="file" id="file-edital" accept=".json" class="form-control" style="margin-bottom:15px; background: var(--hover-bg);">
+                            <button class="btn-primary" onclick="window.importarEditalJson()"><i class="fa-solid fa-upload"></i> Enviar Edital Público</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- === MODAIS CUSTOMIZADOS === -->
+        <!-- === MODAIS CUSTOMIZADOS (SUBSTITUEM ALERT, CONFIRM, PROMPT) === -->
         <div id="custom-dialog" class="modal-overlay hidden" style="z-index: 9999;">
             <div class="modal-content" style="max-width: 400px; text-align: center;">
                 <h2 id="custom-dialog-title" style="margin-bottom: 15px; font-size: 1.2rem;">Aviso</h2>
@@ -567,12 +585,9 @@
             </div>
         </div>
 
-        <div id="modal-login" class="modal-overlay hidden">
+        <div id="modal-login" class="modal-overlay">
             <div class="modal-content" style="max-width: 400px; text-align: center;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                    <h2 style="margin: 0;"><i class="fa-solid fa-lock" style="color: var(--primary-color);"></i> Acesso Restrito</h2>
-                    <button class="btn-close" onclick="window.fecharModalLogin()"><i class="fa-solid fa-xmark"></i></button>
-                </div>
+                <h2 style="margin-bottom: 10px;"><i class="fa-solid fa-lock" style="color: var(--primary-color);"></i> Acesso Restrito</h2>
                 <p style="margin-bottom: 25px; color: var(--text-muted); font-size: 0.9rem;">Insira as suas credenciais seguras para aceder ao PlanIQ.</p>
                 <input type="email" id="login-email" class="form-control" placeholder="E-mail" style="margin-bottom: 15px;">
                 <input type="password" id="login-senha" class="form-control" placeholder="Senha" style="margin-bottom: 25px;">
@@ -711,6 +726,7 @@
         };
         const appId = 'planiq-producao';
         
+        // Altere este e-mail para o e-mail de Administrador que desejar.
         const ADMIN_EMAILS = ['matsanmed@gmail.com']; 
 
         let app, auth, db;
@@ -808,6 +824,32 @@
         };
 
         // =====================================
+        // NORMALIZADORES (TRADUTORES JSON -> EDITAL)
+        // =====================================
+        window.normalizarDisciplina = function(d) {
+            if(!d) return "";
+            let n = d.trim();
+            if(n === "Português") return "Língua Portuguesa";
+            if(n === "Raciocínio Lógico e Matemático") return "Raciocínio Lógico";
+            if(n === "Discursiva") return "Língua Portuguesa"; // Agrupa redações em PT se desejado
+            return n;
+        };
+
+        window.normalizarTopico = function(t) {
+            if(!t) return "";
+            let n = t.trim();
+            if(n === "Verbo") return "Verbos";
+            if(n === "Sintaxe - Período simples") return "Sintaxe Período simples";
+            if(n === "Sintaxe - Período composto") return "Sintaxe Período composto";
+            if(n.includes("Termos essenciais") || n.includes("Termos integrantes") || n.includes("Termos Acessórios") || n.includes("Voz passiva e ativa")) return "Sintaxe Período simples";
+            if(n.includes("Estruturas Lógicas") && n.includes("Argumentação")) return "Estruturas Lógicas e Proposições";
+            if(n.includes("Redes de Computadores")) return "Redes de Computadores";
+            if(n.includes("Frações, Porcentagem") || n.includes("Regra de três")) return "Problemas Aritméticos e Algébricos";
+            if(n.includes("Argumentativa") || n.includes("Expositiva") || n === "Treino Argumentativa") return "Redação oficial";
+            return n;
+        };
+
+        // =====================================
         // TEMA MODO CLARO / ESCURO
         // =====================================
         window.toggleTheme = function() { 
@@ -820,14 +862,19 @@
         function atualizarBotaoTema(isLight) { 
             const icon = document.getElementById('theme-icon'); 
             const text = document.getElementById('theme-text'); 
-            if(icon && text) { 
-                if (isLight) { 
-                    icon.className = 'fa-solid fa-moon'; 
-                    text.innerText = 'Modo Escuro'; 
-                } else { 
-                    icon.className = 'fa-solid fa-sun'; 
-                    text.innerText = 'Modo Claro'; 
-                } 
+            const configIcon = document.getElementById('config-theme-icon');
+            const configText = document.getElementById('config-theme-text');
+
+            if (isLight) { 
+                if(icon) icon.className = 'fa-solid fa-moon'; 
+                if(text) text.innerText = 'Modo Escuro'; 
+                if(configIcon) configIcon.className = 'fa-solid fa-moon'; 
+                if(configText) configText.innerText = 'Modo Escuro'; 
+            } else { 
+                if(icon) icon.className = 'fa-solid fa-sun'; 
+                if(text) text.innerText = 'Modo Claro'; 
+                if(configIcon) configIcon.className = 'fa-solid fa-sun'; 
+                if(configText) configText.innerText = 'Modo Claro'; 
             } 
         };
         atualizarBotaoTema(document.body.classList.contains('light-theme'));
@@ -930,10 +977,11 @@
                 document.getElementById('view-desempenho').classList.add('hidden'); 
                 document.getElementById('view-metas').classList.add('hidden'); 
                 document.getElementById('view-simulados').classList.add('hidden');
-                document.getElementById('view-admin').classList.add('hidden');
+                document.getElementById('view-configuracoes').classList.add('hidden');
                 
                 const menuItems = document.querySelectorAll('.nav-menu .nav-item'); 
                 menuItems.forEach(i => i.classList.remove('active'));
+                document.getElementById('btn-nav-config').classList.remove('active');
                 
                 if (tela === 'dashboard') { document.getElementById('view-dashboard').classList.remove('hidden'); menuItems[0].classList.add('active'); window.renderizarDashboard(); } 
                 else if (tela === 'edital') { document.getElementById('view-edital').classList.remove('hidden'); menuItems[1].classList.add('active'); window.renderizarEdital(); } 
@@ -942,7 +990,7 @@
                 else if (tela === 'desempenho') { document.getElementById('view-desempenho').classList.remove('hidden'); menuItems[4].classList.add('active'); window.renderizarDesempenho(); } 
                 else if (tela === 'simulados') { document.getElementById('view-simulados').classList.remove('hidden'); menuItems[5].classList.add('active'); window.renderizarSimulados(); window.renderizarRedacoes(); } 
                 else if (tela === 'metas') { document.getElementById('view-metas').classList.remove('hidden'); menuItems[6].classList.add('active'); window.renderizarMetas(); }
-                else if (tela === 'admin') { document.getElementById('view-admin').classList.remove('hidden'); document.getElementById('btn-nav-admin').classList.add('active'); }
+                else if (tela === 'configuracoes') { document.getElementById('view-configuracoes').classList.remove('hidden'); document.getElementById('btn-nav-config').classList.add('active'); }
                 
                 document.querySelector('.sidebar').classList.remove('open');
                 document.getElementById('sidebar-overlay').classList.remove('active');
@@ -1019,11 +1067,12 @@
                     if (isM) { mes.min += min; mes.q += q; }
                 }
                 
-                if (porDisciplina[reg.disciplina]) { 
-                    porDisciplina[reg.disciplina].min += min; 
-                    porDisciplina[reg.disciplina].a += a; 
-                    porDisciplina[reg.disciplina].e += e; 
-                    porDisciplina[reg.disciplina].q += q; 
+                let regDiscNorm = window.normalizarDisciplina(reg.disciplina);
+                if (porDisciplina[regDiscNorm]) { 
+                    porDisciplina[regDiscNorm].min += min; 
+                    porDisciplina[regDiscNorm].a += a; 
+                    porDisciplina[regDiscNorm].e += e; 
+                    porDisciplina[regDiscNorm].q += q; 
                 }
             });
 
@@ -1152,15 +1201,21 @@
         window.calcularAgendaRevisoes = function() {
             let ultimosEstudos = {};
             registrosDeEstudo.forEach(reg => { 
-                let chave = reg.disciplina + "|||" + reg.topico; 
-                if (!ultimosEstudos[chave]) ultimosEstudos[chave] = reg; 
+                let regDiscNorm = window.normalizarDisciplina(reg.disciplina);
+                let regTopNorm = window.normalizarTopico(reg.topico);
+                let chave = regDiscNorm + "|||" + regTopNorm; 
+                
+                // Usamos o registro original, mas com nomes traduzidos
+                let regNormalizado = { ...reg, disciplina: regDiscNorm, topico: regTopNorm, registroOriginal: reg };
+                
+                if (!ultimosEstudos[chave]) ultimosEstudos[chave] = regNormalizado; 
             });
             
             let revisoesPendentes = [];
-            Object.values(ultimosEstudos).forEach(reg => {
-                if (reg.agendarRevisao) {
-                    let acertos = reg.questoes && reg.questoes.acertos ? reg.questoes.acertos : 0;
-                    let erros = reg.questoes && reg.questoes.erros ? reg.questoes.erros : 0;
+            Object.values(ultimosEstudos).forEach(regNorm => {
+                if (regNorm.registroOriginal.agendarRevisao) {
+                    let acertos = regNorm.registroOriginal.questoes && regNorm.registroOriginal.questoes.acertos ? regNorm.registroOriginal.questoes.acertos : 0;
+                    let erros = regNorm.registroOriginal.questoes && regNorm.registroOriginal.questoes.erros ? regNorm.registroOriginal.questoes.erros : 0;
                     let totalQ = acertos + erros; 
                     let perf = totalQ > 0 ? (acertos / totalQ) : 0; 
                     let diasParaPular = 2; 
@@ -1172,11 +1227,11 @@
                     else if (perf < 1.00) diasParaPular = 15; 
                     else if (perf === 1.00) diasParaPular = 30;
                     
-                    let baseDateStr = reg.dataRevisaoManual || reg.data || window.formatarDataLocalParaISO(new Date());
+                    let baseDateStr = regNorm.registroOriginal.dataRevisaoManual || regNorm.registroOriginal.data || window.formatarDataLocalParaISO(new Date());
                     let pData = baseDateStr.split('-'); 
                     if (pData.length === 3) {
                         let dataIdeal = new Date(pData[0], pData[1] - 1, pData[2]); 
-                        if (!reg.dataRevisaoManual) {
+                        if (!regNorm.registroOriginal.dataRevisaoManual) {
                             dataIdeal.setDate(dataIdeal.getDate() + diasParaPular);
                         }
                         
@@ -1184,12 +1239,12 @@
                         if (dataIdeal.getDay() === 0) dataIdeal.setDate(dataIdeal.getDate() + 1); 
                         
                         revisoesPendentes.push({ 
-                            registroOriginal: reg, 
+                            registroOriginal: regNorm.registroOriginal, 
                             perf: perf, 
                             dataIdealOriginal: new Date(dataIdeal), 
                             dataIdeal: dataIdeal, 
-                            disciplina: reg.disciplina, 
-                            topico: reg.topico 
+                            disciplina: regNorm.disciplina, 
+                            topico: regNorm.topico 
                         });
                     }
                 }
@@ -1400,7 +1455,11 @@
 
                             if (Array.isArray(registrosDeEstudo)) {
                                 registrosDeEstudo.forEach(reg => {
-                                    if (reg.disciplina === disc.nome && reg.topico === nomeTopico) {
+                                    // Utiliza os tradutores de nomes em vez da string bruta
+                                    let regDiscNorm = window.normalizarDisciplina(reg.disciplina);
+                                    let regTopNorm = window.normalizarTopico(reg.topico);
+                                    
+                                    if (regDiscNorm === disc.nome && regTopNorm === nomeTopico) {
                                         if (reg.tempo) tempoTotal += (Number(reg.tempo.horas) * 60) + Number(reg.tempo.minutos);
                                         acertos += Number(reg.questoes?.acertos || 0);
                                         erros += Number(reg.questoes?.erros || 0);
@@ -1545,7 +1604,9 @@
                 if (d) {
                     detailContainer.classList.remove('hidden'); let acertosTotais = 0; let errosTotais = 0; let totalMinutosEstudados = 0;
                     registrosDeEstudo.forEach(reg => { 
-                        if (reg.disciplina === d.nome) { 
+                        // Normaliza os nomes para refletir a mesma string do Edital
+                        let regDiscNorm = window.normalizarDisciplina(reg.disciplina);
+                        if (regDiscNorm === d.nome) { 
                             acertosTotais += reg.questoes && reg.questoes.acertos ? reg.questoes.acertos : 0; 
                             errosTotais += reg.questoes && reg.questoes.erros ? reg.questoes.erros : 0; 
                             if (reg.tempo) totalMinutosEstudados += (reg.tempo.horas || 0) * 60 + (reg.tempo.minutos || 0); 
@@ -1972,8 +2033,8 @@
             const registro = registrosDeEstudo.find(r => r.idDoc === idReference || r.timestamp == idReference); if (!registro) return;
             window.abrirModalEstudo(); document.getElementById('modal-estudo-titulo').innerText = "Editar Registo de Estudo"; document.getElementById('estudo-edit-doc-id').value = idReference;
             document.getElementById('estudo-data').value = registro.data;
-            let d = editalDoUsuario.disciplinas.find(x => x.nome === registro.disciplina);
-            if(d) { document.getElementById('select-disciplina').value = d.id; window.atualizarTopicosEstudo(); document.getElementById('select-topico').value = registro.topico; }
+            let d = editalDoUsuario.disciplinas.find(x => x.nome === window.normalizarDisciplina(registro.disciplina));
+            if(d) { document.getElementById('select-disciplina').value = d.id; window.atualizarTopicosEstudo(); document.getElementById('select-topico').value = window.normalizarTopico(registro.topico); }
             document.getElementById('estudo-horas').value = registro.tempo?.horas || ''; document.getElementById('estudo-minutos').value = registro.tempo?.minutos || ''; document.getElementById('estudo-acertos').value = registro.questoes?.acertos || ''; document.getElementById('estudo-erros').value = registro.questoes?.erros || ''; document.getElementById('estudo-comentario').value = registro.comentario || ''; document.getElementById('estudo-agendar-revisao').checked = registro.agendarRevisao;
             document.querySelectorAll('input[name="estudo-categoria"]').forEach(cb => { cb.checked = (registro.categorias || []).includes(cb.value); }); document.querySelectorAll('input[name="estudo-material"]').forEach(cb => { cb.checked = (registro.materiais || []).includes(cb.value); });
         }
@@ -2084,8 +2145,11 @@
         }
 
         window.abrirModalRedacao = function() { document.getElementById('modal-redacao').classList.remove('hidden'); document.getElementById('redacao-titulo').innerText = "Registar Redação"; document.getElementById('red-edit-id').value = ''; const hoje = new Date().toISOString().split('T')[0]; document.getElementById('red-data').value = hoje; document.getElementById('red-tema').value = ''; document.getElementById('red-concurso').value = ''; document.getElementById('red-banca').value = ''; document.getElementById('red-link').value = ''; document.getElementById('red-tempo').value = ''; document.getElementById('red-pontos').value = ''; document.getElementById('red-consideracoes').value = ''; }
+        
         window.editarRedacao = function(id) { let red = redacoesDoUsuario.find(r => r.id === id); if(!red) return; document.getElementById('modal-redacao').classList.remove('hidden'); document.getElementById('redacao-titulo').innerText = "Editar Redação"; document.getElementById('red-edit-id').value = red.id; document.getElementById('red-data').value = red.data; document.getElementById('red-tema').value = red.tema; document.getElementById('red-concurso').value = red.concurso || ''; document.getElementById('red-banca').value = red.banca || ''; document.getElementById('red-link').value = red.link || ''; document.getElementById('red-tempo').value = red.tempo || ''; document.getElementById('red-pontos').value = red.pontos !== null ? red.pontos : ''; document.getElementById('red-consideracoes').value = red.consideracoes || ''; }
+        
         window.fecharModalRedacao = function() { document.getElementById('modal-redacao').classList.add('hidden'); }
+        
         window.salvarRedacao = function() {
             let editId = document.getElementById('red-edit-id').value; let tema = document.getElementById('red-tema').value; let concurso = document.getElementById('red-concurso').value; let banca = document.getElementById('red-banca').value; let link = document.getElementById('red-link').value; let data = document.getElementById('red-data').value; let tempo = document.getElementById('red-tempo').value; let pontos = document.getElementById('red-pontos').value; let cons = document.getElementById('red-consideracoes').value;
             const tarIdConc = document.getElementById('red-tarefa-id-conclusao').value; const tarCtxConc = document.getElementById('red-tarefa-context-conclusao').value;
@@ -2097,7 +2161,9 @@
             if (tarIdConc && tarCtxConc) window.alternarStatusTarefaPlanejada(tarCtxConc, parseInt(tarIdConc), true);
             window.salvarDadosGeraisNaNuvem(); window.salvarDadosLocais(); window.atualizarTodasAsTelas(); window.fecharModalRedacao();
         }
+        
         window.excluirRedacao = function(id) { window.mostrarConfirmacao("Eliminar esta redação?", () => { redacoesDoUsuario = redacoesDoUsuario.filter(r => r.id !== id); window.salvarDadosGeraisNaNuvem(); window.salvarDadosLocais(); window.atualizarTodasAsTelas(); }); }
+        
         window.renderizarRedacoes = function() {
             const tbody = document.getElementById('lista-redacoes'); if(!tbody) return; tbody.innerHTML = '';
             if(redacoesDoUsuario.length === 0) { tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding: 2rem; color:var(--text-muted);">Nenhuma redação registada.</td></tr>`; return; }
@@ -2124,8 +2190,10 @@
                 await signInWithEmailAndPassword(auth, email, senha);
                 window.mostrarAlerta("Login efetuado! A sincronizar dados com a nuvem...");
                 window.fecharModalLogin();
+                // Força o carregamento de dados imediatamente após o login
+                window.carregarDadosDaNuvem(); 
             } catch (error) {
-                window.mostrarAlerta("Acesso negado. Credenciais inválidas ou conta inexistente. Apenas o administrador pode criar novas contas.");
+                window.mostrarAlerta("Acesso negado. Credenciais inválidas ou conta inexistente.");
             }
         }
 
@@ -2137,9 +2205,6 @@
             } catch(e) { console.error("Erro no logout", e); }
         }
 
-        // =========================================================================
-        // === PUXAR DADOS DO FIREBASE (NOVO) ===
-        // =========================================================================
         let unsubDadosGerais = null;
         let unsubRegistros = null;
 
@@ -2209,7 +2274,6 @@
                             window.mostrarAlerta("Histórico de estudos importado e salvo na nuvem com sucesso!");
                             fileInput.value = ''; // Limpar input
                             
-                            // Os dados aparecerão na tela automaticamente graças à função carregarDadosDaNuvem (onSnapshot)
                         } catch (err) {
                             console.error("Erro ao importar histórico:", err);
                             window.mostrarAlerta("Falha ao salvar o histórico na base de dados.");
@@ -2272,8 +2336,8 @@
                 currentUser = user;
                 if (user && !user.isAnonymous) {
                     if (ADMIN_EMAILS.includes(user.email)) {
-                        const adminBtn = document.getElementById('btn-nav-admin');
-                        if (adminBtn) adminBtn.classList.remove('hidden');
+                        const adminPanel = document.getElementById('config-admin-panel');
+                        if (adminPanel) adminPanel.classList.remove('hidden');
                     }
                     // Fecha a modal de login se o login for válido
                     window.fecharModalLogin();
@@ -2281,8 +2345,8 @@
                     // Puxa os dados da nuvem
                     window.carregarDadosDaNuvem(); 
                 } else {
-                    const adminBtn = document.getElementById('btn-nav-admin');
-                    if (adminBtn) adminBtn.classList.add('hidden');
+                    const adminPanel = document.getElementById('config-admin-panel');
+                    if (adminPanel) adminPanel.classList.add('hidden');
                     // Exige login obrigatório
                     window.abrirModalLogin();
                 }
