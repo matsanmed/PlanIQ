@@ -595,13 +595,23 @@
                 </div>
                 <p id="relatorio-semanal-data" style="text-align: center; font-weight: 700; color: var(--text-main); margin-bottom: 1.5rem; font-size: 1.1rem;"></p>
                 
-                <h3 style="font-size: 1.1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 5px; margin-bottom: 10px; color: var(--primary-color);">1. Resumo de Estudos (Geral)</h3>
+                <h3 style="font-size: 1.1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 5px; margin-bottom: 10px; color: var(--primary-color);">1. Resumo por Disciplina</h3>
                 <div style="overflow-x: auto; max-height: 250px; overflow-y: auto; margin-bottom: 1.5rem; border: 1px solid var(--border-color); border-radius: 6px;">
                     <table style="width: 100%; border-collapse: collapse;">
                         <thead style="position: sticky; top: 0; background: var(--hover-bg); z-index: 10;">
-                            <tr><th style="padding: 10px;">Matéria</th><th style="padding: 10px;">Assunto</th><th style="text-align:center; padding: 10px;">Tempo</th><th style="text-align:center; padding: 10px;">Acertos/Erros</th><th style="text-align:center; padding: 10px;">Desempenho</th></tr>
+                            <tr><th style="padding: 10px;">Disciplina</th><th style="text-align:center; padding: 10px;">Tempo</th><th style="text-align:center; padding: 10px;">Acertos/Erros</th><th style="text-align:center; padding: 10px;">Desempenho</th></tr>
                         </thead>
-                        <tbody id="relatorio-semanal-tabela"></tbody>
+                        <tbody id="relatorio-tabela-disciplinas"></tbody>
+                    </table>
+                </div>
+
+                <h3 style="font-size: 1.1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 5px; margin-bottom: 10px; color: var(--primary-color);">2. Detalhe por Assunto</h3>
+                <div style="overflow-x: auto; max-height: 250px; overflow-y: auto; margin-bottom: 1.5rem; border: 1px solid var(--border-color); border-radius: 6px;">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead style="position: sticky; top: 0; background: var(--hover-bg); z-index: 10;">
+                            <tr><th style="padding: 10px;">Disciplina</th><th style="padding: 10px;">Assunto</th><th style="text-align:center; padding: 10px;">Tipo</th><th style="text-align:center; padding: 10px;">Tempo</th><th style="text-align:center; padding: 10px;">Acertos/Erros</th><th style="text-align:center; padding: 10px;">Desempenho</th></tr>
+                        </thead>
+                        <tbody id="relatorio-tabela-assuntos"></tbody>
                     </table>
                 </div>
 
