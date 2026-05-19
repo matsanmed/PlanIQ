@@ -490,6 +490,7 @@
         <div id="view-desempenho" class="hidden">
             <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
                 <div><h1 style="margin-bottom: 0;">Desempenho</h1><p style="color: var(--text-muted); margin-top: 5px;">Acompanhe as suas métricas, precisão e horas por disciplina e assunto.</p></div>
+                <button class="btn-primary" style="width: auto; padding: 0.6rem 1.2rem; background-color: var(--primary-color);" onclick="window.abrirModalRelatorioSemanal()"><i class="fa-solid fa-chart-pie"></i> Relatório Semanal</button>
             </header>
             <div id="lista-desempenho-disciplinas"></div>
         </div>
@@ -583,6 +584,37 @@
                 <input type="email" id="login-email" class="form-control" placeholder="E-mail" style="margin-bottom: 15px;">
                 <input type="password" id="login-senha" class="form-control" placeholder="Senha" style="margin-bottom: 25px;">
                 <button class="btn-primary" onclick="window.fazerLogin()"><i class="fa-solid fa-right-to-bracket"></i> Entrar na Plataforma</button>
+            </div>
+        </div>
+
+        <div id="modal-relatorio-semanal" class="modal-overlay hidden" style="z-index: 2000;">
+            <div class="modal-content" style="max-width: 800px;">
+                <div class="modal-header">
+                    <h2><i class="fa-solid fa-chart-pie" style="color: var(--primary-color);"></i> Relatório Semanal</h2>
+                    <button class="btn-close" onclick="window.fecharModalRelatorioSemanal()"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <p id="relatorio-semanal-data" style="text-align: center; font-weight: 700; color: var(--text-main); margin-bottom: 1.5rem; font-size: 1.1rem;"></p>
+                
+                <h3 style="font-size: 1.1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 5px; margin-bottom: 10px; color: var(--primary-color);">1. Resumo de Estudos (Geral)</h3>
+                <div style="overflow-x: auto; max-height: 250px; overflow-y: auto; margin-bottom: 1.5rem; border: 1px solid var(--border-color); border-radius: 6px;">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead style="position: sticky; top: 0; background: var(--hover-bg); z-index: 10;">
+                            <tr><th style="padding: 10px;">Matéria</th><th style="padding: 10px;">Assunto</th><th style="text-align:center; padding: 10px;">Tempo</th><th style="text-align:center; padding: 10px;">Acertos/Erros</th><th style="text-align:center; padding: 10px;">Desempenho</th></tr>
+                        </thead>
+                        <tbody id="relatorio-semanal-tabela"></tbody>
+                    </table>
+                </div>
+
+                <div class="grid-2-cols" style="margin-bottom: 1.5rem;">
+                    <div style="background: var(--bg-color); padding: 15px; border-radius: 6px; border: 1px solid var(--border-color);">
+                        <h3 style="font-size: 1rem; color: var(--warning-color); margin-bottom: 10px;"><i class="fa-regular fa-calendar-check"></i> Assuntos Vistos (Cronograma)</h3>
+                        <div id="relatorio-semanal-cronograma-lista" style="font-size: 0.85rem; color: var(--text-muted); max-height: 200px; overflow-y: auto; padding-right: 5px;"></div>
+                    </div>
+                    <div style="background: var(--bg-color); padding: 15px; border-radius: 6px; border: 1px solid var(--border-color);">
+                        <h3 style="font-size: 1rem; color: var(--success-color); margin-bottom: 10px;"><i class="fa-solid fa-bolt"></i> Revisões Realizadas</h3>
+                        <div id="relatorio-semanal-revisoes-lista" style="font-size: 0.85rem; color: var(--text-muted); max-height: 200px; overflow-y: auto; padding-right: 5px;"></div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -1505,6 +1537,341 @@
                 const container = document.getElementById('lista-desempenho-disciplinas');
                 if(container) container.innerHTML = `<p style="color:var(--danger-color); padding: 1rem;">Ocorreu um erro ao carregar o desempenho. Verifique a consola para mais detalhes.</p>`;
             }
+        };
+
+        window.fecharModalRelatorioSemanal = function() {
+            document.getElementById('modal-relatorio-semanal').classList.add('hidden');
+        };
+
+        // Função utilitária para obter os limites da semana atual
+        window.obterDatasSemanaAtual = function() {
+            let today = new Date();
+            let dayOfWeek = today.getDay(); 
+            let diffToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+            
+            let monday = new Date(today);
+            monday.setDate(today.getDate() + diffToMonday);
+            monday.setHours(0,0,0,0);
+            
+            let sunday = new Date(monday);
+            sunday.setDate(monday.getDate() + 6);
+            sunday.setHours(23,59,59,999);
+
+            return { monday, sunday };
+        };
+
+        window.abrirModalRelatorioSemanal = function() {
+            let { monday, sunday } = window.obterDatasSemanaAtual();
+
+            let strMon = `${String(monday.getDate()).padStart(2,'0')}/${String(monday.getMonth()+1).padStart(2,'0')}/${monday.getFullYear()}`;
+            let strSun = `${String(sunday.getDate()).padStart(2,'0')}/${String(sunday.getMonth()+1).padStart(2,'0')}/${sunday.getFullYear()}`;
+            
+            document.getElementById('relatorio-semanal-data').innerText = `Período: ${strMon} a ${strSun}`;
+
+            let isoMon = window.formatarDataLocalParaISO(monday);
+            let isoSun = window.formatarDataLocalParaISO(sunday);
+            let recordsSemana = registrosDeEstudo.filter(r => r.data >= isoMon && r.data <= isoSun);
+
+            let aggDisciplina = {};
+            let aggAssunto = {};
+            let revisoesRealizadas = [];
+
+            recordsSemana.forEach(r => {
+                let isRev = r.categorias && r.categorias.includes("Revisão");
+                let tipoLabel = isRev ? "Revisão" : "Estudo";
+                
+                if (isRev) revisoesRealizadas.push(r);
+
+                let mins = (r.tempo?.horas || 0) * 60 + (r.tempo?.minutos || 0);
+                let a = r.questoes?.acertos || 0;
+                let e = r.questoes?.erros || 0;
+
+                // Agregação por Disciplina
+                if(!aggDisciplina[r.disciplina]) aggDisciplina[r.disciplina] = { d: r.disciplina, mins: 0, a: 0, e: 0 };
+                aggDisciplina[r.disciplina].mins += mins;
+                aggDisciplina[r.disciplina].a += a;
+                aggDisciplina[r.disciplina].e += e;
+
+                // Agregação por Assunto e Tipo (Estudo vs Revisão)
+                let keyAssunto = r.disciplina + "|||" + r.topico + "|||" + tipoLabel;
+                if(!aggAssunto[keyAssunto]) aggAssunto[keyAssunto] = { d: r.disciplina, t: r.topico, tipo: tipoLabel, mins: 0, a: 0, e: 0 };
+                aggAssunto[keyAssunto].mins += mins;
+                aggAssunto[keyAssunto].a += a;
+                aggAssunto[keyAssunto].e += e;
+            });
+
+            // 1. Tabela de Disciplinas
+            let tbodyDisc = document.getElementById('relatorio-tabela-disciplinas');
+            tbodyDisc.innerHTML = '';
+            let listDisc = Object.values(aggDisciplina).sort((a,b) => b.mins - a.mins);
+            
+            if(listDisc.length === 0) {
+                tbodyDisc.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 1.5rem; color:var(--text-muted);">Nenhum estudo registado nesta semana.</td></tr>';
+            } else {
+                listDisc.forEach(item => {
+                    let h = Math.floor(item.mins / 60); let m = item.mins % 60;
+                    let timeStr = `${h > 0 ? h+'h ' : ''}${m}m`.trim() || '-';
+                    let totalQ = item.a + item.e;
+                    let perc = totalQ > 0 ? Math.round((item.a / totalQ)*100) : 0;
+                    let pColor = perc >= 80 ? 'var(--success-color)' : perc >= 60 ? 'var(--warning-color)' : 'var(--danger-color)';
+                    
+                    tbodyDisc.innerHTML += `<tr>
+                        <td style="font-weight: 600; color: var(--text-main); padding: 10px; border-bottom: 1px solid var(--border-color);">${item.d}</td>
+                        <td style="text-align:center; padding: 10px; border-bottom: 1px solid var(--border-color);"><i class="fa-regular fa-clock" style="font-size:0.8rem; color:var(--text-muted);"></i> ${timeStr}</td>
+                        <td style="text-align:center; padding: 10px; border-bottom: 1px solid var(--border-color);"><span style="color:var(--success-color); font-weight:bold;">${item.a}</span> / <span style="color:var(--danger-color); font-weight:bold;">${item.e}</span></td>
+                        <td style="text-align:center; padding: 10px; border-bottom: 1px solid var(--border-color);"><span style="color:${pColor}; font-weight:bold;">${perc}%</span></td>
+                    </tr>`;
+                });
+            }
+
+            // 2. Tabela Detalhada por Assunto
+            let tbodyAssunto = document.getElementById('relatorio-tabela-assuntos');
+            tbodyAssunto.innerHTML = '';
+            let listAssunto = Object.values(aggAssunto).sort((a,b) => {
+                if (a.d !== b.d) return a.d.localeCompare(b.d);
+                return b.mins - a.mins;
+            });
+            
+            if(listAssunto.length === 0) {
+                tbodyAssunto.innerHTML = '<tr><td colspan="6" style="text-align:center; padding: 1.5rem; color:var(--text-muted);">Nenhum assunto registado nesta semana.</td></tr>';
+            } else {
+                listAssunto.forEach(item => {
+                    let h = Math.floor(item.mins / 60); let m = item.mins % 60;
+                    let timeStr = `${h > 0 ? h+'h ' : ''}${m}m`.trim() || '-';
+                    let totalQ = item.a + item.e;
+                    let perc = totalQ > 0 ? Math.round((item.a / totalQ)*100) : 0;
+                    let pColor = perc >= 80 ? 'var(--success-color)' : perc >= 60 ? 'var(--warning-color)' : 'var(--danger-color)';
+                    let badgeTipo = item.tipo === 'Revisão' ? `<span class="badge" style="background:var(--icon-green-bg); color:var(--success-color);">Revisão</span>` : `<span class="badge" style="background:var(--icon-blue-bg); color:var(--primary-color);">Estudo</span>`;
+                    
+                    tbodyAssunto.innerHTML += `<tr>
+                        <td style="font-weight: 600; color: var(--text-main); padding: 10px; border-bottom: 1px solid var(--border-color);">${item.d}</td>
+                        <td style="color: var(--text-muted); padding: 10px; font-size: 0.85rem; border-bottom: 1px solid var(--border-color);">${item.t}</td>
+                        <td style="text-align:center; padding: 10px; border-bottom: 1px solid var(--border-color);">${badgeTipo}</td>
+                        <td style="text-align:center; padding: 10px; border-bottom: 1px solid var(--border-color);">${timeStr}</td>
+                        <td style="text-align:center; padding: 10px; border-bottom: 1px solid var(--border-color);"><span style="color:var(--success-color); font-weight:bold;">${item.a}</span> / <span style="color:var(--danger-color); font-weight:bold;">${item.e}</span></td>
+                        <td style="text-align:center; padding: 10px; border-bottom: 1px solid var(--border-color);"><span style="background:${pColor}; color:white; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; font-weight:bold;">${perc}%</span></td>
+                    </tr>`;
+                });
+            }
+
+            // 3. Cronograma Concluído
+            let cronogramaListaEl = document.getElementById('relatorio-semanal-cronograma-lista');
+            cronogramaListaEl.innerHTML = '';
+            let itensCronoConcluidos = [];
+            planejamentoDoUsuario.cronograma.forEach(dia => {
+                dia.itens.forEach(item => { if(item.concluido) itensCronoConcluidos.push({ dia: dia.dia, ...item }); });
+            });
+
+            if (itensCronoConcluidos.length === 0) {
+                cronogramaListaEl.innerHTML = '<p style="color:var(--text-muted); text-align:center; margin-top: 1rem;">Nenhuma atividade do cronograma foi concluída.</p>';
+            } else {
+                let ulCrono = '<ul style="list-style:none; padding:0; margin:0;">';
+                itensCronoConcluidos.forEach(it => {
+                    let mainTitle = it.tipo === 'estudo' ? it.disciplina : (it.tipo === 'redacao' ? it.concurso : it.cargo); 
+                    let subTitle = it.tipo === 'estudo' ? it.topico : (it.tipo === 'redacao' ? it.tema : 'Simulado / Prova');
+                    let icon = it.tipo === 'redacao' ? 'fa-pen-nib' : (it.tipo === 'simulado' ? 'fa-list-check' : 'fa-book');
+                    ulCrono += `<li style="padding: 8px 0; border-bottom: 1px dashed var(--border-color);">
+                        <div style="font-weight: 600; color: var(--text-main); font-size: 0.9rem;"><i class="fa-solid ${icon}" style="color:var(--warning-color); width: 15px;"></i> ${mainTitle} <span style="font-size:0.7rem; color:var(--text-muted); float:right;">(${it.dia})</span></div>
+                        <div style="font-size: 0.8rem; color: var(--text-muted); margin-left: 20px;">${subTitle}</div>
+                    </li>`;
+                });
+                ulCrono += '</ul>';
+                cronogramaListaEl.innerHTML = ulCrono;
+            }
+
+            // 4. Revisões Realizadas
+            let revisoesListaEl = document.getElementById('relatorio-semanal-revisoes-lista');
+            revisoesListaEl.innerHTML = '';
+            if (revisoesRealizadas.length === 0) {
+                revisoesListaEl.innerHTML = '<p style="color:var(--text-muted); text-align:center; margin-top: 1rem;">Nenhuma revisão registada nesta semana.</p>';
+            } else {
+                let ulRev = '<ul style="list-style:none; padding:0; margin:0;">';
+                revisoesRealizadas.forEach(rev => {
+                    let a = rev.questoes?.acertos || 0; let e = rev.questoes?.erros || 0; let totalQ = a + e;
+                    let perc = totalQ > 0 ? Math.round((a / totalQ)*100) : 0;
+                    let pColor = perc >= 80 ? 'var(--success-color)' : perc >= 60 ? 'var(--warning-color)' : 'var(--danger-color)';
+                    let parts = rev.data.split('-'); let df = `${parts[2]}/${parts[1]}/${parts[0]}`;
+                    
+                    ulRev += `<li style="padding: 8px 0; border-bottom: 1px dashed var(--border-color);">
+                        <div style="font-weight: 600; color: var(--text-main); font-size: 0.9rem;"><i class="fa-solid fa-bolt" style="color:var(--success-color); width: 15px;"></i> ${rev.disciplina} <span style="font-size:0.7rem; color:var(--text-muted); float:right;">(${df})</span></div>
+                        <div style="font-size: 0.8rem; color: var(--text-muted); margin-left: 20px; margin-bottom: 4px;">${rev.topico}</div>
+                        <div style="margin-left: 20px; font-size: 0.75rem;">
+                            <span style="color:var(--success-color); font-weight:bold;">${a} acertos</span> | <span style="color:var(--danger-color); font-weight:bold;">${e} erros</span> 
+                            <span style="float:right; font-weight:bold; color:${pColor};">${perc}%</span>
+                        </div>
+                    </li>`;
+                });
+                ulRev += '</ul>';
+                revisoesListaEl.innerHTML = ulRev;
+            }
+
+            document.getElementById('modal-relatorio-semanal').classList.remove('hidden');
+        };
+
+        // Função para Gerar o Documento A4 e Imprimir/Salvar em PDF
+        window.imprimirRelatorioSemanal = function() {
+            let { monday, sunday } = window.obterDatasSemanaAtual();
+            let strMon = `${String(monday.getDate()).padStart(2,'0')}/${String(monday.getMonth()+1).padStart(2,'0')}/${monday.getFullYear()}`;
+            let strSun = `${String(sunday.getDate()).padStart(2,'0')}/${String(sunday.getMonth()+1).padStart(2,'0')}/${sunday.getFullYear()}`;
+            
+            let isoMon = window.formatarDataLocalParaISO(monday);
+            let isoSun = window.formatarDataLocalParaISO(sunday);
+            let recordsSemana = registrosDeEstudo.filter(r => r.data >= isoMon && r.data <= isoSun);
+
+            let aggDisciplina = {}; let aggAssunto = {}; let revisoesRealizadas = [];
+            recordsSemana.forEach(r => {
+                let isRev = r.categorias && r.categorias.includes("Revisão");
+                let tipoLabel = isRev ? "Revisão" : "Estudo";
+                if (isRev) revisoesRealizadas.push(r);
+
+                let mins = (r.tempo?.horas || 0) * 60 + (r.tempo?.minutos || 0);
+                let a = r.questoes?.acertos || 0; let e = r.questoes?.erros || 0;
+
+                if(!aggDisciplina[r.disciplina]) aggDisciplina[r.disciplina] = { d: r.disciplina, mins: 0, a: 0, e: 0 };
+                aggDisciplina[r.disciplina].mins += mins; aggDisciplina[r.disciplina].a += a; aggDisciplina[r.disciplina].e += e;
+
+                let keyAssunto = r.disciplina + "|||" + r.topico + "|||" + tipoLabel;
+                if(!aggAssunto[keyAssunto]) aggAssunto[keyAssunto] = { d: r.disciplina, t: r.topico, tipo: tipoLabel, mins: 0, a: 0, e: 0 };
+                aggAssunto[keyAssunto].mins += mins; aggAssunto[keyAssunto].a += a; aggAssunto[keyAssunto].e += e;
+            });
+
+            // Gerar HTML de impressão (Clean, fundo branco, otimizado para A4)
+            let printHtml = `
+            <!DOCTYPE html>
+            <html lang="pt-PT">
+            <head>
+                <meta charset="UTF-8">
+                <title>Relatório Semanal PlanIQ (${strMon} - ${strSun})</title>
+                <style>
+                    @page { size: A4; margin: 20mm; }
+                    body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #111; line-height: 1.5; font-size: 14px; background: #fff; }
+                    h1 { text-align: center; color: #2563eb; font-size: 24px; margin-bottom: 5px; }
+                    .subtitle { text-align: center; color: #555; font-size: 14px; margin-bottom: 30px; font-weight: bold; }
+                    h2 { border-bottom: 2px solid #e5e7eb; padding-bottom: 5px; margin-top: 30px; font-size: 18px; color: #1e293b; }
+                    table { width: 100%; border-collapse: collapse; margin-top: 10px; margin-bottom: 20px; font-size: 13px; }
+                    th, td { border: 1px solid #d1d5db; padding: 8px 10px; text-align: left; }
+                    th { background-color: #f8fafc; font-weight: bold; color: #333; }
+                    .text-center { text-align: center; }
+                    .success { color: #16a34a; font-weight: bold; }
+                    .danger { color: #dc2626; font-weight: bold; }
+                    .badge-estudo { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 11px; background: #e0e7ff; color: #4f46e5; border: 1px solid #c7d2fe; }
+                    .badge-revisao { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 11px; background: #dcfce7; color: #16a34a; border: 1px solid #bbf7d0; }
+                    ul.print-list { list-style-type: none; padding-left: 0; margin-top: 10px; }
+                    ul.print-list li { padding: 8px 0; border-bottom: 1px dashed #e5e7eb; page-break-inside: avoid; }
+                    .item-title { font-weight: bold; font-size: 14px; }
+                    .item-subtitle { color: #555; font-size: 13px; margin-left: 10px; }
+                    .item-meta { font-size: 12px; margin-left: 10px; margin-top: 3px; }
+                </style>
+            </head>
+            <body>
+                <h1>Relatório de Desempenho - PlanIQ</h1>
+                <div class="subtitle">Período: ${strMon} a ${strSun}</div>
+
+                <h2>1. Resumo Geral (Por Disciplina)</h2>
+                <table>
+                    <thead><tr><th>Matéria</th><th class="text-center">Tempo</th><th class="text-center">Acertos / Erros</th><th class="text-center">Desempenho</th></tr></thead>
+                    <tbody>`;
+            
+            let listDisc = Object.values(aggDisciplina).sort((a,b) => b.mins - a.mins);
+            if(listDisc.length === 0) {
+                printHtml += `<tr><td colspan="4" class="text-center" style="color: #666; padding: 20px;">Nenhum estudo registado nesta semana.</td></tr>`;
+            } else {
+                listDisc.forEach(item => {
+                    let h = Math.floor(item.mins / 60); let m = item.mins % 60;
+                    let timeStr = `${h > 0 ? h+'h ' : ''}${m}m`.trim() || '-';
+                    let totalQ = item.a + item.e;
+                    let perc = totalQ > 0 ? Math.round((item.a / totalQ)*100) : 0;
+                    printHtml += `<tr>
+                        <td><strong>${item.d}</strong></td>
+                        <td class="text-center">${timeStr}</td>
+                        <td class="text-center"><span class="success">${item.a}</span> / <span class="danger">${item.e}</span></td>
+                        <td class="text-center"><strong>${perc}%</strong></td>
+                    </tr>`;
+                });
+            }
+            printHtml += `</tbody></table>`;
+
+            printHtml += `<h2>2. Resumo Detalhado (Por Assunto)</h2>
+                <table>
+                    <thead><tr><th>Matéria</th><th>Assunto</th><th class="text-center">Tipo</th><th class="text-center">Tempo</th><th class="text-center">A / E</th><th class="text-center">%</th></tr></thead>
+                    <tbody>`;
+            
+            let listAssunto = Object.values(aggAssunto).sort((a,b) => {
+                if (a.d !== b.d) return a.d.localeCompare(b.d);
+                return b.mins - a.mins;
+            });
+            if(listAssunto.length === 0) {
+                printHtml += `<tr><td colspan="6" class="text-center" style="color: #666; padding: 20px;">Nenhum assunto registado nesta semana.</td></tr>`;
+            } else {
+                listAssunto.forEach(item => {
+                    let h = Math.floor(item.mins / 60); let m = item.mins % 60; let timeStr = `${h > 0 ? h+'h ' : ''}${m}m`.trim() || '-';
+                    let totalQ = item.a + item.e; let perc = totalQ > 0 ? Math.round((item.a / totalQ)*100) : 0;
+                    let badgeClass = item.tipo === 'Revisão' ? 'badge-revisao' : 'badge-estudo';
+                    printHtml += `<tr>
+                        <td><strong>${item.d}</strong></td>
+                        <td style="color:#444;">${item.t}</td>
+                        <td class="text-center"><span class="${badgeClass}">${item.tipo}</span></td>
+                        <td class="text-center">${timeStr}</td>
+                        <td class="text-center"><span class="success">${item.a}</span> / <span class="danger">${item.e}</span></td>
+                        <td class="text-center"><strong>${perc}%</strong></td>
+                    </tr>`;
+                });
+            }
+            printHtml += `</tbody></table>`;
+
+            // Cronograma
+            printHtml += `<h2>3. Assuntos Vistos no Cronograma</h2>`;
+            let itensCronoConcluidos = [];
+            planejamentoDoUsuario.cronograma.forEach(dia => { dia.itens.forEach(item => { if(item.concluido) itensCronoConcluidos.push({ dia: dia.dia, ...item }); }); });
+            if (itensCronoConcluidos.length === 0) {
+                printHtml += `<p style="color: #666; margin-top:10px;">Nenhuma atividade concluída no cronograma.</p>`;
+            } else {
+                printHtml += `<ul class="print-list">`;
+                itensCronoConcluidos.forEach(it => {
+                    let mainTitle = it.tipo === 'estudo' ? it.disciplina : (it.tipo === 'redacao' ? it.concurso : it.cargo); 
+                    let subTitle = it.tipo === 'estudo' ? it.topico : (it.tipo === 'redacao' ? it.tema : 'Simulado / Prova');
+                    printHtml += `<li>
+                        <div class="item-title">${mainTitle} <span style="font-weight:normal; font-size:12px; color:#666; float:right;">Dia: ${it.dia}</span></div>
+                        <div class="item-subtitle">${subTitle}</div>
+                    </li>`;
+                });
+                printHtml += `</ul>`;
+            }
+
+            // Revisões
+            printHtml += `<h2>4. Revisões Realizadas</h2>`;
+            if (revisoesRealizadas.length === 0) {
+                printHtml += `<p style="color: #666; margin-top:10px;">Nenhuma revisão registada nesta semana.</p>`;
+            } else {
+                printHtml += `<ul class="print-list">`;
+                revisoesRealizadas.forEach(rev => {
+                    let a = rev.questoes?.acertos || 0; let e = rev.questoes?.erros || 0; let totalQ = a + e;
+                    let perc = totalQ > 0 ? Math.round((a / totalQ)*100) : 0;
+                    let parts = rev.data.split('-'); let df = `${parts[2]}/${parts[1]}/${parts[0]}`;
+                    printHtml += `<li>
+                        <div class="item-title">${rev.disciplina} <span style="font-weight:normal; font-size:12px; color:#666; float:right;">Data: ${df}</span></div>
+                        <div class="item-subtitle">${rev.topico}</div>
+                        <div class="item-meta">
+                            <span class="success">${a} Acertos</span> | <span class="danger">${e} Erros</span> 
+                            <strong style="margin-left: 15px;">Desempenho: ${perc}%</strong>
+                        </div>
+                    </li>`;
+                });
+                printHtml += `</ul>`;
+            }
+
+            printHtml += `
+                <div style="margin-top: 50px; border-top: 1px solid #ccc; padding-top: 10px; text-align: center; font-size: 11px; color: #888;">
+                    Gerado automaticamente pelo sistema PlanIQ.
+                </div>
+                <script>
+                    window.onload = function() { window.print(); window.close(); };
+                <\/script>
+            </body></html>`;
+
+            let printWindow = window.open('', '_blank', 'width=800,height=900');
+            printWindow.document.write(printHtml);
+            printWindow.document.close();
         };
 
         // =====================================
