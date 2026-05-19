@@ -591,7 +591,10 @@
             <div class="modal-content" style="max-width: 800px;">
                 <div class="modal-header">
                     <h2><i class="fa-solid fa-chart-pie" style="color: var(--primary-color);"></i> Relatório Semanal</h2>
-                    <button class="btn-close" onclick="window.fecharModalRelatorioSemanal()"><i class="fa-solid fa-xmark"></i></button>
+                    <div style="display:flex; gap: 8px; align-items: center;">
+                        <button class="btn-primary" style="width:auto; padding: 0.45rem 1rem; font-size:0.9rem;" onclick="window.imprimirRelatorioSemanal()"><i class="fa-solid fa-print"></i> Imprimir / PDF</button>
+                        <button class="btn-close" onclick="window.fecharModalRelatorioSemanal()"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
                 </div>
                 <p id="relatorio-semanal-data" style="text-align: center; font-weight: 700; color: var(--text-main); margin-bottom: 1.5rem; font-size: 1.1rem;"></p>
                 
@@ -1664,12 +1667,15 @@
                 });
             }
 
-            // 3. Cronograma Concluído
+            // 3. Cronograma Concluído — apenas itens NÃO marcados como revisão
             let cronogramaListaEl = document.getElementById('relatorio-semanal-cronograma-lista');
             cronogramaListaEl.innerHTML = '';
+            // Itens concluídos do cronograma que NÃO são revisão (revisão tem categoria "Revisão" nos registos de estudo)
             let itensCronoConcluidos = [];
             planejamentoDoUsuario.cronograma.forEach(dia => {
-                dia.itens.forEach(item => { if(item.concluido) itensCronoConcluidos.push({ dia: dia.dia, ...item }); });
+                dia.itens.forEach(item => {
+                    if (item.concluido) itensCronoConcluidos.push({ dia: dia.dia, ...item });
+                });
             });
 
             if (itensCronoConcluidos.length === 0) {
@@ -1680,16 +1686,43 @@
                     let mainTitle = it.tipo === 'estudo' ? it.disciplina : (it.tipo === 'redacao' ? it.concurso : it.cargo); 
                     let subTitle = it.tipo === 'estudo' ? it.topico : (it.tipo === 'redacao' ? it.tema : 'Simulado / Prova');
                     let icon = it.tipo === 'redacao' ? 'fa-pen-nib' : (it.tipo === 'simulado' ? 'fa-list-check' : 'fa-book');
+
+                    // Buscar registro de estudo correspondente (por disciplina + topico, NÃO revisão)
+                    let regMatch = null;
+                    if (it.tipo === 'estudo') {
+                        regMatch = recordsSemana.find(r =>
+                            r.disciplina === it.disciplina &&
+                            r.topico === it.topico &&
+                            !(r.categorias && r.categorias.includes("Revisão"))
+                        );
+                    }
+
+                    let metaHtml = '';
+                    if (regMatch) {
+                        let hh = regMatch.tempo?.horas || 0; let mm = regMatch.tempo?.minutos || 0;
+                        let timeStr = hh > 0 ? `${hh}h ${mm}m` : `${mm}m`;
+                        let a = regMatch.questoes?.acertos || 0; let e = regMatch.questoes?.erros || 0;
+                        let totalQ = a + e;
+                        let perc = totalQ > 0 ? Math.round((a / totalQ) * 100) : null;
+                        let pColor = perc !== null ? (perc >= 80 ? 'var(--success-color)' : perc >= 60 ? 'var(--warning-color)' : 'var(--danger-color)') : 'var(--text-muted)';
+                        metaHtml = `<div style="margin-left: 20px; font-size: 0.75rem; margin-top: 3px; display:flex; align-items:center; gap:8px;">
+                            <span style="color:var(--text-muted);"><i class="fa-regular fa-clock"></i> ${timeStr}</span>
+                            ${totalQ > 0 ? `<span style="color:var(--success-color); font-weight:bold;">${a} acertos</span> <span style="color:var(--text-muted);">|</span> <span style="color:var(--danger-color); font-weight:bold;">${e} erros</span>` : ''}
+                            ${perc !== null ? `<span style="margin-left:auto; font-weight:bold; color:${pColor};">${perc}%</span>` : ''}
+                        </div>`;
+                    }
+
                     ulCrono += `<li style="padding: 8px 0; border-bottom: 1px dashed var(--border-color);">
                         <div style="font-weight: 600; color: var(--text-main); font-size: 0.9rem;"><i class="fa-solid ${icon}" style="color:var(--warning-color); width: 15px;"></i> ${mainTitle} <span style="font-size:0.7rem; color:var(--text-muted); float:right;">(${it.dia})</span></div>
                         <div style="font-size: 0.8rem; color: var(--text-muted); margin-left: 20px;">${subTitle}</div>
+                        ${metaHtml}
                     </li>`;
                 });
                 ulCrono += '</ul>';
                 cronogramaListaEl.innerHTML = ulCrono;
             }
 
-            // 4. Revisões Realizadas
+            // 4. Revisões Realizadas — apenas registros com categoria "Revisão" (registros de estudo, não cronograma)
             let revisoesListaEl = document.getElementById('relatorio-semanal-revisoes-lista');
             revisoesListaEl.innerHTML = '';
             if (revisoesRealizadas.length === 0) {
@@ -1698,16 +1731,19 @@
                 let ulRev = '<ul style="list-style:none; padding:0; margin:0;">';
                 revisoesRealizadas.forEach(rev => {
                     let a = rev.questoes?.acertos || 0; let e = rev.questoes?.erros || 0; let totalQ = a + e;
-                    let perc = totalQ > 0 ? Math.round((a / totalQ)*100) : 0;
-                    let pColor = perc >= 80 ? 'var(--success-color)' : perc >= 60 ? 'var(--warning-color)' : 'var(--danger-color)';
+                    let perc = totalQ > 0 ? Math.round((a / totalQ)*100) : null;
+                    let pColor = perc !== null ? (perc >= 80 ? 'var(--success-color)' : perc >= 60 ? 'var(--warning-color)' : 'var(--danger-color)') : 'var(--text-muted)';
                     let parts = rev.data.split('-'); let df = `${parts[2]}/${parts[1]}/${parts[0]}`;
+                    let hh = rev.tempo?.horas || 0; let mm = rev.tempo?.minutos || 0;
+                    let timeStr = hh > 0 ? `${hh}h ${mm}m` : `${mm}m`;
                     
                     ulRev += `<li style="padding: 8px 0; border-bottom: 1px dashed var(--border-color);">
                         <div style="font-weight: 600; color: var(--text-main); font-size: 0.9rem;"><i class="fa-solid fa-bolt" style="color:var(--success-color); width: 15px;"></i> ${rev.disciplina} <span style="font-size:0.7rem; color:var(--text-muted); float:right;">(${df})</span></div>
-                        <div style="font-size: 0.8rem; color: var(--text-muted); margin-left: 20px; margin-bottom: 4px;">${rev.topico}</div>
-                        <div style="margin-left: 20px; font-size: 0.75rem;">
-                            <span style="color:var(--success-color); font-weight:bold;">${a} acertos</span> | <span style="color:var(--danger-color); font-weight:bold;">${e} erros</span> 
-                            <span style="float:right; font-weight:bold; color:${pColor};">${perc}%</span>
+                        <div style="font-size: 0.8rem; color: var(--text-muted); margin-left: 20px; margin-bottom: 3px;">${rev.topico}</div>
+                        <div style="margin-left: 20px; font-size: 0.75rem; display:flex; align-items:center; gap:8px;">
+                            <span style="color:var(--text-muted);"><i class="fa-regular fa-clock"></i> ${timeStr}</span>
+                            ${totalQ > 0 ? `<span style="color:var(--success-color); font-weight:bold;">${a} acertos</span> <span style="color:var(--text-muted);">|</span> <span style="color:var(--danger-color); font-weight:bold;">${e} erros</span>` : ''}
+                            ${perc !== null ? `<span style="margin-left:auto; font-weight:bold; color:${pColor};">${perc}%</span>` : ''}
                         </div>
                     </li>`;
                 });
@@ -1840,9 +1876,27 @@
                 itensCronoConcluidos.forEach(it => {
                     let mainTitle = it.tipo === 'estudo' ? it.disciplina : (it.tipo === 'redacao' ? it.concurso : it.cargo); 
                     let subTitle = it.tipo === 'estudo' ? it.topico : (it.tipo === 'redacao' ? it.tema : 'Simulado / Prova');
+                    let regMatch = null;
+                    if (it.tipo === 'estudo') {
+                        regMatch = recordsSemana.find(r =>
+                            r.disciplina === it.disciplina &&
+                            r.topico === it.topico &&
+                            !(r.categorias && r.categorias.includes("Revisão"))
+                        );
+                    }
+                    let metaHtml = '';
+                    if (regMatch) {
+                        let hh = regMatch.tempo?.horas || 0; let mm = regMatch.tempo?.minutos || 0;
+                        let timeStr = hh > 0 ? `${hh}h ${mm}m` : `${mm}m`;
+                        let a = regMatch.questoes?.acertos || 0; let e = regMatch.questoes?.erros || 0;
+                        let totalQ = a + e;
+                        let perc = totalQ > 0 ? Math.round((a / totalQ) * 100) : null;
+                        metaHtml = `<div class="item-meta">Tempo: ${timeStr}${totalQ > 0 ? ` &nbsp;|&nbsp; <span class="success">${a} acertos</span> / <span class="danger">${e} erros</span>` : ''}${perc !== null ? ` &nbsp;|&nbsp; <strong>${perc}%</strong>` : ''}</div>`;
+                    }
                     printHtml += `<li>
                         <div class="item-title">${mainTitle} <span style="font-weight:normal; font-size:12px; color:#666; float:right;">Dia: ${it.dia}</span></div>
                         <div class="item-subtitle">${subTitle}</div>
+                        ${metaHtml}
                     </li>`;
                 });
                 printHtml += `</ul>`;
@@ -1856,15 +1910,14 @@
                 printHtml += `<ul class="print-list">`;
                 revisoesRealizadas.forEach(rev => {
                     let a = rev.questoes?.acertos || 0; let e = rev.questoes?.erros || 0; let totalQ = a + e;
-                    let perc = totalQ > 0 ? Math.round((a / totalQ)*100) : 0;
+                    let perc = totalQ > 0 ? Math.round((a / totalQ)*100) : null;
                     let parts = rev.data.split('-'); let df = `${parts[2]}/${parts[1]}/${parts[0]}`;
+                    let hh = rev.tempo?.horas || 0; let mm = rev.tempo?.minutos || 0;
+                    let timeStr = hh > 0 ? `${hh}h ${mm}m` : `${mm}m`;
                     printHtml += `<li>
                         <div class="item-title">${rev.disciplina} <span style="font-weight:normal; font-size:12px; color:#666; float:right;">Data: ${df}</span></div>
                         <div class="item-subtitle">${rev.topico}</div>
-                        <div class="item-meta">
-                            <span class="success">${a} Acertos</span> | <span class="danger">${e} Erros</span> 
-                            <strong style="margin-left: 15px;">Desempenho: ${perc}%</strong>
-                        </div>
+                        <div class="item-meta">Tempo: ${timeStr}${totalQ > 0 ? ` &nbsp;|&nbsp; <span class="success">${a} Acertos</span> / <span class="danger">${e} Erros</span>` : ''}${perc !== null ? ` &nbsp;|&nbsp; <strong>Desempenho: ${perc}%</strong>` : ''}</div>
                     </li>`;
                 });
                 printHtml += `</ul>`;
