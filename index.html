@@ -1018,6 +1018,11 @@
             if(hMatch) mins += parseInt(hMatch[1]) * 60; if(mMatch) mins += parseInt(mMatch[1]);
             return mins;
         }
+        window.normalizarDisciplina = function(nome) { 
+            if (!nome) return ''; 
+            return nome.trim(); 
+        }
+
         window.calcularProgressoDisciplina = function(disciplinaObj) { 
             if (!disciplinaObj.topicos || disciplinaObj.topicos.length === 0) return 0; 
             let topicosValidos = disciplinaObj.topicos.filter(t => {
@@ -1991,7 +1996,7 @@
                     registrosDeEstudo.forEach(reg => { 
                         // Normaliza os nomes para refletir a mesma string do Edital
                         let regDiscNorm = window.normalizarDisciplina(reg.disciplina);
-                        if (regDiscNorm === d.nome) { 
+                        if (regDiscNorm === window.normalizarDisciplina(d.nome)) { 
                             acertosTotais += reg.questoes && reg.questoes.acertos ? reg.questoes.acertos : 0; 
                             errosTotais += reg.questoes && reg.questoes.erros ? reg.questoes.erros : 0; 
                             if (reg.tempo) totalMinutosEstudados += (reg.tempo.horas || 0) * 60 + (reg.tempo.minutos || 0); 
