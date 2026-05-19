@@ -552,21 +552,12 @@
             </div>
 
             <div id="config-admin-panel" class="hidden">
-                <div class="panel" style="border: 2px solid var(--warning-color);">
-                    <h2 class="panel-title" style="color: var(--warning-color); border-bottom-color: var(--warning-color);"><i class="fa-solid fa-crown"></i> Painel de Administração (Acesso Restrito)</h2>
-                    <div class="dashboard-grid grid-2-cols" style="margin-top: 15px;">
-                        <div style="background: var(--bg-color); padding: 15px; border-radius: 6px; border: 1px solid var(--border-color);">
-                            <h3 style="font-size: 1rem; margin-bottom: 10px; color: var(--text-main);"><i class="fa-solid fa-file-import"></i> Importar Histórico de Estudos (JSON)</h3>
-                            <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:15px;">Faça upload de um ficheiro JSON contendo o histórico de estudos para adicionar à sua conta atual.</p>
-                            <input type="file" id="file-historico" accept=".json" class="form-control" style="margin-bottom:15px; background: var(--hover-bg);">
-                            <button class="btn-primary" onclick="window.importarHistoricoJson()"><i class="fa-solid fa-upload"></i> Enviar Histórico</button>
-                        </div>
-                        <div style="background: var(--bg-color); padding: 15px; border-radius: 6px; border: 1px solid var(--border-color);">
-                            <h3 style="font-size: 1rem; margin-bottom: 10px; color: var(--text-main);"><i class="fa-solid fa-file-import"></i> Importar Edital Base Pública (JSON)</h3>
-                            <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:15px;">Faça upload de um edital no formato JSON para disponibilizar na base de dados global e pública para todos os utilizadores.</p>
-                            <input type="file" id="file-edital" accept=".json" class="form-control" style="margin-bottom:15px; background: var(--hover-bg);">
-                            <button class="btn-primary" onclick="window.importarEditalJson()"><i class="fa-solid fa-upload"></i> Enviar Edital Público</button>
-                        </div>
+                <div class="panel" style="border: 1px solid var(--border-color);">
+                    <h2 class="panel-title"><i class="fa-solid fa-database"></i> Atualização do Edital Base</h2>
+                    <div style="background: var(--bg-color); padding: 15px; border-radius: 6px; border: 1px solid var(--border-color);">
+                        <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:15px;">Faça upload de um edital no formato JSON para disponibilizar na base de dados global e pública para todos os utilizadores.</p>
+                        <input type="file" id="file-edital" accept=".json" class="form-control" style="margin-bottom:15px; background: var(--hover-bg);">
+                        <button class="btn-primary" onclick="window.importarEditalJson()"><i class="fa-solid fa-upload"></i> Enviar Edital Público</button>
                     </div>
                 </div>
             </div>
@@ -824,32 +815,6 @@
         };
 
         // =====================================
-        // NORMALIZADORES (TRADUTORES JSON -> EDITAL)
-        // =====================================
-        window.normalizarDisciplina = function(d) {
-            if(!d) return "";
-            let n = d.trim();
-            if(n === "Português") return "Língua Portuguesa";
-            if(n === "Raciocínio Lógico e Matemático") return "Raciocínio Lógico";
-            if(n === "Discursiva") return "Língua Portuguesa"; // Agrupa redações em PT se desejado
-            return n;
-        };
-
-        window.normalizarTopico = function(t) {
-            if(!t) return "";
-            let n = t.trim();
-            if(n === "Verbo") return "Verbos";
-            if(n === "Sintaxe - Período simples") return "Sintaxe Período simples";
-            if(n === "Sintaxe - Período composto") return "Sintaxe Período composto";
-            if(n.includes("Termos essenciais") || n.includes("Termos integrantes") || n.includes("Termos Acessórios") || n.includes("Voz passiva e ativa")) return "Sintaxe Período simples";
-            if(n.includes("Estruturas Lógicas") && n.includes("Argumentação")) return "Estruturas Lógicas e Proposições";
-            if(n.includes("Redes de Computadores")) return "Redes de Computadores";
-            if(n.includes("Frações, Porcentagem") || n.includes("Regra de três")) return "Problemas Aritméticos e Algébricos";
-            if(n.includes("Argumentativa") || n.includes("Expositiva") || n === "Treino Argumentativa") return "Redação oficial";
-            return n;
-        };
-
-        // =====================================
         // TEMA MODO CLARO / ESCURO
         // =====================================
         window.toggleTheme = function() { 
@@ -1067,12 +1032,11 @@
                     if (isM) { mes.min += min; mes.q += q; }
                 }
                 
-                let regDiscNorm = window.normalizarDisciplina(reg.disciplina);
-                if (porDisciplina[regDiscNorm]) { 
-                    porDisciplina[regDiscNorm].min += min; 
-                    porDisciplina[regDiscNorm].a += a; 
-                    porDisciplina[regDiscNorm].e += e; 
-                    porDisciplina[regDiscNorm].q += q; 
+                if (porDisciplina[reg.disciplina]) { 
+                    porDisciplina[reg.disciplina].min += min; 
+                    porDisciplina[reg.disciplina].a += a; 
+                    porDisciplina[reg.disciplina].e += e; 
+                    porDisciplina[reg.disciplina].q += q; 
                 }
             });
 
@@ -1201,14 +1165,9 @@
         window.calcularAgendaRevisoes = function() {
             let ultimosEstudos = {};
             registrosDeEstudo.forEach(reg => { 
-                let regDiscNorm = window.normalizarDisciplina(reg.disciplina);
-                let regTopNorm = window.normalizarTopico(reg.topico);
-                let chave = regDiscNorm + "|||" + regTopNorm; 
+                let chave = reg.disciplina + "|||" + reg.topico; 
                 
-                // Usamos o registro original, mas com nomes traduzidos
-                let regNormalizado = { ...reg, disciplina: regDiscNorm, topico: regTopNorm, registroOriginal: reg };
-                
-                if (!ultimosEstudos[chave]) ultimosEstudos[chave] = regNormalizado; 
+                if (!ultimosEstudos[chave]) ultimosEstudos[chave] = { ...reg, registroOriginal: reg }; 
             });
             
             let revisoesPendentes = [];
@@ -1455,11 +1414,7 @@
 
                             if (Array.isArray(registrosDeEstudo)) {
                                 registrosDeEstudo.forEach(reg => {
-                                    // Utiliza os tradutores de nomes em vez da string bruta
-                                    let regDiscNorm = window.normalizarDisciplina(reg.disciplina);
-                                    let regTopNorm = window.normalizarTopico(reg.topico);
-                                    
-                                    if (regDiscNorm === disc.nome && regTopNorm === nomeTopico) {
+                                    if (reg.disciplina === disc.nome && reg.topico === nomeTopico) {
                                         if (reg.tempo) tempoTotal += (Number(reg.tempo.horas) * 60) + Number(reg.tempo.minutos);
                                         acertos += Number(reg.questoes?.acertos || 0);
                                         erros += Number(reg.questoes?.erros || 0);
@@ -2033,8 +1988,8 @@
             const registro = registrosDeEstudo.find(r => r.idDoc === idReference || r.timestamp == idReference); if (!registro) return;
             window.abrirModalEstudo(); document.getElementById('modal-estudo-titulo').innerText = "Editar Registo de Estudo"; document.getElementById('estudo-edit-doc-id').value = idReference;
             document.getElementById('estudo-data').value = registro.data;
-            let d = editalDoUsuario.disciplinas.find(x => x.nome === window.normalizarDisciplina(registro.disciplina));
-            if(d) { document.getElementById('select-disciplina').value = d.id; window.atualizarTopicosEstudo(); document.getElementById('select-topico').value = window.normalizarTopico(registro.topico); }
+            let d = editalDoUsuario.disciplinas.find(x => x.nome === registro.disciplina);
+            if(d) { document.getElementById('select-disciplina').value = d.id; window.atualizarTopicosEstudo(); document.getElementById('select-topico').value = registro.topico; }
             document.getElementById('estudo-horas').value = registro.tempo?.horas || ''; document.getElementById('estudo-minutos').value = registro.tempo?.minutos || ''; document.getElementById('estudo-acertos').value = registro.questoes?.acertos || ''; document.getElementById('estudo-erros').value = registro.questoes?.erros || ''; document.getElementById('estudo-comentario').value = registro.comentario || ''; document.getElementById('estudo-agendar-revisao').checked = registro.agendarRevisao;
             document.querySelectorAll('input[name="estudo-categoria"]').forEach(cb => { cb.checked = (registro.categorias || []).includes(cb.value); }); document.querySelectorAll('input[name="estudo-material"]').forEach(cb => { cb.checked = (registro.materiais || []).includes(cb.value); });
         }
@@ -2243,49 +2198,6 @@
                 registrosDeEstudo.sort((a, b) => b.timestamp - a.timestamp);
                 window.atualizarTodasAsTelas();
             }, (error) => console.error("Erro ao puxar registos de estudo do Firebase:", error));
-        };
-
-        window.importarHistoricoJson = function() {
-            const fileInput = document.getElementById('file-historico');
-            if(!fileInput.files.length) return window.mostrarAlerta("Selecione um ficheiro JSON.");
-            const file = fileInput.files[0];
-            const reader = new FileReader();
-            
-            reader.onload = async function(e) {
-                try {
-                    const dados = JSON.parse(e.target.result);
-                    if(!Array.isArray(dados)) return window.mostrarAlerta("O JSON deve ser uma lista (array) de registos.");
-                    
-                    window.mostrarConfirmacao(`Tem a certeza que deseja importar ${dados.length} registos de estudo para a sua conta?`, async () => {
-                        if (!db || !currentUser || currentUser.isAnonymous) {
-                            return window.mostrarAlerta("Erro: Precisa estar autenticado para enviar para a nuvem.");
-                        }
-                        
-                        try {
-                            const { addDoc, collection } = await import("https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js");
-                            const colRef = collection(db, 'artifacts', appId, 'users', currentUser.uid, 'registros_estudos');
-                            
-                            // Adicionar cada registo do JSON diretamente na coleção privada do Firestore
-                            for(let reg of dados) {
-                                if (!reg.timestamp) reg.timestamp = Date.now() + Math.floor(Math.random() * 1000);
-                                await addDoc(colRef, reg);
-                            }
-                            
-                            window.mostrarAlerta("Histórico de estudos importado e salvo na nuvem com sucesso!");
-                            fileInput.value = ''; // Limpar input
-                            
-                        } catch (err) {
-                            console.error("Erro ao importar histórico:", err);
-                            window.mostrarAlerta("Falha ao salvar o histórico na base de dados.");
-                        }
-                    });
-                } catch (error) {
-                    console.error("Erro na leitura do JSON:", error);
-                    window.mostrarAlerta("Erro ao ler o ficheiro. Certifique-se que é um JSON válido.");
-                }
-            };
-            
-            reader.readAsText(file);
         };
 
         window.importarEditalJson = function() {
