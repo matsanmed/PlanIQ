@@ -100,7 +100,7 @@
         .btn-primary:hover { filter: brightness(1.1); }
         .btn-icon { background: var(--hover-bg); border: 1px solid var(--border-color); border-radius: 4px; padding: 0.4rem 0.8rem; cursor: pointer; color: var(--text-main); transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; }
         .btn-icon:hover { filter: brightness(1.2); }
-        .btn-danger-outline { background: var(--icon-red-bg); color: var(--danger-color); border: 1px solid var(--danger-color); border-radius: 4px; padding: 0.4rem 0.8rem; cursor: pointer; }
+        .btn-danger-outline { background: var(--icon-red-bg); color: var(--danger-color); border: 1px solid var(--danger-color); border-radius: 4px; padding: 0.4rem 0.8rem; cursor: pointer; font-weight: 500; }
         .btn-danger-outline:hover { filter: brightness(1.2); }
         .btn-success-outline { background: var(--icon-green-bg); color: var(--success-color); border: 1px solid var(--success-color); border-radius: 4px; padding: 0.4rem 0.8rem; cursor: pointer; }
         .btn-success-outline:hover { filter: brightness(1.2); }
@@ -109,9 +109,9 @@
         .progress-bar-fill { height: 100%; background: var(--primary-color); border-radius: 4px; transition: width 0.4s ease; }
 
         .dash-cards-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 1.5rem; align-items: stretch; }
-        .dash-top-card { background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 10px; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); display: flex; flex-direction: column; justify-content: space-between; gap: 10px; }
-        .dash-card-title { font-size: 0.9rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
-        .dash-card-big-number { font-size: 2.2rem; font-weight: 800; color: var(--text-main); margin-bottom: 10px; }
+        .dash-top-card { background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 10px; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); display: flex; flex-direction: column; justify-content: flex-start; height: 100%; }
+        .dash-card-title { font-size: 0.9rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+        .dash-card-big-number { font-size: 2.2rem; font-weight: 800; color: var(--text-main); margin-bottom: 5px; }
         .dash-card-substats { display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-muted); margin-top: 10px; font-weight: 500; }
         .dashboard-main-grid { display: grid; grid-template-columns: 2.5fr 1fr; gap: 1.5rem; margin-top: 1rem; }
 
@@ -321,30 +321,44 @@
                 <button class="btn-primary" style="width: auto; padding: 0.6rem 1.2rem;" onclick="window.abrirModalEstudo()"><i class="fa-solid fa-plus"></i> Adicionar Estudo</button>
             </header>
             <div class="panel" style="padding: 1rem; text-align: center; margin-bottom: 1.5rem; font-style: italic; color: var(--text-muted); font-size: 1.05rem;">"A disciplina é a ponte entre metas e realizações."</div>
+            
             <section class="dash-cards-grid">
                 <div class="dash-top-card">
-                    <div class="dash-card-title"><i class="fa-regular fa-clock" style="color: var(--primary-color); font-size: 1.2rem;"></i> Horas Totais</div>
-                    <div class="dash-card-big-number" id="dash-horas-totais">0h 0m</div>
-                </div>
-                <div class="dash-top-card">
-                    <div class="dash-card-title"><i class="fa-solid fa-chart-line" style="color: var(--success-color); font-size: 1.2rem;"></i> Desempenho</div>
-                    <div class="dash-card-big-number" id="dash-perc-geral">0%</div>
-                    <div class="progress-bar-container" style="height: 6px; margin: 0; background: var(--bg-color);"><div class="progress-bar-fill" id="dash-bar-geral" style="width: 0%; background: var(--success-color);"></div></div>
-                    <div class="dash-card-substats">
-                        <span title="Total de Questões"><i class="fa-solid fa-list-ol"></i> <span id="dash-q-total">0</span></span>
-                        <span title="Acertos" style="color: var(--success-color);"><i class="fa-solid fa-check"></i> <span id="dash-q-acertos">0</span></span>
-                        <span title="Erros" style="color: var(--danger-color);"><i class="fa-solid fa-xmark"></i> <span id="dash-q-erros">0</span></span>
+                    <div>
+                        <div class="dash-card-title"><i class="fa-regular fa-clock" style="color: var(--primary-color); font-size: 1.2rem;"></i> Horas Totais</div>
+                        <div class="dash-card-big-number" id="dash-horas-totais">0h 0m</div>
                     </div>
                 </div>
+                
                 <div class="dash-top-card">
-                    <div class="dash-card-title"><i class="fa-solid fa-book-open" style="color: var(--warning-color); font-size: 1.2rem;"></i> Progresso do Edital</div>
-                    <div style="display: flex; justify-content: space-between; align-items: baseline;">
-                        <div class="dash-card-big-number" id="dash-perc-edital">0%</div>
-                        <div style="font-size: 1rem; color: var(--text-muted); font-weight: 600;" id="dash-frac-edital">0/0</div>
+                    <div>
+                        <div class="dash-card-title"><i class="fa-solid fa-chart-line" style="color: var(--success-color); font-size: 1.2rem;"></i> Desempenho</div>
+                        <div class="dash-card-big-number" id="dash-perc-geral">0%</div>
                     </div>
-                    <div class="progress-bar-container" style="height: 6px; margin: 0; background: var(--bg-color);"><div class="progress-bar-fill" id="dash-bar-edital" style="width: 0%; background: var(--warning-color);"></div></div>
+                    <div style="margin-top: auto;">
+                        <div class="progress-bar-container" style="height: 6px; margin: 0; background: var(--bg-color);"><div class="progress-bar-fill" id="dash-bar-geral" style="width: 0%; background: var(--success-color);"></div></div>
+                        <div class="dash-card-substats">
+                            <span title="Total de Questões"><i class="fa-solid fa-list-ol"></i> <span id="dash-q-total">0</span></span>
+                            <span title="Acertos" style="color: var(--success-color);"><i class="fa-solid fa-check"></i> <span id="dash-q-acertos">0</span></span>
+                            <span title="Erros" style="color: var(--danger-color);"><i class="fa-solid fa-xmark"></i> <span id="dash-q-erros">0</span></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="dash-top-card">
+                    <div>
+                        <div class="dash-card-title"><i class="fa-solid fa-book-open" style="color: var(--warning-color); font-size: 1.2rem;"></i> Progresso do Edital</div>
+                        <div style="display: flex; justify-content: space-between; align-items: baseline;">
+                            <div class="dash-card-big-number" id="dash-perc-edital">0%</div>
+                            <div style="font-size: 1rem; color: var(--text-muted); font-weight: 600;" id="dash-frac-edital">0/0</div>
+                        </div>
+                    </div>
+                    <div style="margin-top: auto;">
+                        <div class="progress-bar-container" style="height: 6px; margin: 0; background: var(--bg-color);"><div class="progress-bar-fill" id="dash-bar-edital" style="width: 0%; background: var(--warning-color);"></div></div>
+                    </div>
                 </div>
             </section>
+            
             <section class="dashboard-main-grid">
                 <div class="col-left">
                     <div class="panel" style="margin-bottom: 1.5rem;">
@@ -370,13 +384,13 @@
                         <div id="dash-metas-container"></div>
                     </div>
                 </div>
-                <div class="col-right">
-                    <div class="panel" style="margin-bottom: 1.5rem; text-align: center;">
+                <div class="col-right" style="display: flex; flex-direction: column; gap: 1.5rem;">
+                    <div class="panel" style="text-align: center;">
                         <h3 style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">Resumo de Hoje</h3>
                         <p style="font-weight: 800; font-size: 1.5rem; margin: 10px 0; color: var(--text-main);"><i class="fa-regular fa-clock" style="color:var(--primary-color);"></i> <span id="dash-hoje-h">0h 0m</span></p>
                         <p style="font-size: 0.9rem; color: var(--text-muted); font-weight: 500;"><i class="fa-solid fa-check-double" style="color:var(--success-color);"></i> <span id="dash-hoje-q">0</span> questões resolvidas</p>
                     </div>
-                    <div class="panel" style="margin-bottom: 1.5rem; text-align: center;">
+                    <div class="panel" style="text-align: center;">
                         <h3 style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; display:flex; justify-content:space-between; align-items:center;">
                             <span>Esta Semana</span>
                             <div style="display:flex; gap:5px; font-size:0.7rem;">
@@ -394,12 +408,12 @@
                             <span>D</span><span>S</span><span>T</span><span>Q</span><span>Q</span><span>S</span><span>S</span>
                         </div>
                     </div>
-                    <div class="panel" style="margin-bottom: 1.5rem; text-align: center;">
+                    <div class="panel" style="text-align: center;">
                         <h3 style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">Este Mês</h3>
                         <p style="font-weight: 800; font-size: 1.5rem; margin: 10px 0; color: var(--text-main);"><i class="fa-regular fa-clock" style="color:var(--primary-color);"></i> <span id="dash-mes-h">0h 0m</span></p>
                         <p style="font-size: 0.9rem; color: var(--text-muted); font-weight: 500;"><i class="fa-solid fa-check-double" style="color:var(--success-color);"></i> <span id="dash-mes-q">0</span> questions resolvidas</p>
                     </div>
-                    <div class="panel" style="margin-bottom: 1.5rem; border: 2px solid var(--primary-color);" id="painel-proxima-atividade">
+                    <div class="panel" style="border: 2px solid var(--primary-color);" id="painel-proxima-atividade">
                         <h2 class="panel-title">Próxima Atividade</h2>
                         <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 10px;">A calcular sugestões...</p>
                     </div>
@@ -441,6 +455,7 @@
             </div>
             <div id="view-c-semanal">
                 <div style="margin-bottom: 1.5rem; display: flex; justify-content: flex-end; gap: 10px; flex-wrap: wrap;">
+                    <button class="btn-primary btn-icon" style="width:auto; padding: 0.6rem 1.2rem; border-radius:6px; font-weight:600;" onclick="window.imprimirCronogramaSemanal()"><i class="fa-solid fa-print"></i> Imprimir</button>
                     <button class="btn-danger-outline btn-icon" onclick="window.limparCronograma()"><i class="fa-solid fa-trash-can"></i> Limpar Semana</button>
                     <button class="btn-danger-outline btn-icon" onclick="window.reiniciarCronograma()"><i class="fa-solid fa-rotate-left"></i> Reiniciar Semana</button>
                 </div>
@@ -688,7 +703,7 @@
                 <div class="form-group"><label>Categoria</label><div class="checkbox-group"><label class="checkbox-item"><input type="checkbox" name="estudo-categoria" value="Teoria"> Teoria</label><label class="checkbox-item"><input type="checkbox" name="estudo-categoria" value="Questão"> Questão</label><label class="checkbox-item"><input type="checkbox" name="estudo-categoria" value="Revisão"> Revisão</label><label class="checkbox-item"><input type="checkbox" name="estudo-categoria" value="Leitura de Lei"> Leitura de Lei</label></div></div>
                 <div class="form-group"><label>Material Utilizado</label><div class="checkbox-group"><label class="checkbox-item"><input type="checkbox" name="estudo-material" value="Vídeo Aula"> Vídeo Aula</label><label class="checkbox-item"><input type="checkbox" name="estudo-material" value="PDF"> PDF</label><label class="checkbox-item"><input type="checkbox" name="estudo-material" value="Site de questões"> Site de questões</label><label class="checkbox-item"><input type="checkbox" name="estudo-material" value="Resumo"> Resumo</label><label class="checkbox-item"><input type="checkbox" name="estudo-material" value="Lei Seca"> Lei Seca</label></div></div>
                 <div class="form-group grid-2-cols"><div><label style="color: var(--success-color);">Questões Acertadas</label><input type="number" id="estudo-acertos" class="form-control" min="0"></div><div><label style="color: var(--danger-color);">Questões Erradas</label><input type="number" id="estudo-erros" class="form-control" min="0"></div></div>
-                <div class="form-group"><label>Comentário</label><textarea id="estudo-comentario" class="form-control" rows="3"></textarea></div>
+                <div class="form-group"><label>Comentário / Descrição Rápida</label><textarea id="estudo-comentario" class="form-control" rows="3" placeholder="Insira o seu comentário ou descrição da atividade..."></textarea></div>
                 <button class="btn-success" onclick="window.salvarEstudo()"><i class="fa-solid fa-save"></i> Registar e Concluir</button>
             </div>
         </div>
@@ -728,7 +743,7 @@
                 <div class="form-group"><label>Link (URL do espelho ou rascunho)</label><input type="url" id="red-link" class="form-control" placeholder="https://..."></div>
                 <div class="form-group grid-2-cols"><div><label>Data</label><input type="date" id="red-data" class="form-control"></div><div><label>Duração</label><input type="text" id="red-tempo" class="form-control"></div></div>
                 <div class="form-group"><label style="color: var(--primary-color);">Pontuação Obtida</label><input type="number" id="red-pontos" class="form-control" step="0.1"></div>
-                <div class="form-group"><label>Considerações</label><textarea id="red-consideracoes" class="form-control" rows="3"></textarea></div>
+                <div class="form-group"><label>Considerações / Descrição Rápida</label><textarea id="red-consideracoes" class="form-control" rows="3" placeholder="Insira o seu comentário ou descrição da atividade..."></textarea></div>
                 <button class="btn-success" onclick="window.salvarRedacao()"><i class="fa-solid fa-save"></i> Guardar Redação</button>
             </div>
         </div>
@@ -763,7 +778,6 @@
         };
         const appId = 'planiq-producao';
         
-        // Altere este e-mail para o e-mail de Administrador que desejar.
         const ADMIN_EMAILS = ['matsanmed@gmail.com']; 
 
         let app, auth, db;
@@ -1717,11 +1731,15 @@
                             ${perc !== null ? `<span style="margin-left:auto; font-weight:bold; color:${pColor};">${perc}%</span>` : ''}
                         </div>`;
                     }
+                    
+                    let comentarioStr = regMatch && regMatch.comentario ? regMatch.comentario : it.descricao;
+                    let comentarioHtml = comentarioStr ? `<div style="font-size: 0.8rem; color: var(--text-muted); font-style: italic; margin-left: 20px; margin-top: 4px;"><i class="fa-regular fa-comment-dots"></i> ${comentarioStr}</div>` : '';
 
                     ulCrono += `<li style="padding: 8px 0; border-bottom: 1px dashed var(--border-color);">
                         <div style="font-weight: 600; color: var(--text-main); font-size: 0.9rem;"><i class="fa-solid ${icon}" style="color:var(--warning-color); width: 15px;"></i> ${mainTitle} <span style="font-size:0.7rem; color:var(--text-muted); float:right;">(${it.dia})</span></div>
                         <div style="font-size: 0.8rem; color: var(--text-muted); margin-left: 20px;">${subTitle}</div>
                         ${metaHtml}
+                        ${comentarioHtml}
                     </li>`;
                 });
                 ulCrono += '</ul>';
@@ -1743,6 +1761,8 @@
                     let hh = rev.tempo?.horas || 0; let mm = rev.tempo?.minutos || 0;
                     let timeStr = hh > 0 ? `${hh}h ${mm}m` : `${mm}m`;
                     
+                    let comentarioHtml = rev.comentario ? `<div style="font-size: 0.8rem; color: var(--text-muted); font-style: italic; margin-left: 20px; margin-top: 4px;"><i class="fa-regular fa-comment-dots"></i> ${rev.comentario}</div>` : '';
+                    
                     ulRev += `<li style="padding: 8px 0; border-bottom: 1px dashed var(--border-color);">
                         <div style="font-weight: 600; color: var(--text-main); font-size: 0.9rem;"><i class="fa-solid fa-bolt" style="color:var(--success-color); width: 15px;"></i> ${rev.disciplina} <span style="font-size:0.7rem; color:var(--text-muted); float:right;">(${df})</span></div>
                         <div style="font-size: 0.8rem; color: var(--text-muted); margin-left: 20px; margin-bottom: 3px;">${rev.topico}</div>
@@ -1751,6 +1771,7 @@
                             ${totalQ > 0 ? `<span style="color:var(--success-color); font-weight:bold;">${a} acertos</span> <span style="color:var(--text-muted);">|</span> <span style="color:var(--danger-color); font-weight:bold;">${e} erros</span>` : ''}
                             ${perc !== null ? `<span style="margin-left:auto; font-weight:bold; color:${pColor};">${perc}%</span>` : ''}
                         </div>
+                        ${comentarioHtml}
                     </li>`;
                 });
                 ulRev += '</ul>';
@@ -1795,7 +1816,7 @@
                 <meta charset="UTF-8">
                 <title>Relatório Semanal PlanIQ (${strMon} - ${strSun})</title>
                 <style>
-                    @page { size: A4; margin: 20mm; }
+                    @page { size: A4 portrait; margin: 20mm; }
                     body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #111; line-height: 1.5; font-size: 14px; background: #fff; }
                     h1 { text-align: center; color: #2563eb; font-size: 24px; margin-bottom: 5px; }
                     .subtitle { text-align: center; color: #555; font-size: 14px; margin-bottom: 30px; font-weight: bold; }
@@ -1809,10 +1830,11 @@
                     .badge-estudo { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 11px; background: #e0e7ff; color: #4f46e5; border: 1px solid #c7d2fe; }
                     .badge-revisao { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 11px; background: #dcfce7; color: #16a34a; border: 1px solid #bbf7d0; }
                     ul.print-list { list-style-type: none; padding-left: 0; margin-top: 10px; }
-                    ul.print-list li { padding: 8px 0; border-bottom: 1px dashed #e5e7eb; page-break-inside: avoid; }
+                    ul.print-list li { padding: 10px 0; border-bottom: 1px dashed #e5e7eb; page-break-inside: avoid; }
                     .item-title { font-weight: bold; font-size: 14px; }
                     .item-subtitle { color: #555; font-size: 13px; margin-left: 10px; }
                     .item-meta { font-size: 12px; margin-left: 10px; margin-top: 3px; }
+                    .item-desc { font-size: 12px; font-style: italic; color: #777; margin-left: 10px; margin-top: 3px; }
                 </style>
             </head>
             <body>
@@ -1899,10 +1921,13 @@
                         let perc = totalQ > 0 ? Math.round((a / totalQ) * 100) : null;
                         metaHtml = `<div class="item-meta">Tempo: ${timeStr}${totalQ > 0 ? ` &nbsp;|&nbsp; <span class="success">${a} acertos</span> / <span class="danger">${e} erros</span>` : ''}${perc !== null ? ` &nbsp;|&nbsp; <strong>${perc}%</strong>` : ''}</div>`;
                     }
+                    let comentarioStr = regMatch && regMatch.comentario ? regMatch.comentario : it.descricao;
+                    let comentarioHtml = comentarioStr ? `<div class="item-desc">"${comentarioStr}"</div>` : '';
                     printHtml += `<li>
                         <div class="item-title">${mainTitle} <span style="font-weight:normal; font-size:12px; color:#666; float:right;">Dia: ${it.dia}</span></div>
                         <div class="item-subtitle">${subTitle}</div>
                         ${metaHtml}
+                        ${comentarioHtml}
                     </li>`;
                 });
                 printHtml += `</ul>`;
@@ -1920,10 +1945,12 @@
                     let parts = rev.data.split('-'); let df = `${parts[2]}/${parts[1]}/${parts[0]}`;
                     let hh = rev.tempo?.horas || 0; let mm = rev.tempo?.minutos || 0;
                     let timeStr = hh > 0 ? `${hh}h ${mm}m` : `${mm}m`;
+                    let comentarioHtml = rev.comentario ? `<div class="item-desc">"${rev.comentario}"</div>` : '';
                     printHtml += `<li>
                         <div class="item-title">${rev.disciplina} <span style="font-weight:normal; font-size:12px; color:#666; float:right;">Data: ${df}</span></div>
                         <div class="item-subtitle">${rev.topico}</div>
                         <div class="item-meta">Tempo: ${timeStr}${totalQ > 0 ? ` &nbsp;|&nbsp; <span class="success">${a} Acertos</span> / <span class="danger">${e} Erros</span>` : ''}${perc !== null ? ` &nbsp;|&nbsp; <strong>Desempenho: ${perc}%</strong>` : ''}</div>
+                        ${comentarioHtml}
                     </li>`;
                 });
                 printHtml += `</ul>`;
@@ -1942,6 +1969,85 @@
             printWindow.document.write(printHtml);
             printWindow.document.close();
         };
+
+        // Função para Imprimir Cronograma Semanal em PDF (A4 Retrato)
+        window.imprimirCronogramaSemanal = function() {
+            let printHtml = `
+            <!DOCTYPE html>
+            <html lang="pt-PT">
+            <head>
+                <meta charset="UTF-8">
+                <title>Cronograma Semanal - PlanIQ</title>
+                <style>
+                    @page { size: A4 portrait; margin: 15mm; }
+                    body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #111; line-height: 1.5; font-size: 14px; background: #fff; }
+                    h1 { text-align: center; color: #2563eb; font-size: 22px; margin-bottom: 20px; border-bottom: 2px solid #e5e7eb; padding-bottom: 10px; }
+                    .day-block { border: 1px solid #cbd5e1; border-radius: 8px; margin-bottom: 15px; page-break-inside: avoid; overflow: hidden; }
+                    .day-header { background: #f8fafc; padding: 10px 15px; font-weight: bold; border-bottom: 1px solid #cbd5e1; color: #1e293b; font-size: 16px; }
+                    .task-list { list-style: none; padding: 0; margin: 0; }
+                    .task-item { padding: 12px 15px; border-bottom: 1px solid #e2e8f0; display: flex; align-items: flex-start; gap: 10px; }
+                    .task-item:last-child { border-bottom: none; }
+                    .checkbox { width: 16px; height: 16px; border: 2px solid #94a3b8; border-radius: 3px; display: inline-block; margin-top: 2px; flex-shrink: 0; }
+                    .task-content { flex: 1; }
+                    .task-title { font-weight: bold; font-size: 15px; color: #0f172a; margin-bottom: 2px; }
+                    .task-subtitle { font-size: 13px; color: #475569; font-weight: 600; }
+                    .task-desc { font-size: 12px; font-style: italic; color: #64748b; margin-top: 4px; }
+                    .tags { margin-top: 6px; }
+                    .tag { display: inline-block; font-size: 10px; padding: 2px 6px; background: #e2e8f0; color: #475569; border-radius: 4px; margin-right: 4px; font-weight: bold; }
+                    .empty-msg { padding: 15px; text-align: center; color: #94a3b8; font-style: italic; font-size: 13px; }
+                </style>
+            </head>
+            <body>
+                <h1>Meu Cronograma Semanal</h1>
+            `;
+
+            planejamentoDoUsuario.cronograma.forEach(dia => {
+                printHtml += `<div class="day-block">
+                    <div class="day-header" style="border-top: 4px solid ${dia.corBorda};">${dia.dia}</div>`;
+                
+                if (dia.itens.length === 0) {
+                    printHtml += `<div class="empty-msg">Nenhuma atividade planeada.</div>`;
+                } else {
+                    printHtml += `<ul class="task-list">`;
+                    dia.itens.forEach(item => {
+                        let mainTitle = item.tipo === 'estudo' ? item.disciplina : (item.tipo === 'redacao' ? item.concurso : item.cargo); 
+                        let subTitle = item.tipo === 'estudo' ? item.topico : (item.tipo === 'redacao' ? item.tema : 'Simulado / Prova');
+                        
+                        let tagsTodas = [];
+                        if(item.tipo === 'estudo') tagsTodas = [...(item.categorias || []), ...(item.materiais || [])];
+                        else if (item.tipo === 'redacao') tagsTodas = ["Discursiva", item.banca].filter(Boolean);
+                        else if (item.tipo === 'simulado') tagsTodas = ["Simulado", item.origem].filter(Boolean);
+                        
+                        let tagsHTML = tagsTodas.map(t => `<span class="tag">${t}</span>`).join('');
+
+                        printHtml += `<li class="task-item">
+                            <div class="checkbox"></div>
+                            <div class="task-content">
+                                <div class="task-title">${mainTitle}</div>
+                                <div class="task-subtitle">${subTitle}</div>
+                                ${item.descricao ? `<div class="task-desc">"${item.descricao}"</div>` : ''}
+                                ${tagsHTML ? `<div class="tags">${tagsHTML}</div>` : ''}
+                            </div>
+                        </li>`;
+                    });
+                    printHtml += `</ul>`;
+                }
+                printHtml += `</div>`;
+            });
+
+            printHtml += `
+                <div style="margin-top: 30px; border-top: 1px solid #ccc; padding-top: 10px; text-align: center; font-size: 11px; color: #888;">
+                    Impresso via PlanIQ
+                </div>
+                <script>
+                    window.onload = function() { window.print(); window.close(); };
+                <\/script>
+            </body></html>`;
+
+            let printWindow = window.open('', '_blank', 'width=800,height=900');
+            printWindow.document.write(printHtml);
+            printWindow.document.close();
+        }
 
         // =====================================
         // EDITAL COM DRAG AND DROP E IMPORTAÇÃO
@@ -2101,7 +2207,7 @@
                 const snap = await getDocs(colRef);
                 
                 if (snap.empty) {
-                    const seedData = { nome: "Edital Base Padrão", disciplinas: EDITAL_BASE };
+                    const seedData = { nome: "Edital Base Padrão", disciplines: EDITAL_BASE };
                     await addDoc(colRef, seedData);
                     window.abrirModalImportarEdital(); 
                     return;
@@ -2355,10 +2461,14 @@
                 document.getElementById('estudo-tarefa-id-conclusao').value = tarefaId; document.getElementById('estudo-tarefa-context-conclusao').value = contexto;
                 document.querySelectorAll('input[name="estudo-categoria"]').forEach(cb => { cb.checked = (item.categorias || []).includes(cb.value); });
                 document.querySelectorAll('input[name="estudo-material"]').forEach(cb => { cb.checked = (item.materiais || []).includes(cb.value); });
+                // Transfere a Descrição Rápida para o Comentário
+                document.getElementById('estudo-comentario').value = item.descricao || '';
             } else if (item.tipo === 'redacao') {
                 window.abrirModalRedacao();
                 document.getElementById('red-tema').value = item.tema || ''; document.getElementById('red-concurso').value = item.concurso || ''; document.getElementById('red-banca').value = item.banca || ''; document.getElementById('red-link').value = item.link || '';
                 document.getElementById('red-tarefa-id-conclusao').value = tarefaId; document.getElementById('red-tarefa-context-conclusao').value = contexto;
+                // Transfere a Descrição Rápida para as Considerações
+                document.getElementById('red-consideracoes').value = item.descricao || '';
             } else if (item.tipo === 'simulado') {
                 window.abrirModalSimulado();
                 document.getElementById('sim-cargo').value = item.cargo || ''; document.getElementById('sim-origem').value = item.origem || ''; document.getElementById('sim-estilo').value = item.estilo || 'multipla_escolha';
@@ -2673,6 +2783,90 @@
             
             reader.readAsText(file);
         };
+
+        // Metas
+        window.fecharModalMeta = function() { document.getElementById('modal-meta').classList.add('hidden'); }
+        window.abrirModalMeta = function() { 
+            document.getElementById('modal-meta').classList.remove('hidden');
+            document.getElementById('meta-titulo').value = '';
+            document.getElementById('meta-tipo').value = 'horas';
+            document.getElementById('meta-alvo').value = '';
+            const hoje = new Date().toISOString().split('T')[0];
+            document.getElementById('meta-inicio').value = hoje;
+            document.getElementById('meta-fim').value = '';
+            window.atualizarLabelAlvoMeta();
+        }
+        window.atualizarLabelAlvoMeta = function() {
+            const tipo = document.getElementById('meta-tipo').value;
+            document.getElementById('label-meta-alvo').innerText = tipo === 'horas' ? 'Quantidade (em Horas)' : 'Quantidade de Questões';
+        }
+        window.salvarMeta = function() {
+            const titulo = document.getElementById('meta-titulo').value;
+            const tipo = document.getElementById('meta-tipo').value;
+            const alvo = parseInt(document.getElementById('meta-alvo').value);
+            const dtInicio = document.getElementById('meta-inicio').value;
+            const dtFim = document.getElementById('meta-fim').value;
+
+            if(!titulo || isNaN(alvo) || !dtInicio || !dtFim) {
+                window.mostrarAlerta("Preencha todos os campos da meta.");
+                return;
+            }
+            
+            metasDoUsuario.push({ id: Date.now(), titulo, tipo, alvo, dataInicio: dtInicio, dataFim: dtFim });
+            window.salvarDadosGeraisNaNuvem();
+            window.salvarDadosLocais();
+            window.atualizarTodasAsTelas();
+            window.fecharModalMeta();
+        }
+        window.excluirMeta = function(id) {
+            window.mostrarConfirmacao("Deseja eliminar esta meta?", () => {
+                metasDoUsuario = metasDoUsuario.filter(m => m.id !== id);
+                window.salvarDadosGeraisNaNuvem();
+                window.salvarDadosLocais();
+                window.atualizarTodasAsTelas();
+            });
+        }
+        window.renderizarMetas = function() {
+            const container = document.getElementById('lista-metas');
+            if(!container) return;
+            container.innerHTML = '';
+            if(metasDoUsuario.length === 0) {
+                container.innerHTML = '<p style="color:var(--text-muted); text-align:center; padding: 2rem;">Não tens metas definidas.</p>';
+                return;
+            }
+            
+            metasDoUsuario.forEach(meta => {
+                let progressoAtual = 0;
+                registrosDeEstudo.forEach(reg => { 
+                    if (reg.data && reg.data >= meta.dataInicio && reg.data <= meta.dataFim) { 
+                        if (meta.tipo === 'horas' && reg.tempo) progressoAtual += (reg.tempo.horas * 60) + reg.tempo.minutos; 
+                        else if (meta.tipo === 'questoes' && reg.questoes) progressoAtual += (reg.questoes.acertos || 0) + (reg.questoes.erros || 0); 
+                    } 
+                });
+                if (meta.tipo === 'horas') progressoAtual = progressoAtual / 60;
+                let perc = (progressoAtual / meta.alvo) * 100;
+                if(isNaN(perc) || !isFinite(perc)) perc = 0;
+                let percLimpo = Math.min(Math.max(Math.round(perc), 0), 100);
+                
+                let dataI = meta.dataInicio.split('-').reverse().join('/');
+                let dataF = meta.dataFim.split('-').reverse().join('/');
+                let statusPill = percLimpo >= 100 ? `<span class="meta-status-pill" style="background:var(--icon-green-bg); color:var(--success-color);"><i class="fa-solid fa-trophy"></i> Meta Atingida</span>` : `<span class="meta-status-pill" style="background:var(--icon-blue-bg); color:var(--primary-color);"><i class="fa-solid fa-person-running"></i> Em Progresso</span>`;
+                
+                let metaHTML = `
+                <div class="meta-card">
+                    <button class="btn-icon" style="position:absolute; top: 1.5rem; right: 1.5rem; color:var(--danger-color); border-color:transparent;" onclick="window.excluirMeta(${meta.id})"><i class="fa-solid fa-trash"></i></button>
+                    ${statusPill}
+                    <h3>${meta.titulo}</h3>
+                    <p class="meta-date-info"><i class="fa-regular fa-calendar"></i> De ${dataI} até ${dataF}</p>
+                    <p class="meta-msg" style="margin-top:10px;">Progresso: <strong>${Math.round(progressoAtual * 10)/10}</strong> de <strong>${meta.alvo}</strong> ${meta.tipo === 'horas' ? 'horas' : 'questões'}</p>
+                    <div style="display:flex; align-items:center;">
+                        <div class="progress-bar-container" style="flex:1; height:8px;"><div class="progress-bar-fill" style="width:${percLimpo}%;"></div></div>
+                        <div class="meta-perc-text">${percLimpo}%</div>
+                    </div>
+                </div>`;
+                container.innerHTML += metaHTML;
+            });
+        }
 
         // Carregar dados locais inicialmente (fallback offline)
         window.carregarDadosLocais();
