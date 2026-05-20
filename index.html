@@ -109,9 +109,9 @@
         .progress-bar-fill { height: 100%; background: var(--primary-color); border-radius: 4px; transition: width 0.4s ease; }
 
         .dash-cards-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 1.5rem; align-items: stretch; }
-        .dash-top-card { background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 10px; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); display: flex; flex-direction: column; justify-content: flex-start; height: 100%; }
-        .dash-card-title { font-size: 0.9rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
-        .dash-card-big-number { font-size: 2.2rem; font-weight: 800; color: var(--text-main); margin-bottom: 5px; }
+        .dash-top-card { background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 10px; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); display: flex; flex-direction: column; justify-content: space-between; gap: 10px; }
+        .dash-card-title { font-size: 0.9rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
+        .dash-card-big-number { font-size: 2.2rem; font-weight: 800; color: var(--text-main); margin-bottom: 10px; }
         .dash-card-substats { display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-muted); margin-top: 10px; font-weight: 500; }
         .dashboard-main-grid { display: grid; grid-template-columns: 2.5fr 1fr; gap: 1.5rem; margin-top: 1rem; }
 
@@ -172,15 +172,29 @@
         .revisoes-horizontal-scroll::-webkit-scrollbar { height: 8px; }
         .revisoes-horizontal-scroll::-webkit-scrollbar-thumb { background-color: var(--border-color); border-radius: 4px; }
         .revisao-card { min-width: 260px; background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; border-left: 4px solid var(--primary-color); display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
-        .revisao-card.urgente { border-left-color: var(--danger-color); }
-        .revisao-card.alerta { border-left-color: var(--warning-color); }
-        .revisao-card.normal { border-left-color: var(--success-color); }
+        
+        /* Badges e cores específicas do Review Engine */
+        .revisao-card.atrasada { border-left-color: var(--danger-color); }
+        .badge-atrasada { background: var(--icon-red-bg); color: var(--danger-color); }
+        
+        .revisao-card.hoje { border-left-color: var(--warning-color); }
+        .badge-hoje { background: var(--icon-yellow-bg); color: var(--warning-color); }
+        
+        .revisao-card.revisaom { border-left-color: #3b82f6; } /* Azul */
+        .badge-revisaom { background: rgba(59, 130, 246, 0.2); color: #3b82f6; }
+        
+        .revisao-card.performance { border-left-color: var(--success-color); } /* Verde */
+        .badge-performance { background: rgba(34, 197, 94, 0.2); color: var(--success-color); }
+
+        .revisao-card.spaced { border-left-color: #a855f7; } /* Roxo */
+        .badge-spaced { background: rgba(168, 85, 247, 0.2); color: #c084fc; }
+
+        .revisao-card.weekly { border-left-color: #ec4899; } /* Rosa */
+        .badge-weekly { background: rgba(236, 72, 153, 0.2); color: #f472b6; }
+
         .revisao-card-title { font-weight: 700; font-size: 0.95rem; color: var(--text-main); margin-bottom: 0.3rem; }
         .revisao-card-subtitle { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.8rem; display: flex; align-items: center; gap: 5px; }
         .revisao-badge { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 600; margin-bottom: 0.5rem; width: fit-content; }
-        .badge-urgente { background: var(--icon-red-bg); color: var(--danger-color); }
-        .badge-alerta { background: var(--icon-yellow-bg); color: var(--warning-color); }
-        .badge-normal { background: var(--icon-green-bg); color: var(--success-color); }
 
         .calendar-wrapper { background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden; }
         .calendar-header-row { display: grid; grid-template-columns: repeat(7, 1fr); background: var(--hover-bg); text-align: right; font-weight: 600; font-size: 0.8rem; color: var(--text-muted); border-bottom: 1px solid var(--border-color); }
@@ -194,8 +208,8 @@
         .calendar-day.today .day-number { background: var(--primary-color); color: white; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; }
         .cal-review-item { font-size: 0.7rem; padding: 3px 5px; border-radius: 4px; background: var(--icon-blue-bg); color: var(--icon-blue-text); border-left: 2px solid var(--primary-color); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; transition: all 0.2s; }
         .cal-review-item:hover { filter: brightness(1.2); }
-        .cal-review-item.urgente { background: var(--icon-red-bg); color: var(--danger-color); border-left-color: var(--danger-color); }
-        .cal-review-item.alerta { background: var(--icon-yellow-bg); color: var(--warning-color); border-left-color: var(--warning-color); }
+        .cal-review-item.atrasada { background: var(--icon-red-bg); color: var(--danger-color); border-left-color: var(--danger-color); }
+        .cal-review-item.hoje { background: var(--icon-yellow-bg); color: var(--warning-color); border-left-color: var(--warning-color); }
 
         .desempenho-card { background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 1rem; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
         .desempenho-header { padding: 1rem 1.5rem; display: flex; justify-content: space-between; align-items: center; cursor: pointer; font-weight: 600; background-color: var(--bg-color); border-bottom: 1px solid transparent; transition: all 0.2s; }
@@ -485,8 +499,11 @@
         <!-- === ECRÃ 4: REVISÕES === -->
         <div id="view-revisoes" class="hidden">
             <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-                <div><h1 style="margin-bottom: 0;">Agenda de Revisões</h1><p style="color: var(--text-muted); margin-top: 5px;">O seu cronograma inteligente baseado em desempenho (Spaced Repetition).</p></div>
-                <button class="btn-primary" style="width: auto; padding: 0.6rem 1.2rem;" onclick="window.abrirModalEstudo()"><i class="fa-solid fa-plus"></i> Adicionar Estudo</button>
+                <div><h1 style="margin-bottom: 0;">Agenda de Revisões</h1><p style="color: var(--text-muted); margin-top: 5px;">O seu cronograma inteligente (Review Engine).</p></div>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button class="btn-icon" style="width: auto; padding: 0.6rem 1.2rem; border-color: var(--primary-color); color: var(--primary-color);" onclick="window.abrirModalDiasDisponiveis()"><i class="fa-solid fa-calendar-day"></i> Dias Disponíveis</button>
+                    <button class="btn-primary" style="width: auto; padding: 0.6rem 1.2rem;" onclick="window.abrirModalEstudo()"><i class="fa-solid fa-plus"></i> Adicionar Estudo</button>
+                </div>
             </header>
             <section style="margin-bottom: 2.5rem;"><h2 class="panel-title" style="color: var(--danger-color); border-bottom-color: var(--danger-color); font-size: 1.2rem;"><i class="fa-solid fa-triangle-exclamation"></i> Prioridades (Hoje & Atrasadas)</h2><div id="lista-prioridades" class="revisoes-horizontal-scroll"></div></section>
             <section style="margin-bottom: 2.5rem;"><h2 class="panel-title" style="color: var(--primary-color); border-bottom-color: var(--primary-color); font-size: 1.2rem;"><i class="fa-solid fa-calendar-week"></i> Revisões Semanais (Próximos 7 dias)</h2><div id="lista-semana" class="revisoes-horizontal-scroll"></div></section>
@@ -580,7 +597,7 @@
             </div>
         </div>
 
-        <!-- === MODAIS CUSTOMIZADOS (SUBSTITUEM ALERT, CONFIRM, PROMPT) === -->
+        <!-- === MODAIS CUSTOMIZADOS === -->
         <div id="custom-dialog" class="modal-overlay hidden" style="z-index: 9999;">
             <div class="modal-content" style="max-width: 400px; text-align: center;">
                 <h2 id="custom-dialog-title" style="margin-bottom: 15px; font-size: 1.2rem;">Aviso</h2>
@@ -593,6 +610,7 @@
             </div>
         </div>
 
+        <!-- Modais Existentes (Login, Relatório, Tarefa, Estudo, Meta, Simulado, Redacao, Importar Edital) -->
         <div id="modal-login" class="modal-overlay">
             <div class="modal-content" style="max-width: 400px; text-align: center;">
                 <h2 style="margin-bottom: 10px;"><i class="fa-solid fa-lock" style="color: var(--primary-color);"></i> Acesso Restrito</h2>
@@ -761,6 +779,75 @@
             </div>
         </div>
 
+        <!-- === NOVAS MODAIS DO REVIEW ENGINE === -->
+        
+        <!-- Modal: Configuração da Revisão da Disciplina -->
+        <div id="modal-config-revisao" class="modal-overlay hidden">
+            <div class="modal-content" style="max-width: 500px;">
+                <div class="modal-header">
+                    <h2><i class="fa-solid fa-gears" style="color: var(--primary-color);"></i> Configurar Revisão</h2>
+                    <button class="btn-close" onclick="window.fecharModalConfigRevisao()"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 15px;">Defina o motor de repetição espaçada para <strong id="lbl-disciplina-revisao" style="color: var(--text-main);"></strong>.</p>
+                <input type="hidden" id="config-rev-disciplina-id">
+                
+                <div class="form-group">
+                    <label>Estratégia de Revisão</label>
+                    <select id="config-rev-tipo" class="form-control" onchange="window.toggleCamposConfigRevisao()">
+                        <option value="performance">Por Desempenho (Baseado em % de acertos)</option>
+                        <option value="revisaom">Revisão M (24h -> 7d -> Desempenho)</option>
+                        <option value="spaced">Espaçada Fixa (24h, 7d, 15d, 30d...)</option>
+                        <option value="weekly">Semanal Fixa (Dias específicos)</option>
+                        <option value="parallel">Paralela (Agenda de Teoria + Agenda de Questões)</option>
+                    </select>
+                </div>
+
+                <div id="div-config-weekly" class="form-group hidden" style="background: var(--hover-bg); padding: 15px; border-radius: 6px;">
+                    <label>Selecione os dias da semana para revisar esta disciplina:</label>
+                    <div class="checkbox-group">
+                        <label class="checkbox-item"><input type="checkbox" name="chk-weekly-day" value="1"> Segunda</label>
+                        <label class="checkbox-item"><input type="checkbox" name="chk-weekly-day" value="2"> Terça</label>
+                        <label class="checkbox-item"><input type="checkbox" name="chk-weekly-day" value="3"> Quarta</label>
+                        <label class="checkbox-item"><input type="checkbox" name="chk-weekly-day" value="4"> Quinta</label>
+                        <label class="checkbox-item"><input type="checkbox" name="chk-weekly-day" value="5"> Sexta</label>
+                        <label class="checkbox-item"><input type="checkbox" name="chk-weekly-day" value="6"> Sábado</label>
+                        <label class="checkbox-item"><input type="checkbox" name="chk-weekly-day" value="0"> Domingo</label>
+                    </div>
+                </div>
+
+                <div style="margin-top: 15px; font-size: 0.85rem; color: var(--text-muted); background: var(--bg-color); padding: 10px; border-left: 3px solid var(--primary-color); border-radius: 4px;" id="config-rev-help">
+                    As revisões serão agendadas com base no seu desempenho nos exercícios (Ex: < 50% = repete rápido, > 80% = repete longe).
+                </div>
+
+                <button class="btn-success" onclick="window.salvarConfigRevisao()"><i class="fa-solid fa-save"></i> Guardar Configuração</button>
+            </div>
+        </div>
+
+        <!-- Modal: Disponibilidade Semanal Global -->
+        <div id="modal-dias-disponiveis" class="modal-overlay hidden">
+            <div class="modal-content" style="max-width: 450px;">
+                <div class="modal-header">
+                    <h2><i class="fa-regular fa-calendar-check" style="color: var(--primary-color);"></i> Dias Disponíveis</h2>
+                    <button class="btn-close" onclick="window.fecharModalDiasDisponiveis()"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 15px;">Quais os dias da semana em que costuma estudar/revisar? As revisões não cairão nos dias desmarcados.</p>
+                
+                <div class="form-group" style="background: var(--hover-bg); padding: 15px; border-radius: 6px;">
+                    <div class="checkbox-group" style="flex-direction: column; gap: 10px;">
+                        <label class="checkbox-item" style="font-weight: 600;"><input type="checkbox" name="chk-avail-day" value="1"> Segunda-feira</label>
+                        <label class="checkbox-item" style="font-weight: 600;"><input type="checkbox" name="chk-avail-day" value="2"> Terça-feira</label>
+                        <label class="checkbox-item" style="font-weight: 600;"><input type="checkbox" name="chk-avail-day" value="3"> Quarta-feira</label>
+                        <label class="checkbox-item" style="font-weight: 600;"><input type="checkbox" name="chk-avail-day" value="4"> Quinta-feira</label>
+                        <label class="checkbox-item" style="font-weight: 600;"><input type="checkbox" name="chk-avail-day" value="5"> Sexta-feira</label>
+                        <label class="checkbox-item" style="font-weight: 600;"><input type="checkbox" name="chk-avail-day" value="6"> Sábado</label>
+                        <label class="checkbox-item" style="font-weight: 600;"><input type="checkbox" name="chk-avail-day" value="0"> Domingo</label>
+                    </div>
+                </div>
+
+                <button class="btn-success" onclick="window.salvarDiasDisponiveis()"><i class="fa-solid fa-save"></i> Guardar Disponibilidade</button>
+            </div>
+        </div>
+
     </main>
 
     <script type="module">
@@ -810,11 +897,129 @@
         let simuladosDoUsuario = []; 
         let redacoesDoUsuario = [];
         let planejamentoDoUsuario = { cronograma: [], ciclo: [] };
+        let configuracoesGlobais = { diasDisponiveis: [1, 2, 3, 4, 5] }; // Seg-Sex por defeito
         
         let abaAtivaEdital = 'ativas'; 
         let disciplinaSelecionadaId = null; 
         let mesAtualExibicao = new Date().getMonth(); 
         let anoAtualExibicao = new Date().getFullYear(); 
+
+        // =====================================================================
+        // === MOTOR DE REVISÃO (REVIEW ENGINE)                              ===
+        // =====================================================================
+        window.ReviewEngine = {
+            adjustToAvailability: function(date, availDaysArr) {
+                // Se nenhum dia estiver marcado, assume-se que tudo é válido para evitar loop infinito
+                if (!availDaysArr || availDaysArr.length === 0) return date; 
+                let d = new Date(date);
+                let loopGuard = 0;
+                while (!availDaysArr.includes(d.getDay()) && loopGuard < 14) {
+                    d.setDate(d.getDate() + 1);
+                    loopGuard++;
+                }
+                return d;
+            },
+            
+            strategies: {
+                performance: function(records) {
+                    // Pega o último registo com questões
+                    let lastRev = [...records].reverse().find(r => r.questoes && (r.questoes.acertos > 0 || r.questoes.erros > 0));
+                    if (!lastRev) lastRev = records[records.length - 1]; // Fallback
+                    
+                    let a = lastRev.questoes?.acertos || 0;
+                    let e = lastRev.questoes?.erros || 0;
+                    let t = a + e;
+                    let perf = t > 0 ? a / t : 0; // Default to 0 se não houver questões
+                    
+                    let daysToAdd = 2;
+                    if (perf <= 0.30) daysToAdd = 2;
+                    else if (perf <= 0.50) daysToAdd = 4;
+                    else if (perf <= 0.75) daysToAdd = 7;
+                    else if (perf <= 0.85) daysToAdd = 10;
+                    else if (perf < 1.00) daysToAdd = 15;
+                    else if (perf === 1.00) daysToAdd = 30;
+
+                    let base = new Date(lastRev.data + "T00:00:00");
+                    base.setDate(base.getDate() + daysToAdd);
+                    return { date: base, perf: perf, type: 'performance' };
+                },
+                
+                spaced: function(records) {
+                    let intervals = [1, 7, 15, 30, 60, 120];
+                    let count = records.length;
+                    let stage = count - 1; // 1 estudo = index 0 (+1 dia)
+                    if (stage < 0) stage = 0;
+                    if (stage >= intervals.length) stage = intervals.length - 1;
+                    
+                    let lastRev = records[records.length - 1];
+                    let base = new Date(lastRev.data + "T00:00:00");
+                    base.setDate(base.getDate() + intervals[stage]);
+                    
+                    let a = lastRev.questoes?.acertos || 0; let e = lastRev.questoes?.erros || 0; let t = a+e;
+                    let perf = t > 0 ? a/t : null;
+
+                    return { date: base, perf: perf !== null ? perf : 1, type: 'spaced' };
+                },
+
+                revisaom: function(records) {
+                    let lastRev = records[records.length - 1];
+                    let base = new Date(lastRev.data + "T00:00:00");
+                    let a = lastRev.questoes?.acertos || 0; let e = lastRev.questoes?.erros || 0; let t = a+e;
+                    let perf = t > 0 ? a/t : null;
+
+                    if (records.length === 1) {
+                        // Apenas estudou (Dia 1) -> Agendar 24h
+                        base.setDate(base.getDate() + 1);
+                        return { date: base, perf: perf !== null ? perf : 1, type: 'revisaom' };
+                    } else if (records.length === 2) {
+                        // Já fez a revisão de 24h -> Agendar a de 7 dias (calculado do estudo original)
+                        let initialStudy = records[0];
+                        base = new Date(initialStudy.data + "T00:00:00");
+                        base.setDate(base.getDate() + 7);
+                        // Ensure it's in the future compared to last interaction
+                        let lastInter = new Date(lastRev.data + "T00:00:00");
+                        if (base <= lastInter) { base = new Date(lastInter); base.setDate(base.getDate() + 5); }
+                        return { date: base, perf: perf !== null ? perf : 1, type: 'revisaom' };
+                    } else {
+                        // Migração Automática para Performance após as duas primeiras fases
+                        let res = window.ReviewEngine.strategies.performance(records);
+                        res.type = 'performance'; // Mutates visually to performance
+                        return res;
+                    }
+                },
+
+                weekly: function(records, config) {
+                    let lastRev = records[records.length - 1];
+                    let base = new Date(lastRev.data + "T00:00:00");
+                    base.setDate(base.getDate() + 1); // Tem de ser no mínimo amanhã
+                    
+                    let targetDays = config.days || [1]; // Fallback to Monday se não configurado
+                    if (targetDays.length === 0) targetDays = [1];
+                    targetDays = targetDays.map(Number);
+
+                    let loop = 0;
+                    while (!targetDays.includes(base.getDay()) && loop < 14) {
+                        base.setDate(base.getDate() + 1);
+                        loop++;
+                    }
+
+                    let a = lastRev.questoes?.acertos || 0; let e = lastRev.questoes?.erros || 0; let t = a+e;
+                    let perf = t > 0 ? a/t : null;
+                    return { date: base, perf: perf !== null ? perf : 1, type: 'weekly' };
+                },
+
+                parallel: function(records) {
+                    // Estrutura preparatória: Retornamos um array com 2 datas em vez de 1.
+                    // Para integrar sem quebrar o core, devolvemos Spaced para Teoria, Performance para Questões
+                    let resTheory = window.ReviewEngine.strategies.spaced(records);
+                    let resQuest = window.ReviewEngine.strategies.performance(records);
+                    resTheory.parallelSub = 'Teoria';
+                    resQuest.parallelSub = 'Questões';
+                    return [resTheory, resQuest];
+                }
+            }
+        };
+
 
         window.toggleMobileMenu = function() {
             document.querySelector('.sidebar').classList.toggle('open');
@@ -908,6 +1113,9 @@
         // SANITIZAR E SALVAR DADOS
         // =====================================
         window.sanitizarDados = function() {
+            if (!configuracoesGlobais) configuracoesGlobais = { diasDisponiveis: [1,2,3,4,5] };
+            if (!configuracoesGlobais.diasDisponiveis) configuracoesGlobais.diasDisponiveis = [1,2,3,4,5];
+
             if (!editalDoUsuario || typeof editalDoUsuario !== 'object') {
                 editalDoUsuario = { concursoSelecionado: "Edital Base", disciplinas: [] };
             }
@@ -916,6 +1124,7 @@
             }
             editalDoUsuario.disciplinas.forEach(d => {
                 if(!d.statusDisciplina) d.statusDisciplina = 'ativa';
+                if(!d.reviewConfig) d.reviewConfig = { type: 'performance', settings: {} }; // Review Engine Config Default
                 if (!Array.isArray(d.topicos)) d.topicos = [];
                 d.topicos = d.topicos.map(t => typeof t === 'string' ? { nome: t, status: 'nao_iniciado' } : t);
             });
@@ -945,6 +1154,7 @@
 
         window.salvarDadosLocais = function() {
             window.sanitizarDados();
+            localStorage.setItem('PlanIQ_config', JSON.stringify(configuracoesGlobais));
             localStorage.setItem('PlanIQ_edital', JSON.stringify(editalDoUsuario));
             localStorage.setItem('PlanIQ_registros', JSON.stringify(registrosDeEstudo));
             localStorage.setItem('PlanIQ_planejamento', JSON.stringify(planejamentoDoUsuario));
@@ -955,6 +1165,7 @@
 
         window.carregarDadosLocais = function() {
             try {
+                const savedConfig = localStorage.getItem('PlanIQ_config'); if (savedConfig) configuracoesGlobais = JSON.parse(savedConfig);
                 const savedEdital = localStorage.getItem('PlanIQ_edital'); if (savedEdital) editalDoUsuario = JSON.parse(savedEdital);
                 const savedRegistros = localStorage.getItem('PlanIQ_registros'); if (savedRegistros) { registrosDeEstudo = JSON.parse(savedRegistros); registrosDeEstudo.sort((a, b) => b.timestamp - a.timestamp); }
                 const savedPlan = localStorage.getItem('PlanIQ_planejamento'); if (savedPlan) planejamentoDoUsuario = JSON.parse(savedPlan);
@@ -971,6 +1182,7 @@
                 window.sanitizarDados();
                 const docRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'config', 'dadosGerais');
                 await setDoc(docRef, { 
+                    configuracoesGlobais: configuracoesGlobais,
                     edital: editalDoUsuario, 
                     planejamento: planejamentoDoUsuario, 
                     metas: metasDoUsuario, 
@@ -1225,55 +1437,72 @@
         }
 
         // =====================================
-        // PRÓXIMA ATIVIDADE E REVISÕES
+        // PRÓXIMA ATIVIDADE E REVISÕES (NOVO ENGINE)
         // =====================================
         window.calcularAgendaRevisoes = function() {
-            let ultimosEstudos = {};
-            registrosDeEstudo.forEach(reg => { 
+            // 1. Group records by topic
+            let topicHistory = {};
+            registrosDeEstudo.forEach(reg => {
+                if (!reg.agendarRevisao) return; // Utilizador desativou manualmente esta
                 let chave = reg.disciplina + "|||" + reg.topico; 
-                
-                if (!ultimosEstudos[chave]) ultimosEstudos[chave] = { ...reg, registroOriginal: reg }; 
+                if (!topicHistory[chave]) topicHistory[chave] = { disciplina: reg.disciplina, topico: reg.topico, records: [] };
+                topicHistory[chave].records.push(reg);
             });
             
             let revisoesPendentes = [];
-            Object.values(ultimosEstudos).forEach(regNorm => {
-                if (regNorm.registroOriginal.agendarRevisao) {
-                    let acertos = regNorm.registroOriginal.questoes && regNorm.registroOriginal.questoes.acertos ? regNorm.registroOriginal.questoes.acertos : 0;
-                    let erros = regNorm.registroOriginal.questoes && regNorm.registroOriginal.questoes.erros ? regNorm.registroOriginal.questoes.erros : 0;
-                    let totalQ = acertos + erros; 
-                    let perf = totalQ > 0 ? (acertos / totalQ) : 0; 
-                    let diasParaPular = 2; 
-                    
-                    if (perf <= 0.30) diasParaPular = 2; 
-                    else if (perf <= 0.50) diasParaPular = 4; 
-                    else if (perf <= 0.75) diasParaPular = 7; 
-                    else if (perf <= 0.85) diasParaPular = 10; 
-                    else if (perf < 1.00) diasParaPular = 15; 
-                    else if (perf === 1.00) diasParaPular = 30;
-                    
-                    let baseDateStr = regNorm.registroOriginal.dataRevisaoManual || regNorm.registroOriginal.data || window.formatarDataLocalParaISO(new Date());
-                    let pData = baseDateStr.split('-'); 
-                    if (pData.length === 3) {
-                        let dataIdeal = new Date(pData[0], pData[1] - 1, pData[2]); 
-                        if (!regNorm.registroOriginal.dataRevisaoManual) {
-                            dataIdeal.setDate(dataIdeal.getDate() + diasParaPular);
-                        }
-                        
-                        if (dataIdeal.getDay() === 6) dataIdeal.setDate(dataIdeal.getDate() + 2); 
-                        if (dataIdeal.getDay() === 0) dataIdeal.setDate(dataIdeal.getDate() + 1); 
-                        
-                        revisoesPendentes.push({ 
-                            registroOriginal: regNorm.registroOriginal, 
-                            perf: perf, 
-                            dataIdealOriginal: new Date(dataIdeal), 
-                            dataIdeal: dataIdeal, 
-                            disciplina: regNorm.disciplina, 
-                            topico: regNorm.topico 
-                        });
-                    }
+            let availDays = configuracoesGlobais.diasDisponiveis || [1,2,3,4,5]; // Puxa dos globais
+
+            // 2. Compute for each topic
+            Object.values(topicHistory).forEach(tHist => {
+                // Obter config da disciplina
+                let discObj = editalDoUsuario.disciplinas.find(d => window.normalizarDisciplina(d.nome) === window.normalizarDisciplina(tHist.disciplina));
+                if (!discObj) return;
+                
+                let revType = discObj.reviewConfig?.type || 'performance';
+                let revSettings = discObj.reviewConfig?.settings || {};
+
+                // Sort history chronologically
+                tHist.records.sort((a,b) => new Date(a.data) - new Date(b.data));
+                let lastRecord = tHist.records[tHist.records.length - 1];
+                
+                // Se a última ação tem data manual, sobrepõe (Funcionalidade de Pular)
+                if (lastRecord.dataRevisaoManual) {
+                    let mDate = new Date(lastRecord.dataRevisaoManual + "T00:00:00");
+                    let res = { date: mDate, perf: 1, type: revType };
+                    let adjustedDate = window.ReviewEngine.adjustToAvailability(res.date, availDays);
+                    revisoesPendentes.push({
+                        registroOriginal: lastRecord, perf: res.perf,
+                        dataIdealOriginal: res.date, dataIdeal: adjustedDate,
+                        disciplina: tHist.disciplina, topico: tHist.topico,
+                        strategyTag: res.type
+                    });
+                    return;
                 }
+
+                // Call the Engine
+                let engineFunc = window.ReviewEngine.strategies[revType] || window.ReviewEngine.strategies.performance;
+                let results = engineFunc(tHist.records, revSettings);
+                
+                // Handle Parallel Strategy (Array of results)
+                if (!Array.isArray(results)) results = [results];
+                
+                results.forEach(res => {
+                    let adjustedDate = window.ReviewEngine.adjustToAvailability(res.date, availDays);
+                    let nomeTopicoFinal = res.parallelSub ? `${tHist.topico} (${res.parallelSub})` : tHist.topico;
+
+                    revisoesPendentes.push({
+                        registroOriginal: lastRecord,
+                        perf: res.perf,
+                        dataIdealOriginal: res.date,
+                        dataIdeal: adjustedDate,
+                        disciplina: tHist.disciplina,
+                        topico: nomeTopicoFinal,
+                        strategyTag: res.type // Performance, spaced, revisaom...
+                    });
+                });
             });
             
+            // 3. Build Agenda and prioritize
             let hoje = new Date(); hoje.setHours(0,0,0,0); 
             let agendaFinal = {}; 
             let fila = [...revisoesPendentes]; 
@@ -1282,23 +1511,36 @@
             
             while(fila.length > 0 && limiteSeguranca < 1000) {
                 limiteSeguranca++; 
-                if (dataAtualAnalise.getDay() === 6) { dataAtualAnalise.setDate(dataAtualAnalise.getDate() + 2); continue; } 
-                if (dataAtualAnalise.getDay() === 0) { dataAtualAnalise.setDate(dataAtualAnalise.getDate() + 1); continue; }
+                if (!availDays.includes(dataAtualAnalise.getDay())) { 
+                    dataAtualAnalise.setDate(dataAtualAnalise.getDate() + 1); 
+                    continue; 
+                } 
                 
                 let candidatasDoDia = fila.filter(r => r.dataIdeal <= dataAtualAnalise); 
                 if (candidatasDoDia.length === 0) { dataAtualAnalise.setDate(dataAtualAnalise.getDate() + 1); continue; }
                 
+                // PRIORIDADES: Atrasadas > Revisão M > Baixo Desempenho (<50) > Normais
                 candidatasDoDia.sort((a, b) => { 
-                    let aC1 = a.perf <= 0.50 ? 1 : 0; let bC1 = b.perf <= 0.50 ? 1 : 0; 
-                    if (aC1 !== bC1) return bC1 - aC1; 
+                    let isAtrasadaA = a.dataIdealOriginal < hoje ? 1 : 0;
+                    let isAtrasadaB = b.dataIdealOriginal < hoje ? 1 : 0;
+                    if (isAtrasadaA !== isAtrasadaB) return isAtrasadaB - isAtrasadaA; // Atrasadas primeiro
+
+                    let isRevMA = a.strategyTag === 'revisaom' ? 1 : 0;
+                    let isRevMB = b.strategyTag === 'revisaom' ? 1 : 0;
+                    if (isRevMA !== isRevMB) return isRevMB - isRevMA; // Revisão M em 2º lugar
+
+                    let lowPerfA = (a.perf !== null && a.perf <= 0.50) ? 1 : 0; 
+                    let lowPerfB = (b.perf !== null && b.perf <= 0.50) ? 1 : 0; 
+                    if (lowPerfA !== lowPerfB) return lowPerfB - lowPerfA; // Baixo desempenho 3º
+                    
                     let atrasoA = dataAtualAnalise.getTime() - a.dataIdealOriginal.getTime(); 
                     let atrasoB = dataAtualAnalise.getTime() - b.dataIdealOriginal.getTime(); 
-                    if (atrasoA !== atrasoB) return atrasoB - atrasoA; 
-                    let aC3 = (a.perf > 0.50 && a.perf <= 0.75) ? 1 : 0; let bC3 = (b.perf > 0.50 && b.perf <= 0.75) ? 1 : 0; 
-                    if (aC3 !== bC3) return bC3 - aC3; return 0; 
+                    if (atrasoA !== atrasoB) return atrasoB - atrasoA; // Mais antigas
+
+                    return 0;
                 });
                 
-                let aprovadasParaODia = candidatasDoDia.slice(0, 3); 
+                let aprovadasParaODia = candidatasDoDia.slice(0, 3); // Max 3 per day default
                 let dataString = window.formatarDataLocalParaISO(dataAtualAnalise); 
                 agendaFinal[dataString] = aprovadasParaODia; 
                 fila = fila.filter(r => !aprovadasParaODia.includes(r)); 
@@ -1313,7 +1555,9 @@
             let datas = Object.keys(agenda).sort(); 
             for (let data of datas) { 
                 agenda[data].forEach(item => { 
-                    let chave = item.disciplina + "|||" + item.topico; 
+                    // Limpar sub-tags para coincidir com a chave padrão (se for paralela)
+                    let cleanTopic = item.topico.replace(" (Teoria)", "").replace(" (Questões)", "");
+                    let chave = item.disciplina + "|||" + cleanTopic; 
                     if (!mapa[chave]) { let partes = data.split('-'); mapa[chave] = `${partes[2]}/${partes[1]}/${partes[0]}`; } 
                 }); 
             } 
@@ -1366,15 +1610,37 @@
         };
 
         window.criarCartaoRevisaoHTML = function(rev, dataFormatada = null, ehCalendario = false) {
-            let perc = Math.round(rev.perf * 100); let classeCor = 'normal'; let classeBadge = 'badge-normal';
-            if (perc <= 50) { classeCor = 'urgente'; classeBadge = 'badge-urgente'; } else if (perc <= 75) { classeCor = 'alerta'; classeBadge = 'badge-alerta'; }
+            let perc = rev.perf !== null ? Math.round(rev.perf * 100) : null; 
+            
+            // Lógica de CSS por tag
+            let baseColorClass = rev.strategyTag; // performance, revisaom, spaced, weekly
+            let badgeClass = `badge-${baseColorClass}`;
+            
+            let nameLabels = {
+                'performance': 'Desempenho', 'revisaom': 'Revisão M', 'spaced': 'Espaçada', 'weekly': 'Semanal'
+            };
+            let typeLabel = nameLabels[baseColorClass] || 'Revisão';
+
+            // Overrides para Atrasada e Hoje
+            let hojeStr = window.formatarDataLocalParaISO(new Date());
+            let itemDateStr = window.formatarDataLocalParaISO(rev.dataIdeal);
+            
+            if (rev.dataIdealOriginal < new Date(hojeStr+"T00:00:00")) {
+                baseColorClass = 'atrasada'; badgeClass = 'badge-atrasada'; typeLabel = 'Atrasada';
+            } else if (itemDateStr === hojeStr) {
+                baseColorClass = 'hoje'; badgeClass = 'badge-hoje'; typeLabel = 'Hoje';
+            }
+            
             let idUsado = rev.registroOriginal.idDoc || rev.registroOriginal.timestamp;
-            if(ehCalendario) return `<div class="cal-review-item ${classeCor}" onclick="window.prepararConclusaoRevisao('${rev.disciplina}', '${rev.topico}')" title="${rev.disciplina}: ${rev.topico}"><i class="fa-solid fa-book-open"></i> ${rev.disciplina.substring(0, 10)}...</div>`;
-            return `<div class="revisao-card ${classeCor}"><div><span class="revisao-badge ${classeBadge}"><i class="fa-solid fa-bullseye"></i> ${perc}%</span>${dataFormatada ? `<span style="font-size: 0.75rem; color: var(--text-muted); float: right;"><i class="fa-regular fa-calendar"></i> ${dataFormatada}</span>` : ''}<h4 class="revisao-card-title"><i class="fa-solid fa-bars-staggered" style="color: var(--text-muted); margin-right:5px;"></i> ${rev.topico}</h4><p class="revisao-card-subtitle"><i class="fa-regular fa-folder"></i> ${rev.disciplina}</p></div><div style="display:flex; gap: 5px; margin-top: 10px;"><button class="btn-primary" style="padding: 0.5rem; font-size: 0.85rem; flex: 1;" onclick="window.prepararConclusaoRevisao('${rev.disciplina}', '${rev.topico}')"><i class="fa-solid fa-check"></i> Revisar</button><button class="btn-icon" style="padding: 0.5rem; color: var(--warning-color); border-color: var(--warning-color);" onclick="window.pularRevisao('${idUsado}')" title="Pular revisão para amanhã"><i class="fa-solid fa-forward-step"></i></button><button class="btn-icon" style="padding: 0.5rem; color: var(--danger-color); border-color: var(--danger-color);" onclick="window.excluirRevisao('${idUsado}')" title="Excluir revisão"><i class="fa-solid fa-trash"></i></button></div></div>`;
+            let percText = perc !== null ? `${perc}%` : typeLabel;
+
+            if(ehCalendario) return `<div class="cal-review-item ${baseColorClass}" onclick="window.prepararConclusaoRevisao('${rev.disciplina}', '${rev.topico}')" title="${rev.disciplina}: ${rev.topico}"><i class="fa-solid fa-book-open"></i> ${rev.disciplina.substring(0, 10)}...</div>`;
+            
+            return `<div class="revisao-card ${baseColorClass}"><div><span class="revisao-badge ${badgeClass}"><i class="fa-solid fa-bullseye"></i> ${percText}</span>${dataFormatada ? `<span style="font-size: 0.75rem; color: var(--text-muted); float: right;"><i class="fa-regular fa-calendar"></i> ${dataFormatada}</span>` : ''}<h4 class="revisao-card-title"><i class="fa-solid fa-bars-staggered" style="color: var(--text-muted); margin-right:5px;"></i> ${rev.topico}</h4><p class="revisao-card-subtitle"><i class="fa-regular fa-folder"></i> ${rev.disciplina} <span style="font-size:0.7rem; color:var(--text-muted); margin-left: auto;">[${nameLabels[rev.strategyTag] || 'Revisão'}]</span></p></div><div style="display:flex; gap: 5px; margin-top: 10px;"><button class="btn-primary" style="padding: 0.5rem; font-size: 0.85rem; flex: 1;" onclick="window.prepararConclusaoRevisao('${rev.disciplina}', '${rev.topico}')"><i class="fa-solid fa-check"></i> Revisar</button><button class="btn-icon" style="padding: 0.5rem; color: var(--warning-color); border-color: var(--warning-color);" onclick="window.pularRevisao('${idUsado}')" title="Pular revisão para amanhã"><i class="fa-solid fa-forward-step"></i></button><button class="btn-icon" style="padding: 0.5rem; color: var(--danger-color); border-color: var(--danger-color);" onclick="window.excluirRevisao('${idUsado}')" title="Excluir revisão"><i class="fa-solid fa-trash"></i></button></div></div>`;
         }
 
         window.pularRevisao = async function(idStr) {
-            window.mostrarConfirmacao("Deseja pular esta revisão? Ela será reagendada para amanhã.", async () => {
+            window.mostrarConfirmacao("Deseja pular esta revisão? Ela será reagendada para o próximo dia.", async () => {
                 let reg = registrosDeEstudo.find(r => r.idDoc === idStr || r.timestamp == idStr);
                 if(reg) {
                     let amanha = new Date();
@@ -1429,7 +1695,82 @@
             let totalCelulas = primeiroDiaDoMes + diasNoMes; let celulasRestantes = (7 - (totalCelulas % 7)) % 7; for (let i = 0; i < celulasRestantes; i++) { grid.innerHTML += `<div class="calendar-day empty"></div>`; }
         };
         
-        window.prepararConclusaoRevisao = function(disciplina, topico) { window.abrirModalEstudoPreenchido(disciplina, topico); let cbRevisao = document.querySelector('input[name="estudo-categoria"][value="Revisão"]'); if(cbRevisao) cbRevisao.checked = true; document.getElementById('estudo-agendar-revisao').checked = false; };
+        window.prepararConclusaoRevisao = function(disciplina, topico) { 
+            let realTopico = topico.replace(" (Teoria)", "").replace(" (Questões)", "");
+            window.abrirModalEstudoPreenchido(disciplina, realTopico); 
+            let cbRevisao = document.querySelector('input[name="estudo-categoria"][value="Revisão"]'); if(cbRevisao) cbRevisao.checked = true; document.getElementById('estudo-agendar-revisao').checked = true; 
+        };
+
+        // =====================================
+        // DIAS DISPONÍVEIS E CONFIG REVISÃO UI
+        // =====================================
+        window.abrirModalDiasDisponiveis = function() {
+            document.getElementById('modal-dias-disponiveis').classList.remove('hidden');
+            let avail = configuracoesGlobais.diasDisponiveis || [1,2,3,4,5];
+            document.querySelectorAll('input[name="chk-avail-day"]').forEach(cb => {
+                cb.checked = avail.includes(parseInt(cb.value));
+            });
+        }
+        window.fecharModalDiasDisponiveis = function() { document.getElementById('modal-dias-disponiveis').classList.add('hidden'); }
+        window.salvarDiasDisponiveis = function() {
+            let avail = Array.from(document.querySelectorAll('input[name="chk-avail-day"]:checked')).map(cb => parseInt(cb.value));
+            if(avail.length === 0) { window.mostrarAlerta("Tem de selecionar pelo menos um dia disponível."); return; }
+            configuracoesGlobais.diasDisponiveis = avail;
+            window.salvarDadosGeraisNaNuvem();
+            window.salvarDadosLocais();
+            window.renderizarRevisoes();
+            window.fecharModalDiasDisponiveis();
+        }
+
+        window.abrirConfigRevisao = function(discId) {
+            let d = editalDoUsuario.disciplinas.find(x => x.id === discId);
+            if(!d) return;
+            document.getElementById('modal-config-revisao').classList.remove('hidden');
+            document.getElementById('lbl-disciplina-revisao').innerText = d.nome;
+            document.getElementById('config-rev-disciplina-id').value = d.id;
+            
+            let conf = d.reviewConfig || { type: 'performance', settings: {} };
+            document.getElementById('config-rev-tipo').value = conf.type;
+            
+            if (conf.type === 'weekly' && conf.settings.days) {
+                document.querySelectorAll('input[name="chk-weekly-day"]').forEach(cb => { cb.checked = conf.settings.days.includes(parseInt(cb.value)); });
+            } else {
+                document.querySelectorAll('input[name="chk-weekly-day"]').forEach(cb => cb.checked = false);
+            }
+            window.toggleCamposConfigRevisao();
+        }
+
+        window.toggleCamposConfigRevisao = function() {
+            let tipo = document.getElementById('config-rev-tipo').value;
+            document.getElementById('div-config-weekly').classList.toggle('hidden', tipo !== 'weekly');
+            let helpMsg = document.getElementById('config-rev-help');
+            if (tipo === 'performance') helpMsg.innerText = "As revisões são agendadas unicamente baseadas no seu desempenho (%) das questões que registar no estudo.";
+            else if (tipo === 'spaced') helpMsg.innerText = "Padrão de repetição espaçada fixa: 24h, 7 dias, 15 dias, 30 dias e 60 dias após cada revisão concluída.";
+            else if (tipo === 'revisaom') helpMsg.innerText = "Método M: 24h -> 7 dias -> passa a avaliar automaticamente pelo seu Desempenho (Performance).";
+            else if (tipo === 'weekly') helpMsg.innerText = "Dias fixos na semana. A revisão surgirá sempre no dia selecionado após um estudo ou revisão concluída.";
+            else if (tipo === 'parallel') helpMsg.innerText = "Modo duplo: Vai agendar duas revisões em paralelo. Uma para repassar a teoria (Espaçada) e outra baseada no rendimento das Questões.";
+        }
+
+        window.fecharModalConfigRevisao = function() { document.getElementById('modal-config-revisao').classList.add('hidden'); }
+        window.salvarConfigRevisao = function() {
+            let discId = parseInt(document.getElementById('config-rev-disciplina-id').value);
+            let d = editalDoUsuario.disciplinas.find(x => x.id === discId);
+            if(!d) return;
+
+            let tipo = document.getElementById('config-rev-tipo').value;
+            let settings = {};
+            if (tipo === 'weekly') {
+                let days = Array.from(document.querySelectorAll('input[name="chk-weekly-day"]:checked')).map(cb => parseInt(cb.value));
+                if (days.length === 0) { window.mostrarAlerta("Tem de selecionar pelo menos um dia para a revisão semanal."); return; }
+                settings.days = days;
+            }
+
+            d.reviewConfig = { type: tipo, settings: settings };
+            window.salvarDadosGeraisNaNuvem(); window.salvarDadosLocais();
+            window.atualizarTodasAsTelas();
+            window.fecharModalConfigRevisao();
+        }
+
 
         // =====================================
         // DESEMPENHO (ACCORDION) E PROTEÇÕES
@@ -2122,7 +2463,7 @@
                     if(topicosHTML.trim() === '') topicosHTML = '<li class="topico-item text-muted">Nenhum assunto registado nesta matéria.</li>';
                     
                     let botoesStatusHtml = isDesativada ? `<button class="btn-success-outline btn-icon" onclick="window.alternarStatusDisciplina(${d.id})"><i class="fa-solid fa-power-off"></i> Reativar Disciplina</button>` : `<button class="btn-danger-outline btn-icon" onclick="window.alternarStatusDisciplina(${d.id})"><i class="fa-solid fa-power-off"></i> Desativar Disciplina</button>`;
-                    detailContainer.innerHTML = `<div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--border-color); padding-bottom: 15px; margin-bottom: 15px; flex-wrap:wrap; gap: 10px;"><h2 style="font-size: 1.5rem; color: var(--primary-color);"><i class="fa-solid fa-book"></i> ${d.nome}</h2><div style="display: flex; gap: 10px; flex-wrap:wrap;">${botoesStatusHtml}<button class="btn-icon" onclick="window.editarDisciplina(${d.id})" title="Renomear Disciplina"><i class="fa-solid fa-pen"></i></button><button class="btn-icon" style="color: var(--danger-color); border-color: var(--danger-color);" onclick="window.excluirDisciplina(${d.id})" title="Excluir Definitivamente"><i class="fa-solid fa-trash"></i></button><button class="btn-primary" style="padding: 0.5rem 1rem; width: auto;" onclick="window.adicionarTopico(${d.id})"><i class="fa-solid fa-plus"></i> Novo Assunto</button></div></div><div class="stats-grid-detail"><div><span style="color: var(--text-muted);">Estado da disciplina:</span> <strong style="color: ${isDesativada ? 'var(--danger-color)' : 'var(--success-color)'};">${isDesativada ? 'Desativada' : 'Ativa'}</strong></div><div><span style="color: var(--text-muted);">Horas estudadas:</span> <strong>${textoTempo}</strong></div><div><span style="color: var(--text-muted);">Acertos:</span> <strong style="color: var(--success-color);">${acertosTotais}</strong></div><div><span style="color: var(--text-muted);">Erros:</span> <strong style="color: var(--danger-color);">${errosTotais}</strong></div><div><span style="color: var(--text-muted);">Total de questões:</span> <strong>${totalQuestoes}</strong></div><div><span style="color: var(--text-muted);">Progresso do Edital:</span> <strong>${progressoGeral}%</strong></div></div><div class="progress-bar-container" style="margin-bottom: 25px;"><div class="progress-bar-fill" style="width: ${progressoGeral}%"></div></div><h3 style="margin-bottom: 10px; font-size: 1.1rem;">Assuntos da Matéria</h3><ul class="topicos-list">${topicosHTML}</ul>`;
+                    detailContainer.innerHTML = `<div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--border-color); padding-bottom: 15px; margin-bottom: 15px; flex-wrap:wrap; gap: 10px;"><h2 style="font-size: 1.5rem; color: var(--primary-color);"><i class="fa-solid fa-book"></i> ${d.nome}</h2><div style="display: flex; gap: 10px; flex-wrap:wrap;">${botoesStatusHtml}<button class="btn-primary" style="padding: 0.5rem 1rem; width: auto; background: var(--hover-bg); color: var(--primary-color);" onclick="window.abrirConfigRevisao(${d.id})"><i class="fa-solid fa-gears"></i> Motor de Revisão</button><button class="btn-icon" onclick="window.editarDisciplina(${d.id})" title="Renomear Disciplina"><i class="fa-solid fa-pen"></i></button><button class="btn-icon" style="color: var(--danger-color); border-color: var(--danger-color);" onclick="window.excluirDisciplina(${d.id})" title="Excluir Definitivamente"><i class="fa-solid fa-trash"></i></button><button class="btn-primary" style="padding: 0.5rem 1rem; width: auto;" onclick="window.adicionarTopico(${d.id})"><i class="fa-solid fa-plus"></i> Novo Assunto</button></div></div><div class="stats-grid-detail"><div><span style="color: var(--text-muted);">Estado da disciplina:</span> <strong style="color: ${isDesativada ? 'var(--danger-color)' : 'var(--success-color)'};">${isDesativada ? 'Desativada' : 'Ativa'}</strong></div><div><span style="color: var(--text-muted);">Horas estudadas:</span> <strong>${textoTempo}</strong></div><div><span style="color: var(--text-muted);">Acertos:</span> <strong style="color: var(--success-color);">${acertosTotais}</strong></div><div><span style="color: var(--text-muted);">Erros:</span> <strong style="color: var(--danger-color);">${errosTotais}</strong></div><div><span style="color: var(--text-muted);">Total de questões:</span> <strong>${totalQuestoes}</strong></div><div><span style="color: var(--text-muted);">Progresso do Edital:</span> <strong>${progressoGeral}%</strong></div></div><div class="progress-bar-container" style="margin-bottom: 25px;"><div class="progress-bar-fill" style="width: ${progressoGeral}%"></div></div><h3 style="margin-bottom: 10px; font-size: 1.1rem;">Assuntos da Matéria</h3><ul class="topicos-list">${topicosHTML}</ul>`;
                 }
             }
         };
@@ -2132,7 +2473,7 @@
         window.adicionarDisciplina = function() { 
             window.mostrarPrompt("Digite o nome da nova disciplina:", (nome) => {
                 if (nome && nome.trim() !== "") { 
-                    editalDoUsuario.disciplinas.push({ id: Date.now(), nome: nome.trim(), topicos: [], statusDisciplina: 'ativa' }); 
+                    editalDoUsuario.disciplinas.push({ id: Date.now(), nome: nome.trim(), topicos: [], statusDisciplina: 'ativa', reviewConfig: { type: 'performance', settings: {} } }); 
                     abaAtivaEdital = 'ativas'; 
                     window.salvarDadosGeraisNaNuvem(); 
                     window.renderizarEdital(); 
@@ -2207,7 +2548,7 @@
                 const snap = await getDocs(colRef);
                 
                 if (snap.empty) {
-                    const seedData = { nome: "Edital Base Padrão", disciplines: EDITAL_BASE };
+                    const seedData = { nome: "Edital Base Padrão", disciplinas: EDITAL_BASE };
                     await addDoc(colRef, seedData);
                     window.abrirModalImportarEdital(); 
                     return;
@@ -2392,6 +2733,7 @@
                 document.getElementById('tarefa-red-concurso').value = item.concurso || '';
                 document.getElementById('tarefa-red-banca').value = item.banca || '';
                 document.getElementById('tarefa-red-link').value = item.link || '';
+                document.getElementById('tarefa-descricao').value = item.descricao || '';
             } else if (item.tipo === 'simulado') {
                 document.getElementById('tarefa-sim-cargo').value = item.cargo || '';
                 document.getElementById('tarefa-sim-origem').value = item.origem || '';
@@ -2425,6 +2767,7 @@
                 novaTarefa.disciplina = editalDoUsuario.disciplinas.find(d => d.id == disciplinaId).nome; novaTarefa.topico = topico; novaTarefa.descricao = document.getElementById('tarefa-descricao').value; novaTarefa.categorias = Array.from(document.querySelectorAll('input[name="tarefa-categoria"]:checked')).map(cb => cb.value); novaTarefa.materiais = Array.from(document.querySelectorAll('input[name="tarefa-material"]:checked')).map(cb => cb.value);
             } else if (tipo === 'redacao') {
                 novaTarefa.tema = document.getElementById('tarefa-red-tema').value; novaTarefa.concurso = document.getElementById('tarefa-red-concurso').value; novaTarefa.banca = document.getElementById('tarefa-red-banca').value; novaTarefa.link = document.getElementById('tarefa-red-link').value; if (!novaTarefa.tema) { window.mostrarAlerta("Informe pelo menos o Tema da Redação!"); return; }
+                novaTarefa.descricao = document.getElementById('tarefa-descricao') ? document.getElementById('tarefa-descricao').value : ''; 
             } else if (tipo === 'simulado') {
                 novaTarefa.cargo = document.getElementById('tarefa-sim-cargo').value; novaTarefa.origem = document.getElementById('tarefa-sim-origem').value; novaTarefa.estilo = document.getElementById('tarefa-sim-estilo').value; novaTarefa.descricao = document.getElementById('tarefa-sim-descricao').value; if (!novaTarefa.cargo) { window.mostrarAlerta("Informe pelo menos o Cargo/Prova do Simulado!"); return; }
                 if(document.getElementById('tarefa-sim-especifico').checked) { let discId = document.getElementById('tarefa-sim-disciplina').value; if(discId) novaTarefa.disciplinaVinculada = editalDoUsuario.disciplinas.find(d => d.id == discId).id; }
@@ -2461,13 +2804,11 @@
                 document.getElementById('estudo-tarefa-id-conclusao').value = tarefaId; document.getElementById('estudo-tarefa-context-conclusao').value = contexto;
                 document.querySelectorAll('input[name="estudo-categoria"]').forEach(cb => { cb.checked = (item.categorias || []).includes(cb.value); });
                 document.querySelectorAll('input[name="estudo-material"]').forEach(cb => { cb.checked = (item.materiais || []).includes(cb.value); });
-                // Transfere a Descrição Rápida para o Comentário
                 document.getElementById('estudo-comentario').value = item.descricao || '';
             } else if (item.tipo === 'redacao') {
                 window.abrirModalRedacao();
                 document.getElementById('red-tema').value = item.tema || ''; document.getElementById('red-concurso').value = item.concurso || ''; document.getElementById('red-banca').value = item.banca || ''; document.getElementById('red-link').value = item.link || '';
                 document.getElementById('red-tarefa-id-conclusao').value = tarefaId; document.getElementById('red-tarefa-context-conclusao').value = contexto;
-                // Transfere a Descrição Rápida para as Considerações
                 document.getElementById('red-consideracoes').value = item.descricao || '';
             } else if (item.tipo === 'simulado') {
                 window.abrirModalSimulado();
@@ -2718,6 +3059,7 @@
             unsubDadosGerais = onSnapshot(docGeraisRef, (docSnap) => {
                 if (docSnap.exists()) {
                     const data = docSnap.data();
+                    if(data.configuracoesGlobais) configuracoesGlobais = data.configuracoesGlobais;
                     if(data.edital) editalDoUsuario = data.edital;
                     if(data.planejamento) planejamentoDoUsuario = data.planejamento;
                     if(data.metas) metasDoUsuario = data.metas;
