@@ -492,6 +492,24 @@
                         <thead><tr><th>Data</th><th>Disciplina</th><th>Tópico</th><th>Tempo</th><th>Categorias</th><th style="text-align: center;">Acertos/Erros</th><th>Desempenho</th><th style="text-align: center;">Ações</th></tr></thead>
                         <tbody id="lista-historico"></tbody>
                     </table>
+                    
+                    <!-- Controlos de Paginação do Histórico -->
+                    <div id="historico-paginacao" class="hidden" style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding-top: 15px; border-top: 1px solid var(--border-color); font-size: 0.85rem;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span style="color: var(--text-muted);">Mostrar:</span>
+                            <select id="select-historico-limit" class="form-control" style="width: auto; padding: 0.3rem 0.5rem; font-size: 0.85rem; background: var(--bg-color);" onchange="window.mudarItensPorPaginaHistorico(this.value)">
+                                <option value="20">20 itens</option>
+                                <option value="50">50 itens</option>
+                                <option value="80" selected>80 itens</option>
+                                <option value="all">Todos</option>
+                            </select>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <button class="btn-icon" id="btn-hist-prev" onclick="window.mudarPaginaHistorico(-1)" title="Página Anterior"><i class="fa-solid fa-chevron-left"></i></button>
+                            <span id="historico-page-info" style="color: var(--text-muted); font-weight: 500;">Página 1</span>
+                            <button class="btn-icon" id="btn-hist-next" onclick="window.mudarPaginaHistorico(1)" title="Próxima Página"><i class="fa-solid fa-chevron-right"></i></button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -865,6 +883,7 @@
         };
         const appId = 'planiq-producao';
         
+        // Altere este e-mail para o e-mail de Administrador que desejar.
         const ADMIN_EMAILS = ['matsanmed@gmail.com']; 
 
         let app, auth, db;
@@ -903,13 +922,16 @@
         let disciplinaSelecionadaId = null; 
         let mesAtualExibicao = new Date().getMonth(); 
         let anoAtualExibicao = new Date().getFullYear(); 
+        
+        // Paginação do Histórico
+        let historicoPaginaAtual = 1;
+        let historicoItensPorPagina = 80;
 
         // =====================================================================
         // === MOTOR DE REVISÃO (REVIEW ENGINE)                              ===
         // =====================================================================
         window.ReviewEngine = {
             adjustToAvailability: function(date, availDaysArr) {
-                // Se nenhum dia estiver marcado, assume-se que tudo é válido para evitar loop infinito
                 if (!availDaysArr || availDaysArr.length === 0) return date; 
                 let d = new Date(date);
                 let loopGuard = 0;
@@ -922,14 +944,13 @@
             
             strategies: {
                 performance: function(records) {
-                    // Pega o último registo com questões
                     let lastRev = [...records].reverse().find(r => r.questoes && (r.questoes.acertos > 0 || r.questoes.erros > 0));
-                    if (!lastRev) lastRev = records[records.length - 1]; // Fallback
+                    if (!lastRev) lastRev = records[records.length - 1]; 
                     
                     let a = lastRev.questoes?.acertos || 0;
                     let e = lastRev.questoes?.erros || 0;
                     let t = a + e;
-                    let perf = t > 0 ? a / t : 0; // Default to 0 se não houver questões
+                    let perf = t > 0 ? a / t : 0; 
                     
                     let daysToAdd = 2;
                     if (perf <= 0.30) daysToAdd = 2;
@@ -947,7 +968,7 @@
                 spaced: function(records) {
                     let intervals = [1, 7, 15, 30, 60, 120];
                     let count = records.length;
-                    let stage = count - 1; // 1 estudo = index 0 (+1 dia)
+                    let stage = count - 1; 
                     if (stage < 0) stage = 0;
                     if (stage >= intervals.length) stage = intervals.length - 1;
                     
@@ -968,22 +989,18 @@
                     let perf = t > 0 ? a/t : null;
 
                     if (records.length === 1) {
-                        // Apenas estudou (Dia 1) -> Agendar 24h
                         base.setDate(base.getDate() + 1);
                         return { date: base, perf: perf !== null ? perf : 1, type: 'revisaom' };
                     } else if (records.length === 2) {
-                        // Já fez a revisão de 24h -> Agendar a de 7 dias (calculado do estudo original)
                         let initialStudy = records[0];
                         base = new Date(initialStudy.data + "T00:00:00");
                         base.setDate(base.getDate() + 7);
-                        // Ensure it's in the future compared to last interaction
                         let lastInter = new Date(lastRev.data + "T00:00:00");
                         if (base <= lastInter) { base = new Date(lastInter); base.setDate(base.getDate() + 5); }
                         return { date: base, perf: perf !== null ? perf : 1, type: 'revisaom' };
                     } else {
-                        // Migração Automática para Performance após as duas primeiras fases
                         let res = window.ReviewEngine.strategies.performance(records);
-                        res.type = 'performance'; // Mutates visually to performance
+                        res.type = 'performance'; 
                         return res;
                     }
                 },
@@ -991,9 +1008,9 @@
                 weekly: function(records, config) {
                     let lastRev = records[records.length - 1];
                     let base = new Date(lastRev.data + "T00:00:00");
-                    base.setDate(base.getDate() + 1); // Tem de ser no mínimo amanhã
+                    base.setDate(base.getDate() + 1); 
                     
-                    let targetDays = config.days || [1]; // Fallback to Monday se não configurado
+                    let targetDays = config.days || [1]; 
                     if (targetDays.length === 0) targetDays = [1];
                     targetDays = targetDays.map(Number);
 
@@ -1009,8 +1026,6 @@
                 },
 
                 parallel: function(records) {
-                    // Estrutura preparatória: Retornamos um array com 2 datas em vez de 1.
-                    // Para integrar sem quebrar o core, devolvemos Spaced para Teoria, Performance para Questões
                     let resTheory = window.ReviewEngine.strategies.spaced(records);
                     let resQuest = window.ReviewEngine.strategies.performance(records);
                     resTheory.parallelSub = 'Teoria';
@@ -1124,7 +1139,7 @@
             }
             editalDoUsuario.disciplinas.forEach(d => {
                 if(!d.statusDisciplina) d.statusDisciplina = 'ativa';
-                if(!d.reviewConfig) d.reviewConfig = { type: 'performance', settings: {} }; // Review Engine Config Default
+                if(!d.reviewConfig) d.reviewConfig = { type: 'performance', settings: {} }; 
                 if (!Array.isArray(d.topicos)) d.topicos = [];
                 d.topicos = d.topicos.map(t => typeof t === 'string' ? { nome: t, status: 'nao_iniciado' } : t);
             });
@@ -1440,32 +1455,27 @@
         // PRÓXIMA ATIVIDADE E REVISÕES (NOVO ENGINE)
         // =====================================
         window.calcularAgendaRevisoes = function() {
-            // 1. Group records by topic
             let topicHistory = {};
             registrosDeEstudo.forEach(reg => {
-                if (!reg.agendarRevisao) return; // Utilizador desativou manualmente esta
+                if (!reg.agendarRevisao) return; 
                 let chave = reg.disciplina + "|||" + reg.topico; 
                 if (!topicHistory[chave]) topicHistory[chave] = { disciplina: reg.disciplina, topico: reg.topico, records: [] };
                 topicHistory[chave].records.push(reg);
             });
             
             let revisoesPendentes = [];
-            let availDays = configuracoesGlobais.diasDisponiveis || [1,2,3,4,5]; // Puxa dos globais
+            let availDays = configuracoesGlobais.diasDisponiveis || [1,2,3,4,5]; 
 
-            // 2. Compute for each topic
             Object.values(topicHistory).forEach(tHist => {
-                // Obter config da disciplina
                 let discObj = editalDoUsuario.disciplinas.find(d => window.normalizarDisciplina(d.nome) === window.normalizarDisciplina(tHist.disciplina));
                 if (!discObj) return;
                 
                 let revType = discObj.reviewConfig?.type || 'performance';
                 let revSettings = discObj.reviewConfig?.settings || {};
 
-                // Sort history chronologically
                 tHist.records.sort((a,b) => new Date(a.data) - new Date(b.data));
                 let lastRecord = tHist.records[tHist.records.length - 1];
                 
-                // Se a última ação tem data manual, sobrepõe (Funcionalidade de Pular)
                 if (lastRecord.dataRevisaoManual) {
                     let mDate = new Date(lastRecord.dataRevisaoManual + "T00:00:00");
                     let res = { date: mDate, perf: 1, type: revType };
@@ -1479,11 +1489,9 @@
                     return;
                 }
 
-                // Call the Engine
                 let engineFunc = window.ReviewEngine.strategies[revType] || window.ReviewEngine.strategies.performance;
                 let results = engineFunc(tHist.records, revSettings);
                 
-                // Handle Parallel Strategy (Array of results)
                 if (!Array.isArray(results)) results = [results];
                 
                 results.forEach(res => {
@@ -1497,12 +1505,11 @@
                         dataIdeal: adjustedDate,
                         disciplina: tHist.disciplina,
                         topico: nomeTopicoFinal,
-                        strategyTag: res.type // Performance, spaced, revisaom...
+                        strategyTag: res.type 
                     });
                 });
             });
             
-            // 3. Build Agenda and prioritize
             let hoje = new Date(); hoje.setHours(0,0,0,0); 
             let agendaFinal = {}; 
             let fila = [...revisoesPendentes]; 
@@ -1519,28 +1526,27 @@
                 let candidatasDoDia = fila.filter(r => r.dataIdeal <= dataAtualAnalise); 
                 if (candidatasDoDia.length === 0) { dataAtualAnalise.setDate(dataAtualAnalise.getDate() + 1); continue; }
                 
-                // PRIORIDADES: Atrasadas > Revisão M > Baixo Desempenho (<50) > Normais
                 candidatasDoDia.sort((a, b) => { 
                     let isAtrasadaA = a.dataIdealOriginal < hoje ? 1 : 0;
                     let isAtrasadaB = b.dataIdealOriginal < hoje ? 1 : 0;
-                    if (isAtrasadaA !== isAtrasadaB) return isAtrasadaB - isAtrasadaA; // Atrasadas primeiro
+                    if (isAtrasadaA !== isAtrasadaB) return isAtrasadaB - isAtrasadaA; 
 
                     let isRevMA = a.strategyTag === 'revisaom' ? 1 : 0;
                     let isRevMB = b.strategyTag === 'revisaom' ? 1 : 0;
-                    if (isRevMA !== isRevMB) return isRevMB - isRevMA; // Revisão M em 2º lugar
+                    if (isRevMA !== isRevMB) return isRevMB - isRevMA; 
 
                     let lowPerfA = (a.perf !== null && a.perf <= 0.50) ? 1 : 0; 
                     let lowPerfB = (b.perf !== null && b.perf <= 0.50) ? 1 : 0; 
-                    if (lowPerfA !== lowPerfB) return lowPerfB - lowPerfA; // Baixo desempenho 3º
+                    if (lowPerfA !== lowPerfB) return lowPerfB - lowPerfA; 
                     
                     let atrasoA = dataAtualAnalise.getTime() - a.dataIdealOriginal.getTime(); 
                     let atrasoB = dataAtualAnalise.getTime() - b.dataIdealOriginal.getTime(); 
-                    if (atrasoA !== atrasoB) return atrasoB - atrasoA; // Mais antigas
+                    if (atrasoA !== atrasoB) return atrasoB - atrasoA; 
 
                     return 0;
                 });
                 
-                let aprovadasParaODia = candidatasDoDia.slice(0, 3); // Max 3 per day default
+                let aprovadasParaODia = candidatasDoDia.slice(0, 3); 
                 let dataString = window.formatarDataLocalParaISO(dataAtualAnalise); 
                 agendaFinal[dataString] = aprovadasParaODia; 
                 fila = fila.filter(r => !aprovadasParaODia.includes(r)); 
@@ -1555,7 +1561,6 @@
             let datas = Object.keys(agenda).sort(); 
             for (let data of datas) { 
                 agenda[data].forEach(item => { 
-                    // Limpar sub-tags para coincidir com a chave padrão (se for paralela)
                     let cleanTopic = item.topico.replace(" (Teoria)", "").replace(" (Questões)", "");
                     let chave = item.disciplina + "|||" + cleanTopic; 
                     if (!mapa[chave]) { let partes = data.split('-'); mapa[chave] = `${partes[2]}/${partes[1]}/${partes[0]}`; } 
@@ -1612,8 +1617,7 @@
         window.criarCartaoRevisaoHTML = function(rev, dataFormatada = null, ehCalendario = false) {
             let perc = rev.perf !== null ? Math.round(rev.perf * 100) : null; 
             
-            // Lógica de CSS por tag
-            let baseColorClass = rev.strategyTag; // performance, revisaom, spaced, weekly
+            let baseColorClass = rev.strategyTag; 
             let badgeClass = `badge-${baseColorClass}`;
             
             let nameLabels = {
@@ -1621,7 +1625,6 @@
             };
             let typeLabel = nameLabels[baseColorClass] || 'Revisão';
 
-            // Overrides para Atrasada e Hoje
             let hojeStr = window.formatarDataLocalParaISO(new Date());
             let itemDateStr = window.formatarDataLocalParaISO(rev.dataIdeal);
             
@@ -1771,7 +1774,6 @@
             window.fecharModalConfigRevisao();
         }
 
-
         // =====================================
         // DESEMPENHO (ACCORDION) E PROTEÇÕES
         // =====================================
@@ -1917,7 +1919,6 @@
             document.getElementById('modal-relatorio-semanal').classList.add('hidden');
         };
 
-        // Função utilitária para obter os limites da semana atual
         window.obterDatasSemanaAtual = function() {
             let today = new Date();
             let dayOfWeek = today.getDay(); 
@@ -1960,13 +1961,11 @@
                 let a = r.questoes?.acertos || 0;
                 let e = r.questoes?.erros || 0;
 
-                // Agregação por Disciplina
                 if(!aggDisciplina[r.disciplina]) aggDisciplina[r.disciplina] = { d: r.disciplina, mins: 0, a: 0, e: 0 };
                 aggDisciplina[r.disciplina].mins += mins;
                 aggDisciplina[r.disciplina].a += a;
                 aggDisciplina[r.disciplina].e += e;
 
-                // Agregação por Assunto e Tipo (Estudo vs Revisão)
                 let keyAssunto = r.disciplina + "|||" + r.topico + "|||" + tipoLabel;
                 if(!aggAssunto[keyAssunto]) aggAssunto[keyAssunto] = { d: r.disciplina, t: r.topico, tipo: tipoLabel, mins: 0, a: 0, e: 0 };
                 aggAssunto[keyAssunto].mins += mins;
@@ -1974,7 +1973,6 @@
                 aggAssunto[keyAssunto].e += e;
             });
 
-            // 1. Tabela de Disciplinas
             let tbodyDisc = document.getElementById('relatorio-tabela-disciplinas');
             tbodyDisc.innerHTML = '';
             let listDisc = Object.values(aggDisciplina).sort((a,b) => b.mins - a.mins);
@@ -1998,7 +1996,6 @@
                 });
             }
 
-            // 2. Tabela Detalhada por Assunto
             let tbodyAssunto = document.getElementById('relatorio-tabela-assuntos');
             tbodyAssunto.innerHTML = '';
             let listAssunto = Object.values(aggAssunto).sort((a,b) => {
@@ -2028,10 +2025,8 @@
                 });
             }
 
-            // 3. Cronograma Concluído — apenas itens NÃO marcados como revisão
             let cronogramaListaEl = document.getElementById('relatorio-semanal-cronograma-lista');
             cronogramaListaEl.innerHTML = '';
-            // Itens concluídos do cronograma que NÃO são revisão (revisão tem categoria "Revisão" nos registos de estudo)
             let itensCronoConcluidos = [];
             planejamentoDoUsuario.cronograma.forEach(dia => {
                 dia.itens.forEach(item => {
@@ -2048,7 +2043,6 @@
                     let subTitle = it.tipo === 'estudo' ? it.topico : (it.tipo === 'redacao' ? it.tema : 'Simulado / Prova');
                     let icon = it.tipo === 'redacao' ? 'fa-pen-nib' : (it.tipo === 'simulado' ? 'fa-list-check' : 'fa-book');
 
-                    // Buscar registro de estudo correspondente (por disciplina + topico, NÃO revisão)
                     let regMatch = null;
                     if (it.tipo === 'estudo') {
                         regMatch = recordsSemana.find(r =>
@@ -2087,7 +2081,6 @@
                 cronogramaListaEl.innerHTML = ulCrono;
             }
 
-            // 4. Revisões Realizadas — apenas registros com categoria "Revisão" (registros de estudo, não cronograma)
             let revisoesListaEl = document.getElementById('relatorio-semanal-revisoes-lista');
             revisoesListaEl.innerHTML = '';
             if (revisoesRealizadas.length === 0) {
@@ -2122,7 +2115,6 @@
             document.getElementById('modal-relatorio-semanal').classList.remove('hidden');
         };
 
-        // Função para Gerar o Documento A4 e Imprimir/Salvar em PDF
         window.imprimirRelatorioSemanal = function() {
             let { monday, sunday } = window.obterDatasSemanaAtual();
             let strMon = `${String(monday.getDate()).padStart(2,'0')}/${String(monday.getMonth()+1).padStart(2,'0')}/${monday.getFullYear()}`;
@@ -2149,7 +2141,6 @@
                 aggAssunto[keyAssunto].mins += mins; aggAssunto[keyAssunto].a += a; aggAssunto[keyAssunto].e += e;
             });
 
-            // Gerar HTML de impressão (Clean, fundo branco, otimizado para A4)
             let printHtml = `
             <!DOCTYPE html>
             <html lang="pt-PT">
@@ -2234,7 +2225,6 @@
             }
             printHtml += `</tbody></table>`;
 
-            // Cronograma
             printHtml += `<h2>3. Assuntos Vistos no Cronograma</h2>`;
             let itensCronoConcluidos = [];
             planejamentoDoUsuario.cronograma.forEach(dia => { dia.itens.forEach(item => { if(item.concluido) itensCronoConcluidos.push({ dia: dia.dia, ...item }); }); });
@@ -2274,7 +2264,6 @@
                 printHtml += `</ul>`;
             }
 
-            // Revisões
             printHtml += `<h2>4. Revisões Realizadas</h2>`;
             if (revisoesRealizadas.length === 0) {
                 printHtml += `<p style="color: #666; margin-top:10px;">Nenhuma revisão registada nesta semana.</p>`;
@@ -2311,7 +2300,6 @@
             printWindow.document.close();
         };
 
-        // Função para Imprimir Cronograma Semanal em PDF (A4 Retrato)
         window.imprimirCronogramaSemanal = function() {
             let printHtml = `
             <!DOCTYPE html>
@@ -2390,9 +2378,6 @@
             printWindow.document.close();
         }
 
-        // =====================================
-        // EDITAL COM DRAG AND DROP E IMPORTAÇÃO
-        // =====================================
         window.mudarAbaEdital = function(aba) { abaAtivaEdital = aba; disciplinaSelecionadaId = null; document.getElementById('tab-ativas').classList.remove('active'); document.getElementById('tab-desativadas').classList.remove('active'); document.getElementById(`tab-${aba}`).classList.add('active'); window.renderizarEdital(); }
         window.selecionarDisciplinaCard = function(id) { disciplinaSelecionadaId = id; window.renderizarEdital(); setTimeout(() => { const painel = document.getElementById('disciplina-detalhes'); if(painel && !painel.classList.contains('hidden')) painel.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }, 100); }
         
@@ -2442,7 +2427,6 @@
                 if (d) {
                     detailContainer.classList.remove('hidden'); let acertosTotais = 0; let errosTotais = 0; let totalMinutosEstudados = 0;
                     registrosDeEstudo.forEach(reg => { 
-                        // Normaliza os nomes para refletir a mesma string do Edital
                         let regDiscNorm = window.normalizarDisciplina(reg.disciplina);
                         if (regDiscNorm === window.normalizarDisciplina(d.nome)) { 
                             acertosTotais += reg.questoes && reg.questoes.acertos ? reg.questoes.acertos : 0; 
@@ -2839,11 +2823,60 @@
         
         window.reiniciarCiclo = function() { window.mostrarConfirmacao("Reiniciar o Ciclo de Estudos? Todos os passos voltarão a ficar pendentes.", () => { planejamentoDoUsuario.ciclo.forEach(passo => passo.concluido = false); window.salvarDadosGeraisNaNuvem(); window.salvarDadosLocais(); window.renderizarViewsCronograma(); }); };
 
-        // HISTÓRICO DE ESTUDO BASE
+        // HISTÓRICO DE ESTUDO BASE COM PAGINAÇÃO
+        window.mudarPaginaHistorico = function(delta) {
+            let dataLength = registrosDeEstudo.length;
+            if (historicoItensPorPagina === 'all') return;
+            let totalPages = Math.ceil(dataLength / parseInt(historicoItensPorPagina));
+            
+            historicoPaginaAtual += delta;
+            if (historicoPaginaAtual < 1) historicoPaginaAtual = 1;
+            if (historicoPaginaAtual > totalPages) historicoPaginaAtual = totalPages;
+            
+            window.renderizarHistorico();
+        }
+
+        window.mudarItensPorPaginaHistorico = function(valor) {
+            historicoItensPorPagina = valor;
+            historicoPaginaAtual = 1;
+            window.renderizarHistorico();
+        }
+
         window.renderizarHistorico = function() {
             const container = document.getElementById('lista-historico'); if (!container) return; container.innerHTML = '';
-            if (registrosDeEstudo.length === 0) { container.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-muted); padding: 2rem;">Nenhum estudo registado ainda.</td></tr>`; return; }
-            registrosDeEstudo.forEach(registro => {
+            const paginacaoWrapper = document.getElementById('historico-paginacao');
+            const pageInfo = document.getElementById('historico-page-info');
+            
+            if (registrosDeEstudo.length === 0) { 
+                container.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-muted); padding: 2rem;">Nenhum estudo registado ainda.</td></tr>`; 
+                if (paginacaoWrapper) paginacaoWrapper.classList.add('hidden');
+                return; 
+            }
+
+            let itensRenderizar = registrosDeEstudo;
+            
+            if (historicoItensPorPagina !== 'all') {
+                let limit = parseInt(historicoItensPorPagina);
+                let totalPages = Math.ceil(registrosDeEstudo.length / limit);
+                if (historicoPaginaAtual > totalPages) historicoPaginaAtual = totalPages;
+                
+                let start = (historicoPaginaAtual - 1) * limit;
+                let end = start + limit;
+                itensRenderizar = registrosDeEstudo.slice(start, end);
+                
+                if (paginacaoWrapper) {
+                    paginacaoWrapper.classList.remove('hidden');
+                    pageInfo.innerText = `Página ${historicoPaginaAtual} de ${totalPages}`;
+                    document.getElementById('btn-hist-prev').disabled = historicoPaginaAtual === 1;
+                    document.getElementById('btn-hist-prev').style.opacity = historicoPaginaAtual === 1 ? '0.3' : '1';
+                    document.getElementById('btn-hist-next').disabled = historicoPaginaAtual === totalPages;
+                    document.getElementById('btn-hist-next').style.opacity = historicoPaginaAtual === totalPages ? '0.3' : '1';
+                }
+            } else {
+                if (paginacaoWrapper) paginacaoWrapper.classList.add('hidden');
+            }
+
+            itensRenderizar.forEach(registro => {
                 const tr = document.createElement('tr'); const pData = registro.data.split('-'); const df = pData.length === 3 ? `${pData[2]}/${pData[1]}/${pData[0]}` : registro.data; const catHTML = (registro.categorias || []).map(cat => `<span class="badge">${cat}</span>`).join('');
                 let perfHTML = '-'; let acertosErrosHTML = '-'; const acertos = registro.questoes && registro.questoes.acertos ? registro.questoes.acertos : 0; const erros = registro.questoes && registro.questoes.erros ? registro.questoes.erros : 0; const totalQ = acertos + erros;
                 if (totalQ > 0) { acertosErrosHTML = `<span style="color: var(--success-color); font-weight: bold;">${acertos}</span> / <span style="color: var(--danger-color); font-weight: bold;">${erros}</span>`; const aproveitamento = Math.round((acertos / totalQ) * 100); let cor = '#dc2626'; if (aproveitamento >= 80) cor = 'var(--success-color)'; else if (aproveitamento >= 60) cor = 'var(--warning-color)'; perfHTML = `<span style="color: ${cor}; font-weight: bold;">${aproveitamento}%</span>`; }
@@ -3125,90 +3158,6 @@
             
             reader.readAsText(file);
         };
-
-        // Metas
-        window.fecharModalMeta = function() { document.getElementById('modal-meta').classList.add('hidden'); }
-        window.abrirModalMeta = function() { 
-            document.getElementById('modal-meta').classList.remove('hidden');
-            document.getElementById('meta-titulo').value = '';
-            document.getElementById('meta-tipo').value = 'horas';
-            document.getElementById('meta-alvo').value = '';
-            const hoje = new Date().toISOString().split('T')[0];
-            document.getElementById('meta-inicio').value = hoje;
-            document.getElementById('meta-fim').value = '';
-            window.atualizarLabelAlvoMeta();
-        }
-        window.atualizarLabelAlvoMeta = function() {
-            const tipo = document.getElementById('meta-tipo').value;
-            document.getElementById('label-meta-alvo').innerText = tipo === 'horas' ? 'Quantidade (em Horas)' : 'Quantidade de Questões';
-        }
-        window.salvarMeta = function() {
-            const titulo = document.getElementById('meta-titulo').value;
-            const tipo = document.getElementById('meta-tipo').value;
-            const alvo = parseInt(document.getElementById('meta-alvo').value);
-            const dtInicio = document.getElementById('meta-inicio').value;
-            const dtFim = document.getElementById('meta-fim').value;
-
-            if(!titulo || isNaN(alvo) || !dtInicio || !dtFim) {
-                window.mostrarAlerta("Preencha todos os campos da meta.");
-                return;
-            }
-            
-            metasDoUsuario.push({ id: Date.now(), titulo, tipo, alvo, dataInicio: dtInicio, dataFim: dtFim });
-            window.salvarDadosGeraisNaNuvem();
-            window.salvarDadosLocais();
-            window.atualizarTodasAsTelas();
-            window.fecharModalMeta();
-        }
-        window.excluirMeta = function(id) {
-            window.mostrarConfirmacao("Deseja eliminar esta meta?", () => {
-                metasDoUsuario = metasDoUsuario.filter(m => m.id !== id);
-                window.salvarDadosGeraisNaNuvem();
-                window.salvarDadosLocais();
-                window.atualizarTodasAsTelas();
-            });
-        }
-        window.renderizarMetas = function() {
-            const container = document.getElementById('lista-metas');
-            if(!container) return;
-            container.innerHTML = '';
-            if(metasDoUsuario.length === 0) {
-                container.innerHTML = '<p style="color:var(--text-muted); text-align:center; padding: 2rem;">Não tens metas definidas.</p>';
-                return;
-            }
-            
-            metasDoUsuario.forEach(meta => {
-                let progressoAtual = 0;
-                registrosDeEstudo.forEach(reg => { 
-                    if (reg.data && reg.data >= meta.dataInicio && reg.data <= meta.dataFim) { 
-                        if (meta.tipo === 'horas' && reg.tempo) progressoAtual += (reg.tempo.horas * 60) + reg.tempo.minutos; 
-                        else if (meta.tipo === 'questoes' && reg.questoes) progressoAtual += (reg.questoes.acertos || 0) + (reg.questoes.erros || 0); 
-                    } 
-                });
-                if (meta.tipo === 'horas') progressoAtual = progressoAtual / 60;
-                let perc = (progressoAtual / meta.alvo) * 100;
-                if(isNaN(perc) || !isFinite(perc)) perc = 0;
-                let percLimpo = Math.min(Math.max(Math.round(perc), 0), 100);
-                
-                let dataI = meta.dataInicio.split('-').reverse().join('/');
-                let dataF = meta.dataFim.split('-').reverse().join('/');
-                let statusPill = percLimpo >= 100 ? `<span class="meta-status-pill" style="background:var(--icon-green-bg); color:var(--success-color);"><i class="fa-solid fa-trophy"></i> Meta Atingida</span>` : `<span class="meta-status-pill" style="background:var(--icon-blue-bg); color:var(--primary-color);"><i class="fa-solid fa-person-running"></i> Em Progresso</span>`;
-                
-                let metaHTML = `
-                <div class="meta-card">
-                    <button class="btn-icon" style="position:absolute; top: 1.5rem; right: 1.5rem; color:var(--danger-color); border-color:transparent;" onclick="window.excluirMeta(${meta.id})"><i class="fa-solid fa-trash"></i></button>
-                    ${statusPill}
-                    <h3>${meta.titulo}</h3>
-                    <p class="meta-date-info"><i class="fa-regular fa-calendar"></i> De ${dataI} até ${dataF}</p>
-                    <p class="meta-msg" style="margin-top:10px;">Progresso: <strong>${Math.round(progressoAtual * 10)/10}</strong> de <strong>${meta.alvo}</strong> ${meta.tipo === 'horas' ? 'horas' : 'questões'}</p>
-                    <div style="display:flex; align-items:center;">
-                        <div class="progress-bar-container" style="flex:1; height:8px;"><div class="progress-bar-fill" style="width:${percLimpo}%;"></div></div>
-                        <div class="meta-perc-text">${percLimpo}%</div>
-                    </div>
-                </div>`;
-                container.innerHTML += metaHTML;
-            });
-        }
 
         // Carregar dados locais inicialmente (fallback offline)
         window.carregarDadosLocais();
