@@ -1245,6 +1245,8 @@
                 if(!d.reviewConfig) d.reviewConfig = { type: 'performance', settings: {} }; 
                 if (!Array.isArray(d.topicos)) d.topicos = [];
                 d.topicos = d.topicos.map(t => typeof t === 'string' ? { nome: t, status: 'nao_iniciado' } : t);
+                // Remove "Simulados e outras questões" do edital — ele é virtual, calculado dinamicamente
+                d.topicos = d.topicos.filter(t => (typeof t === 'string' ? t : t.nome) !== 'Simulados e outras questões');
             });
             
             if (!planejamentoDoUsuario || typeof planejamentoDoUsuario !== 'object') {
@@ -1957,6 +1959,8 @@
                     if (Array.isArray(disc.topicos)) {
                         disc.topicos.forEach(topicoObj => {
                             let nomeTopico = typeof topicoObj === 'string' ? topicoObj : topicoObj.nome;
+                            // "Simulados e outras questões" é tratado separadamente abaixo — nunca via topicos[]
+                            if (nomeTopico === 'Simulados e outras questões') return;
                             let statusTopico = typeof topicoObj === 'string' ? 'nao_iniciado' : (topicoObj.status || 'nao_iniciado');
 
                             let tempoTotal = 0, acertos = 0, erros = 0, ultimoContacto = null;
@@ -1976,6 +1980,35 @@
                             let chaveAgenda = disc.nome + "|||" + nomeTopico;
                             topicosData.push({ nomeTopico, statusTopico, tempoTotal, acertos, erros, total, perc, ultimoContacto, dataRevisao: agendaRevisoes[chaveAgenda] || '-' });
                         });
+
+                        // Adiciona "Simulados e outras questões" APENAS se houver registros reais com esse tópico
+                        let simTempoTotal = 0, simAcertos = 0, simErros = 0, simUltimoContato = null;
+                        if (Array.isArray(registrosDeEstudo)) {
+                            registrosDeEstudo.forEach(reg => {
+                                if (reg.disciplina === disc.nome && reg.topico === 'Simulados e outras questões') {
+                                    if (reg.tempo) simTempoTotal += (Number(reg.tempo.horas) * 60) + Number(reg.tempo.minutos);
+                                    simAcertos += Number(reg.questoes?.acertos || 0);
+                                    simErros += Number(reg.questoes?.erros || 0);
+                                    if (!simUltimoContato || new Date(reg.data) > new Date(simUltimoContato)) simUltimoContato = reg.data;
+                                }
+                            });
+                        }
+                        // Só mostra no desempenho se tiver pelo menos 1 registro com dados
+                        if (simAcertos > 0 || simErros > 0 || simTempoTotal > 0) {
+                            let simTotal = simAcertos + simErros;
+                            let simPerc = simTotal > 0 ? Math.round((simAcertos / simTotal) * 100) : null;
+                            topicosData.push({
+                                nomeTopico: 'Simulados e outras questões',
+                                statusTopico: 'concluido',
+                                tempoTotal: simTempoTotal,
+                                acertos: simAcertos,
+                                erros: simErros,
+                                total: simTotal,
+                                perc: simPerc,
+                                ultimoContacto: simUltimoContato,
+                                dataRevisao: '-'
+                            });
+                        }
                     }
 
                     // Aplicar FILTRO de status
@@ -3361,7 +3394,44 @@
             
             let s = { cargo: cargo, origem: origem, estilo: estilo, data: data, tempo: document.getElementById('sim-tempo').value, acertos: a, erros: e, brancos: b, pontos: pts, timestamp: Date.now() };
             
-            if(document.getElementById('sim-vincular').checked) { let dId = document.getElementById('sim-disciplina-vinculada').value; if(dId) s.disciplinaVinculada = editalDoUsuario.disciplinas.find(d => d.id === parseInt(dId))?.nome || ''; }
+            let discVinculadaNome = '';
+            if(document.getElementById('sim-vincular').checked) {
+                let dId = document.getElementById('sim-disciplina-vinculada').value;
+                if(dId) {
+                    let discObj = editalDoUsuario.disciplinas.find(d => d.id === parseInt(dId));
+                    if (discObj) {
+                        discVinculadaNome = discObj.nome;
+                        s.disciplinaVinculada = discVinculadaNome;
+
+                        // Se o simulado é novo (não edição), cria um registro de estudo vinculado
+                        if (!idEdit && (a > 0 || e > 0)) {
+                            let mins = 0;
+                            let tempoStr = document.getElementById('sim-tempo').value || '';
+                            let mH = tempoStr.match(/(\d+)\s*h/i); let mM = tempoStr.match(/(\d+)\s*m/i);
+                            if(mH) mins += parseInt(mH[1]) * 60; if(mM) mins += parseInt(mM[1]);
+                            let fakeReg = {
+                                data: data,
+                                disciplina: discVinculadaNome,
+                                topico: 'Simulados e outras questões',
+                                tempo: { horas: Math.floor(mins/60), minutos: mins % 60 },
+                                categorias: ['Simulado'], materiais: [],
+                                agendarRevisao: false,
+                                questoes: { acertos: a, erros: e },
+                                comentario: `Simulado: ${cargo} (${origem})`,
+                                timestamp: Date.now() + 1
+                            };
+                            registrosDeEstudo.unshift(fakeReg);
+                            registrosDeEstudo.sort((x,y) => y.timestamp - x.timestamp);
+                        }
+
+                        // Limpeza: remove "Simulados e outras questões" do disc.topicos se ainda estiver lá (dado legado)
+                        discObj.topicos = discObj.topicos.filter(t => {
+                            let nome = typeof t === 'string' ? t : t.nome;
+                            return nome !== 'Simulados e outras questões';
+                        });
+                    }
+                }
+            }
             
             if(idEdit) { let idx = simuladosDoUsuario.findIndex(x => x.id === idEdit); if(idx !== -1) { s.id = idEdit; simuladosDoUsuario[idx] = s; } } else { s.id = Date.now().toString(); simuladosDoUsuario.unshift(s); }
             
@@ -3374,7 +3444,7 @@
                 let t = planejamentoDoUsuario.ciclo.find(i => i.id === parseInt(idConclusao)); if (t) t.concluido = true;
             }
             
-            window.salvarDadosGeraisNaNuvem(); window.salvarDadosLocais(); window.renderizarSimulados(); window.renderizarViewsCronograma(); window.fecharModalSimulado();
+            window.salvarDadosGeraisNaNuvem(); window.salvarDadosLocais(); window.renderizarSimulados(); window.renderizarViewsCronograma(); window.renderizarDesempenho(); window.renderizarDashboard(); window.fecharModalSimulado();
         };
         window.excluirSimulado = function(id) { window.mostrarConfirmacao("Excluir registo de simulado?", () => { simuladosDoUsuario = simuladosDoUsuario.filter(x => x.id !== id); window.salvarDadosGeraisNaNuvem(); window.salvarDadosLocais(); window.renderizarSimulados(); }); };
         
