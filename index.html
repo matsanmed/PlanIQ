@@ -66,7 +66,6 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
         body { display: flex; height: 100vh; background-color: var(--bg-color); color: var(--text-main); overflow: hidden; transition: background-color 0.3s, color 0.3s; }
 
-        /* HEADER MOBILE E RESPONSIVIDADE */
         .mobile-header { display: none; background: var(--sidebar-bg); padding: 1rem 1.5rem; border-bottom: 1px solid var(--border-color); align-items: center; justify-content: space-between; z-index: 20;}
         .mobile-header-logo { font-size: 1.2rem; font-weight: 800; color: var(--primary-color); display: flex; align-items: center; gap: 8px;}
         .mobile-menu-btn { background: none; border: none; font-size: 1.5rem; color: var(--text-main); cursor: pointer; }
@@ -173,23 +172,22 @@
         .revisoes-horizontal-scroll::-webkit-scrollbar-thumb { background-color: var(--border-color); border-radius: 4px; }
         .revisao-card { min-width: 260px; background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; border-left: 4px solid var(--primary-color); display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
         
-        /* Badges e cores específicas do Review Engine */
         .revisao-card.atrasada { border-left-color: var(--danger-color); }
         .badge-atrasada { background: var(--icon-red-bg); color: var(--danger-color); }
         
         .revisao-card.hoje { border-left-color: var(--warning-color); }
         .badge-hoje { background: var(--icon-yellow-bg); color: var(--warning-color); }
         
-        .revisao-card.revisaom { border-left-color: #3b82f6; } /* Azul */
+        .revisao-card.revisaom { border-left-color: #3b82f6; } 
         .badge-revisaom { background: rgba(59, 130, 246, 0.2); color: #3b82f6; }
         
-        .revisao-card.performance { border-left-color: var(--success-color); } /* Verde */
+        .revisao-card.performance { border-left-color: var(--success-color); } 
         .badge-performance { background: rgba(34, 197, 94, 0.2); color: var(--success-color); }
 
-        .revisao-card.spaced { border-left-color: #a855f7; } /* Roxo */
+        .revisao-card.spaced { border-left-color: #a855f7; } 
         .badge-spaced { background: rgba(168, 85, 247, 0.2); color: #c084fc; }
 
-        .revisao-card.weekly { border-left-color: #ec4899; } /* Rosa */
+        .revisao-card.weekly { border-left-color: #ec4899; } 
         .badge-weekly { background: rgba(236, 72, 153, 0.2); color: #f472b6; }
 
         .revisao-card-title { font-weight: 700; font-size: 0.95rem; color: var(--text-main); margin-bottom: 0.3rem; }
@@ -269,7 +267,8 @@
         
         .bar-hover:hover { filter: brightness(1.2); cursor: pointer; }
 
-        /* REGRAS PARA DISPOSITIVOS MÓVEIS (RESPONSIVO) */
+        .sufocado-banner { background-color: var(--danger-color); color: white; padding: 0.75rem; border-radius: 8px; font-weight: 600; display: flex; align-items: center; gap: 10px; margin-bottom: 1.5rem; font-size: 0.9rem;}
+
         @media (max-width: 768px) {
             body { flex-direction: column; overflow: auto; }
             .mobile-header { display: flex; }
@@ -493,7 +492,6 @@
                         <tbody id="lista-historico"></tbody>
                     </table>
                     
-                    <!-- Controlos de Paginação do Histórico -->
                     <div id="historico-paginacao" class="hidden" style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding-top: 15px; border-top: 1px solid var(--border-color); font-size: 0.85rem;">
                         <div style="display: flex; align-items: center; gap: 10px;">
                             <span style="color: var(--text-muted);">Mostrar:</span>
@@ -519,12 +517,21 @@
             <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
                 <div><h1 style="margin-bottom: 0;">Agenda de Revisões</h1><p style="color: var(--text-muted); margin-top: 5px;">O seu cronograma inteligente (Review Engine).</p></div>
                 <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                    <button class="btn-icon" style="width: auto; padding: 0.6rem 1.2rem; border-color: var(--primary-color); color: var(--primary-color);" onclick="window.abrirModalDiasDisponiveis()"><i class="fa-solid fa-calendar-day"></i> Dias Disponíveis</button>
+                    <button class="btn-icon" style="width: auto; padding: 0.6rem 1.2rem; border-color: var(--primary-color); color: var(--primary-color);" onclick="window.abrirModalConfigRevisaoGlobal()"><i class="fa-solid fa-sliders"></i> Configurações da Agenda</button>
                     <button class="btn-primary" style="width: auto; padding: 0.6rem 1.2rem;" onclick="window.abrirModalEstudo()"><i class="fa-solid fa-plus"></i> Adicionar Estudo</button>
                 </div>
             </header>
+
+            <div id="sufocado-banner" class="sufocado-banner hidden">
+                <i class="fa-solid fa-triangle-exclamation" style="font-size: 1.2rem;"></i>
+                <div>
+                    <div><strong>Modo Sufocado Ativo!</strong></div>
+                    <div style="font-size: 0.8rem; font-weight: normal; margin-top: 2px;">Você atingiu o limite de matérias atrasadas. As revisões de assuntos já dominados (>85%) estão suspensas temporariamente para focar nas urgências.</div>
+                </div>
+            </div>
+
             <section style="margin-bottom: 2.5rem;"><h2 class="panel-title" style="color: var(--danger-color); border-bottom-color: var(--danger-color); font-size: 1.2rem;"><i class="fa-solid fa-triangle-exclamation"></i> Prioridades (Hoje & Atrasadas)</h2><div id="lista-prioridades" class="revisoes-horizontal-scroll"></div></section>
-            <section style="margin-bottom: 2.5rem;"><h2 class="panel-title" style="color: var(--primary-color); border-bottom-color: var(--primary-color); font-size: 1.2rem;"><i class="fa-solid fa-calendar-week"></i> Revisões Semanais (Próximos 7 dias)</h2><div id="lista-semana" class="revisoes-horizontal-scroll"></div></section>
+            <section style="margin-bottom: 2.5rem;"><h2 class="panel-title" style="color: var(--primary-color); border-bottom-color: var(--primary-color); font-size: 1.2rem;"><i class="fa-solid fa-calendar-week"></i> Próximos 7 dias úteis</h2><div id="lista-semana" class="revisoes-horizontal-scroll"></div></section>
             <section>
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
                     <h2 class="panel-title" style="margin: 0; border: none; font-size: 1.2rem;"><i class="fa-regular fa-calendar-days"></i> Visão Mensal</h2>
@@ -543,6 +550,38 @@
                 <div><h1 style="margin-bottom: 0;">Desempenho</h1><p style="color: var(--text-muted); margin-top: 5px;">Acompanhe as suas métricas, precisão e horas por disciplina e assunto.</p></div>
                 <button class="btn-primary" style="width: auto; padding: 0.6rem 1.2rem; background-color: var(--primary-color);" onclick="window.abrirModalRelatorioSemanal()"><i class="fa-solid fa-chart-pie"></i> Relatório Semanal</button>
             </header>
+            <!-- Barra de filtros e ordenação -->
+            <div style="background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 0.9rem 1.2rem; margin-bottom: 1.2rem; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                <span style="font-size: 0.82rem; font-weight: 600; color: var(--text-muted); white-space: nowrap;"><i class="fa-solid fa-sliders"></i> Ordenar por:</span>
+                <select id="desemp-sort-col" class="form-control" style="width: auto; padding: 0.35rem 0.7rem; font-size: 0.82rem;" onchange="window.renderizarDesempenho()">
+                    <option value="nome">Nome do Assunto</option>
+                    <option value="perc_asc">Pior Desempenho (↑)</option>
+                    <option value="perc_desc">Melhor Desempenho (↓)</option>
+                    <option value="questoes_desc">Mais Questões</option>
+                    <option value="questoes_asc">Menos Questões</option>
+                    <option value="horas_desc">Mais Horas</option>
+                    <option value="horas_asc">Menos Horas</option>
+                    <option value="data_desc">Contato Mais Recente</option>
+                    <option value="data_asc">Contato Mais Antigo</option>
+                </select>
+                <span style="font-size: 0.82rem; font-weight: 600; color: var(--text-muted); white-space: nowrap; margin-left: 8px;"><i class="fa-solid fa-filter"></i> Filtrar:</span>
+                <select id="desemp-filter-status" class="form-control" style="width: auto; padding: 0.35rem 0.7rem; font-size: 0.82rem;" onchange="window.renderizarDesempenho()">
+                    <option value="todos">Todos os status</option>
+                    <option value="nao_iniciado">Não Iniciado</option>
+                    <option value="estudando">Estudando</option>
+                    <option value="concluido">Concluído</option>
+                </select>
+                <select id="desemp-filter-desemp" class="form-control" style="width: auto; padding: 0.35rem 0.7rem; font-size: 0.82rem;" onchange="window.renderizarDesempenho()">
+                    <option value="todos">Todo desempenho</option>
+                    <option value="critico">Crítico (&lt;60%)</option>
+                    <option value="medio">Médio (60-79%)</option>
+                    <option value="bom">Bom (≥80%)</option>
+                    <option value="sem_questoes">Sem questões</option>
+                </select>
+                <button class="btn-icon" style="font-size:0.78rem; padding: 0.35rem 0.8rem; margin-left:auto;" onclick="document.getElementById('desemp-sort-col').value='nome'; document.getElementById('desemp-filter-status').value='todos'; document.getElementById('desemp-filter-desemp').value='todos'; window.renderizarDesempenho();">
+                    <i class="fa-solid fa-rotate-left"></i> Limpar
+                </button>
+            </div>
             <div id="lista-desempenho-disciplinas"></div>
         </div>
 
@@ -615,7 +654,7 @@
             </div>
         </div>
 
-        <!-- === MODAIS CUSTOMIZADOS === -->
+        <!-- === MODAIS === -->
         <div id="custom-dialog" class="modal-overlay hidden" style="z-index: 9999;">
             <div class="modal-content" style="max-width: 400px; text-align: center;">
                 <h2 id="custom-dialog-title" style="margin-bottom: 15px; font-size: 1.2rem;">Aviso</h2>
@@ -628,7 +667,6 @@
             </div>
         </div>
 
-        <!-- Modais Existentes (Login, Relatório, Tarefa, Estudo, Meta, Simulado, Redacao, Importar Edital) -->
         <div id="modal-login" class="modal-overlay">
             <div class="modal-content" style="max-width: 400px; text-align: center;">
                 <h2 style="margin-bottom: 10px;"><i class="fa-solid fa-lock" style="color: var(--primary-color);"></i> Acesso Restrito</h2>
@@ -649,7 +687,6 @@
                     </div>
                 </div>
                 <p id="relatorio-semanal-data" style="text-align: center; font-weight: 700; color: var(--text-main); margin-bottom: 1.5rem; font-size: 1.1rem;"></p>
-                
                 <h3 style="font-size: 1.1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 5px; margin-bottom: 10px; color: var(--primary-color);">1. Resumo por Disciplina</h3>
                 <div style="overflow-x: auto; max-height: 250px; overflow-y: auto; margin-bottom: 1.5rem; border: 1px solid var(--border-color); border-radius: 6px;">
                     <table style="width: 100%; border-collapse: collapse;">
@@ -797,8 +834,6 @@
             </div>
         </div>
 
-        <!-- === NOVAS MODAIS DO REVIEW ENGINE === -->
-        
         <!-- Modal: Configuração da Revisão da Disciplina -->
         <div id="modal-config-revisao" class="modal-overlay hidden">
             <div class="modal-content" style="max-width: 500px;">
@@ -823,13 +858,13 @@
                 <div id="div-config-weekly" class="form-group hidden" style="background: var(--hover-bg); padding: 15px; border-radius: 6px;">
                     <label>Selecione os dias da semana para revisar esta disciplina:</label>
                     <div class="checkbox-group">
-                        <label class="checkbox-item"><input type="checkbox" name="chk-weekly-day" value="1"> Segunda</label>
-                        <label class="checkbox-item"><input type="checkbox" name="chk-weekly-day" value="2"> Terça</label>
-                        <label class="checkbox-item"><input type="checkbox" name="chk-weekly-day" value="3"> Quarta</label>
-                        <label class="checkbox-item"><input type="checkbox" name="chk-weekly-day" value="4"> Quinta</label>
-                        <label class="checkbox-item"><input type="checkbox" name="chk-weekly-day" value="5"> Sexta</label>
-                        <label class="checkbox-item"><input type="checkbox" name="chk-weekly-day" value="6"> Sábado</label>
-                        <label class="checkbox-item"><input type="checkbox" name="chk-weekly-day" value="0"> Domingo</label>
+                        <label class="checkbox-item"><input type="checkbox" name="chk-weekly-day-disc" value="1"> Segunda</label>
+                        <label class="checkbox-item"><input type="checkbox" name="chk-weekly-day-disc" value="2"> Terça</label>
+                        <label class="checkbox-item"><input type="checkbox" name="chk-weekly-day-disc" value="3"> Quarta</label>
+                        <label class="checkbox-item"><input type="checkbox" name="chk-weekly-day-disc" value="4"> Quinta</label>
+                        <label class="checkbox-item"><input type="checkbox" name="chk-weekly-day-disc" value="5"> Sexta</label>
+                        <label class="checkbox-item"><input type="checkbox" name="chk-weekly-day-disc" value="6"> Sábado</label>
+                        <label class="checkbox-item"><input type="checkbox" name="chk-weekly-day-disc" value="0"> Domingo</label>
                     </div>
                 </div>
 
@@ -841,28 +876,74 @@
             </div>
         </div>
 
-        <!-- Modal: Disponibilidade Semanal Global -->
-        <div id="modal-dias-disponiveis" class="modal-overlay hidden">
-            <div class="modal-content" style="max-width: 450px;">
+        <!-- Modal: Configurações Globais do Review Engine -->
+        <div id="modal-config-revisao-global" class="modal-overlay hidden">
+            <div class="modal-content" style="max-width: 500px;">
                 <div class="modal-header">
-                    <h2><i class="fa-regular fa-calendar-check" style="color: var(--primary-color);"></i> Dias Disponíveis</h2>
-                    <button class="btn-close" onclick="window.fecharModalDiasDisponiveis()"><i class="fa-solid fa-xmark"></i></button>
+                    <h2><i class="fa-solid fa-sliders" style="color: var(--primary-color);"></i> Configurações da Agenda</h2>
+                    <button class="btn-close" onclick="window.fecharModalConfigRevisaoGlobal()"><i class="fa-solid fa-xmark"></i></button>
                 </div>
-                <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 15px;">Quais os dias da semana em que costuma estudar/revisar? As revisões não cairão nos dias desmarcados.</p>
                 
-                <div class="form-group" style="background: var(--hover-bg); padding: 15px; border-radius: 6px;">
-                    <div class="checkbox-group" style="flex-direction: column; gap: 10px;">
-                        <label class="checkbox-item" style="font-weight: 600;"><input type="checkbox" name="chk-avail-day" value="1"> Segunda-feira</label>
-                        <label class="checkbox-item" style="font-weight: 600;"><input type="checkbox" name="chk-avail-day" value="2"> Terça-feira</label>
-                        <label class="checkbox-item" style="font-weight: 600;"><input type="checkbox" name="chk-avail-day" value="3"> Quarta-feira</label>
-                        <label class="checkbox-item" style="font-weight: 600;"><input type="checkbox" name="chk-avail-day" value="4"> Quinta-feira</label>
-                        <label class="checkbox-item" style="font-weight: 600;"><input type="checkbox" name="chk-avail-day" value="5"> Sexta-feira</label>
-                        <label class="checkbox-item" style="font-weight: 600;"><input type="checkbox" name="chk-avail-day" value="6"> Sábado</label>
-                        <label class="checkbox-item" style="font-weight: 600;"><input type="checkbox" name="chk-avail-day" value="0"> Domingo</label>
+                <h3 style="font-size: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 5px; margin-bottom: 10px; color: var(--primary-color);">Disponibilidade Semanal</h3>
+                <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 10px;">Quais os dias da semana em que costuma estudar/revisar?</p>
+                <div class="form-group" style="background: var(--hover-bg); padding: 10px; border-radius: 6px;">
+                    <div class="checkbox-group" style="flex-direction: row; gap: 10px; justify-content: center;">
+                        <label class="checkbox-item" style="font-weight: 600;"><input type="checkbox" name="chk-avail-day" value="1"> Seg</label>
+                        <label class="checkbox-item" style="font-weight: 600;"><input type="checkbox" name="chk-avail-day" value="2"> Ter</label>
+                        <label class="checkbox-item" style="font-weight: 600;"><input type="checkbox" name="chk-avail-day" value="3"> Qua</label>
+                        <label class="checkbox-item" style="font-weight: 600;"><input type="checkbox" name="chk-avail-day" value="4"> Qui</label>
+                        <label class="checkbox-item" style="font-weight: 600;"><input type="checkbox" name="chk-avail-day" value="5"> Sex</label>
+                        <label class="checkbox-item" style="font-weight: 600;"><input type="checkbox" name="chk-avail-day" value="6"> Sáb</label>
+                        <label class="checkbox-item" style="font-weight: 600;"><input type="checkbox" name="chk-avail-day" value="0"> Dom</label>
                     </div>
                 </div>
 
-                <button class="btn-success" onclick="window.salvarDiasDisponiveis()"><i class="fa-solid fa-save"></i> Guardar Disponibilidade</button>
+                <div class="grid-2-cols" style="margin-top: 20px;">
+                    <div class="form-group">
+                        <label>Limite Diário de Revisões</label>
+                        <select id="config-global-limite" class="form-control">
+                            <option value="0">Ilimitado</option>
+                            <option value="1">1 Assunto / dia</option>
+                            <option value="2">2 Assuntos / dia</option>
+                            <option value="3" selected>3 Assuntos / dia</option>
+                            <option value="4">4 Assuntos / dia</option>
+                            <option value="5">5 Assuntos / dia</option>
+                            <option value="10">10 Assuntos / dia</option>
+                        </select>
+                        <span style="font-size: 0.75rem; color: var(--text-muted);">Evita sobrecarregar o seu dia.</span>
+                    </div>
+                    <div class="form-group">
+                        <label>Prazo Máximo (Deadline)</label>
+                        <select id="config-global-deadline" class="form-control">
+                            <option value="3">Até +3 dias</option>
+                            <option value="5">Até +5 dias</option>
+                            <option value="7" selected>Até +7 dias</option>
+                            <option value="10">Até +10 dias</option>
+                            <option value="15">Até +15 dias</option>
+                        </select>
+                        <span style="font-size: 0.75rem; color: var(--text-muted);">Tempo máximo de atraso tolerado.</span>
+                    </div>
+                </div>
+
+                <h3 style="font-size: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 5px; margin-top: 15px; margin-bottom: 10px; color: var(--danger-color);">Modo Sufocado</h3>
+                <div class="form-group" style="background: var(--bg-color); padding: 15px; border-radius: 6px; border: 1px solid var(--border-color);">
+                    <label class="checkbox-item" style="font-weight: 600; color: var(--text-main); margin-bottom: 10px;">
+                        <input type="checkbox" id="config-global-sufocado-ativo" onchange="document.getElementById('div-sufocado-threshold').classList.toggle('hidden', !this.checked)"> 
+                        Ativar "Modo Sufocado" Automático
+                    </label>
+                    <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 10px;">Suspende temporariamente as revisões de assuntos já dominados (>85%) para focar nas urgências e atrasos.</p>
+                    <div id="div-sufocado-threshold" class="hidden">
+                        <label style="font-size: 0.85rem;">Ativar automaticamente quando atingir:</label>
+                        <select id="config-global-sufocado-limite" class="form-control" style="margin-top: 5px;">
+                            <option value="5">5 revisões atrasadas</option>
+                            <option value="10">10 revisões atrasadas</option>
+                            <option value="15">15 revisões atrasadas</option>
+                            <option value="20">20 revisões atrasadas</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button class="btn-success" onclick="window.salvarConfigRevisaoGlobal()"><i class="fa-solid fa-save"></i> Guardar Opções da Agenda</button>
             </div>
         </div>
 
@@ -883,7 +964,6 @@
         };
         const appId = 'planiq-producao';
         
-        // Altere este e-mail para o e-mail de Administrador que desejar.
         const ADMIN_EMAILS = ['matsanmed@gmail.com']; 
 
         let app, auth, db;
@@ -916,7 +996,7 @@
         let simuladosDoUsuario = []; 
         let redacoesDoUsuario = [];
         let planejamentoDoUsuario = { cronograma: [], ciclo: [] };
-        let configuracoesGlobais = { diasDisponiveis: [1, 2, 3, 4, 5] }; // Seg-Sex por defeito
+        let configuracoesGlobais = { diasDisponiveis: [1, 2, 3, 4, 5], limiteDiario: 3, deadlineDias: 7, sufocadoAtivo: false, sufocadoLimite: 10 }; 
         
         let abaAtivaEdital = 'ativas'; 
         let disciplinaSelecionadaId = null; 
@@ -927,8 +1007,24 @@
         let historicoPaginaAtual = 1;
         let historicoItensPorPagina = 20;
 
+        // Funções utilitárias de Data
+        window.formatarDataLocalParaISO = function(dataObj) { let ano = dataObj.getFullYear(); let mes = String(dataObj.getMonth() + 1).padStart(2, '0'); let dia = String(dataObj.getDate()).padStart(2, '0'); return `${ano}-${mes}-${dia}`; }
+        window.isToday = function(dateStr) { let d = new Date(dateStr + "T00:00:00"); let today = new Date(); return d.getDate() === today.getDate() && d.getMonth() === today.getMonth() && d.getFullYear() === today.getFullYear(); }
+        window.isThisWeek = function(dateStr) { let d = new Date(dateStr + "T00:00:00"); let today = new Date(); today.setHours(0,0,0,0); let dayOfWeek = today.getDay(); let startOfWeek = new Date(today); startOfWeek.setDate(today.getDate() - dayOfWeek); let endOfWeek = new Date(today); endOfWeek.setDate(today.getDate() + (6 - dayOfWeek)); return d >= startOfWeek && d <= endOfWeek; }
+        window.isThisMonth = function(dateStr) { let d = new Date(dateStr + "T00:00:00"); let today = new Date(); return d.getMonth() === today.getMonth() && d.getFullYear() === today.getFullYear(); }
+        window.parseTempoToMinutos = function(tempoStr) {
+            if(!tempoStr) return 0;
+            let mins = 0; let hMatch = tempoStr.match(/(\d+)\s*h/i); let mMatch = tempoStr.match(/(\d+)\s*m/i);
+            if(hMatch) mins += parseInt(hMatch[1]) * 60; if(mMatch) mins += parseInt(mMatch[1]);
+            return mins;
+        }
+        window.normalizarDisciplina = function(nome) { 
+            if (!nome) return ''; 
+            return nome.trim(); 
+        }
+
         // =====================================================================
-        // === MOTOR DE REVISÃO (REVIEW ENGINE)                              ===
+        // === MOTOR DE REVISÃO (REVIEW ENGINE AVANÇADO)                     ===
         // =====================================================================
         window.ReviewEngine = {
             adjustToAvailability: function(date, availDaysArr) {
@@ -941,24 +1037,31 @@
                 }
                 return d;
             },
+
+            calculatePerformancePerf: function(records) {
+                // Get the last record that had questions answered to base performance on
+                let lastRev = [...records].reverse().find(r => r.questoes && (r.questoes.acertos > 0 || r.questoes.erros > 0));
+                if (!lastRev) lastRev = records[records.length - 1]; 
+                let a = lastRev.questoes?.acertos || 0;
+                let e = lastRev.questoes?.erros || 0;
+                let t = a + e;
+                return t > 0 ? a / t : null;
+            },
             
             strategies: {
                 performance: function(records) {
-                    let lastRev = [...records].reverse().find(r => r.questoes && (r.questoes.acertos > 0 || r.questoes.erros > 0));
-                    if (!lastRev) lastRev = records[records.length - 1]; 
+                    let lastRev = records[records.length - 1];
+                    let perf = window.ReviewEngine.calculatePerformancePerf(records);
                     
-                    let a = lastRev.questoes?.acertos || 0;
-                    let e = lastRev.questoes?.erros || 0;
-                    let t = a + e;
-                    let perf = t > 0 ? a / t : 0; 
-                    
-                    let daysToAdd = 2;
-                    if (perf <= 0.30) daysToAdd = 2;
-                    else if (perf <= 0.50) daysToAdd = 4;
-                    else if (perf <= 0.75) daysToAdd = 7;
-                    else if (perf <= 0.85) daysToAdd = 10;
-                    else if (perf < 1.00) daysToAdd = 15;
-                    else if (perf === 1.00) daysToAdd = 30;
+                    let daysToAdd = 7; // Default
+                    if (perf !== null) {
+                        if (perf <= 0.30) daysToAdd = 2;
+                        else if (perf <= 0.50) daysToAdd = 4;
+                        else if (perf <= 0.75) daysToAdd = 7;
+                        else if (perf <= 0.85) daysToAdd = 10;
+                        else if (perf < 1.00) daysToAdd = 15;
+                        else if (perf === 1.00) daysToAdd = 30;
+                    }
 
                     let base = new Date(lastRev.data + "T00:00:00");
                     base.setDate(base.getDate() + daysToAdd);
@@ -967,40 +1070,37 @@
                 
                 spaced: function(records) {
                     let intervals = [1, 7, 15, 30, 60, 120];
-                    let count = records.length;
-                    let stage = count - 1; 
+                    let stage = records.length - 1; 
                     if (stage < 0) stage = 0;
                     if (stage >= intervals.length) stage = intervals.length - 1;
                     
                     let lastRev = records[records.length - 1];
                     let base = new Date(lastRev.data + "T00:00:00");
                     base.setDate(base.getDate() + intervals[stage]);
-                    
-                    let a = lastRev.questoes?.acertos || 0; let e = lastRev.questoes?.erros || 0; let t = a+e;
-                    let perf = t > 0 ? a/t : null;
+                    let perf = window.ReviewEngine.calculatePerformancePerf(records);
 
-                    return { date: base, perf: perf !== null ? perf : 1, type: 'spaced' };
+                    return { date: base, perf: perf, type: 'spaced' };
                 },
 
                 revisaom: function(records) {
+                    let perf = window.ReviewEngine.calculatePerformancePerf(records);
                     let lastRev = records[records.length - 1];
                     let base = new Date(lastRev.data + "T00:00:00");
-                    let a = lastRev.questoes?.acertos || 0; let e = lastRev.questoes?.erros || 0; let t = a+e;
-                    let perf = t > 0 ? a/t : null;
 
-                    if (records.length === 1) {
+                    if (records.length === 1) { // Só estudou, agendar 24h
                         base.setDate(base.getDate() + 1);
-                        return { date: base, perf: perf !== null ? perf : 1, type: 'revisaom' };
-                    } else if (records.length === 2) {
+                        return { date: base, perf: perf, type: 'revisaom' };
+                    } else if (records.length === 2) { // Fez estudo + 24h, agendar 7d a partir do dia 1
                         let initialStudy = records[0];
                         base = new Date(initialStudy.data + "T00:00:00");
                         base.setDate(base.getDate() + 7);
+                        // Proteção caso já tenha passado
                         let lastInter = new Date(lastRev.data + "T00:00:00");
                         if (base <= lastInter) { base = new Date(lastInter); base.setDate(base.getDate() + 5); }
-                        return { date: base, perf: perf !== null ? perf : 1, type: 'revisaom' };
-                    } else {
+                        return { date: base, perf: perf, type: 'revisaom' };
+                    } else { // Fez 7d, passa para performance normal
                         let res = window.ReviewEngine.strategies.performance(records);
-                        res.type = 'performance'; 
+                        res.type = 'performance'; // Mantém o nome performance porque já saiu do ciclo M
                         return res;
                     }
                 },
@@ -1020,9 +1120,8 @@
                         loop++;
                     }
 
-                    let a = lastRev.questoes?.acertos || 0; let e = lastRev.questoes?.erros || 0; let t = a+e;
-                    let perf = t > 0 ? a/t : null;
-                    return { date: base, perf: perf !== null ? perf : 1, type: 'weekly' };
+                    let perf = window.ReviewEngine.calculatePerformancePerf(records);
+                    return { date: base, perf: perf, type: 'weekly' };
                 },
 
                 parallel: function(records) {
@@ -1128,8 +1227,12 @@
         // SANITIZAR E SALVAR DADOS
         // =====================================
         window.sanitizarDados = function() {
-            if (!configuracoesGlobais) configuracoesGlobais = { diasDisponiveis: [1,2,3,4,5] };
+            if (!configuracoesGlobais) configuracoesGlobais = {};
             if (!configuracoesGlobais.diasDisponiveis) configuracoesGlobais.diasDisponiveis = [1,2,3,4,5];
+            if (configuracoesGlobais.limiteDiario === undefined) configuracoesGlobais.limiteDiario = 3;
+            if (configuracoesGlobais.deadlineDias === undefined) configuracoesGlobais.deadlineDias = 7;
+            if (configuracoesGlobais.sufocadoAtivo === undefined) configuracoesGlobais.sufocadoAtivo = false;
+            if (configuracoesGlobais.sufocadoLimite === undefined) configuracoesGlobais.sufocadoLimite = 10;
 
             if (!editalDoUsuario || typeof editalDoUsuario !== 'object') {
                 editalDoUsuario = { concursoSelecionado: "Edital Base", disciplinas: [] };
@@ -1248,22 +1351,6 @@
                 document.getElementById('sidebar-overlay').classList.remove('active');
             } catch(e) { console.error("Falha ao navegar:", e); }
         };
-
-        // Funções utilitárias de Data
-        window.formatarDataLocalParaISO = function(dataObj) { let ano = dataObj.getFullYear(); let mes = String(dataObj.getMonth() + 1).padStart(2, '0'); let dia = String(dataObj.getDate()).padStart(2, '0'); return `${ano}-${mes}-${dia}`; }
-        window.isToday = function(dateStr) { let d = new Date(dateStr + "T00:00:00"); let today = new Date(); return d.getDate() === today.getDate() && d.getMonth() === today.getMonth() && d.getFullYear() === today.getFullYear(); }
-        window.isThisWeek = function(dateStr) { let d = new Date(dateStr + "T00:00:00"); let today = new Date(); today.setHours(0,0,0,0); let dayOfWeek = today.getDay(); let startOfWeek = new Date(today); startOfWeek.setDate(today.getDate() - dayOfWeek); let endOfWeek = new Date(today); endOfWeek.setDate(today.getDate() + (6 - dayOfWeek)); return d >= startOfWeek && d <= endOfWeek; }
-        window.isThisMonth = function(dateStr) { let d = new Date(dateStr + "T00:00:00"); let today = new Date(); return d.getMonth() === today.getMonth() && d.getFullYear() === today.getFullYear(); }
-        window.parseTempoToMinutos = function(tempoStr) {
-            if(!tempoStr) return 0;
-            let mins = 0; let hMatch = tempoStr.match(/(\d+)\s*h/i); let mMatch = tempoStr.match(/(\d+)\s*m/i);
-            if(hMatch) mins += parseInt(hMatch[1]) * 60; if(mMatch) mins += parseInt(mMatch[1]);
-            return mins;
-        }
-        window.normalizarDisciplina = function(nome) { 
-            if (!nome) return ''; 
-            return nome.trim(); 
-        }
 
         window.calcularProgressoDisciplina = function(disciplinaObj) { 
             if (!disciplinaObj.topicos || disciplinaObj.topicos.length === 0) return 0; 
@@ -1452,20 +1539,25 @@
         }
 
         // =====================================
-        // PRÓXIMA ATIVIDADE E REVISÕES (NOVO ENGINE)
+        // LOAD BALANCER & SCHEDULER ENGINE
         // =====================================
         window.calcularAgendaRevisoes = function() {
             let topicHistory = {};
             registrosDeEstudo.forEach(reg => {
+                // CORREÇÃO: Filtramos logo no início. Assim, se desmarcar a revisão 
+                // ao terminar a teoria, o motor continua a calcular pelas suas revisões passadas!
                 if (!reg.agendarRevisao) return; 
                 let chave = reg.disciplina + "|||" + reg.topico; 
                 if (!topicHistory[chave]) topicHistory[chave] = { disciplina: reg.disciplina, topico: reg.topico, records: [] };
                 topicHistory[chave].records.push(reg);
             });
             
-            let revisoesPendentes = [];
+            let rawAgenda = [];
             let availDays = configuracoesGlobais.diasDisponiveis || [1,2,3,4,5]; 
+            let delayLimite = configuracoesGlobais.deadlineDias !== undefined ? configuracoesGlobais.deadlineDias : 7;
+            let limiteDiario = configuracoesGlobais.limiteDiario !== undefined ? configuracoesGlobais.limiteDiario : 3;
 
+            // 1. Gera todas as pendências
             Object.values(topicHistory).forEach(tHist => {
                 let discObj = editalDoUsuario.disciplinas.find(d => window.normalizarDisciplina(d.nome) === window.normalizarDisciplina(tHist.disciplina));
                 if (!discObj) return;
@@ -1478,13 +1570,14 @@
                 
                 if (lastRecord.dataRevisaoManual) {
                     let mDate = new Date(lastRecord.dataRevisaoManual + "T00:00:00");
-                    let res = { date: mDate, perf: 1, type: revType };
+                    let res = { date: mDate, perf: null, type: revType };
                     let adjustedDate = window.ReviewEngine.adjustToAvailability(res.date, availDays);
-                    revisoesPendentes.push({
+                    let deadlineDate = new Date(adjustedDate); deadlineDate.setDate(deadlineDate.getDate() + delayLimite);
+                    rawAgenda.push({
                         registroOriginal: lastRecord, perf: res.perf,
-                        dataIdealOriginal: res.date, dataIdeal: adjustedDate,
+                        dataIdealOriginal: res.date, dataIdeal: adjustedDate, deadlineDate: deadlineDate,
                         disciplina: tHist.disciplina, topico: tHist.topico,
-                        strategyTag: res.type
+                        strategyTag: res.type, recordCount: tHist.records.length
                     });
                     return;
                 }
@@ -1496,62 +1589,95 @@
                 
                 results.forEach(res => {
                     let adjustedDate = window.ReviewEngine.adjustToAvailability(res.date, availDays);
+                    let deadlineDate = new Date(adjustedDate); deadlineDate.setDate(deadlineDate.getDate() + delayLimite);
                     let nomeTopicoFinal = res.parallelSub ? `${tHist.topico} (${res.parallelSub})` : tHist.topico;
 
-                    revisoesPendentes.push({
-                        registroOriginal: lastRecord,
-                        perf: res.perf,
-                        dataIdealOriginal: res.date,
-                        dataIdeal: adjustedDate,
-                        disciplina: tHist.disciplina,
-                        topico: nomeTopicoFinal,
-                        strategyTag: res.type 
+                    rawAgenda.push({
+                        registroOriginal: lastRecord, perf: res.perf,
+                        dataIdealOriginal: res.date, dataIdeal: adjustedDate, deadlineDate: deadlineDate,
+                        disciplina: tHist.disciplina, topico: nomeTopicoFinal,
+                        strategyTag: res.type, recordCount: tHist.records.length
                     });
                 });
             });
+
+            // 2. Aplicar "Modo Sufocado"
+            let hojeObj = new Date(); hojeObj.setHours(0,0,0,0);
+            let atrasadasCount = rawAgenda.filter(r => r.dataIdealOriginal < hojeObj).length;
+            let isSufocadoAtivo = configuracoesGlobais.sufocadoAtivo && (atrasadasCount >= configuracoesGlobais.sufocadoLimite);
             
-            let hoje = new Date(); hoje.setHours(0,0,0,0); 
-            let agendaFinal = {}; 
-            let fila = [...revisoesPendentes]; 
-            let dataAtualAnalise = new Date(hoje); 
-            let limiteSeguranca = 0;
-            
-            while(fila.length > 0 && limiteSeguranca < 1000) {
-                limiteSeguranca++; 
-                if (!availDays.includes(dataAtualAnalise.getDay())) { 
-                    dataAtualAnalise.setDate(dataAtualAnalise.getDate() + 1); 
-                    continue; 
-                } 
-                
-                let candidatasDoDia = fila.filter(r => r.dataIdeal <= dataAtualAnalise); 
-                if (candidatasDoDia.length === 0) { dataAtualAnalise.setDate(dataAtualAnalise.getDate() + 1); continue; }
-                
-                candidatasDoDia.sort((a, b) => { 
-                    let isAtrasadaA = a.dataIdealOriginal < hoje ? 1 : 0;
-                    let isAtrasadaB = b.dataIdealOriginal < hoje ? 1 : 0;
-                    if (isAtrasadaA !== isAtrasadaB) return isAtrasadaB - isAtrasadaA; 
-
-                    let isRevMA = a.strategyTag === 'revisaom' ? 1 : 0;
-                    let isRevMB = b.strategyTag === 'revisaom' ? 1 : 0;
-                    if (isRevMA !== isRevMB) return isRevMB - isRevMA; 
-
-                    let lowPerfA = (a.perf !== null && a.perf <= 0.50) ? 1 : 0; 
-                    let lowPerfB = (b.perf !== null && b.perf <= 0.50) ? 1 : 0; 
-                    if (lowPerfA !== lowPerfB) return lowPerfB - lowPerfA; 
-                    
-                    let atrasoA = dataAtualAnalise.getTime() - a.dataIdealOriginal.getTime(); 
-                    let atrasoB = dataAtualAnalise.getTime() - b.dataIdealOriginal.getTime(); 
-                    if (atrasoA !== atrasoB) return atrasoB - atrasoA; 
-
-                    return 0;
-                });
-                
-                let aprovadasParaODia = candidatasDoDia.slice(0, 3); 
-                let dataString = window.formatarDataLocalParaISO(dataAtualAnalise); 
-                agendaFinal[dataString] = aprovadasParaODia; 
-                fila = fila.filter(r => !aprovadasParaODia.includes(r)); 
-                dataAtualAnalise.setDate(dataAtualAnalise.getDate() + 1);
+            const banner = document.getElementById('sufocado-banner');
+            if (banner) {
+                if (isSufocadoAtivo) banner.classList.remove('hidden');
+                else banner.classList.add('hidden');
             }
+
+            if (isSufocadoAtivo) {
+                rawAgenda = rawAgenda.filter(r => !(r.perf !== null && r.perf >= 0.86 && r.strategyTag !== 'revisaom'));
+            }
+
+            // 3. Atribuir Priority Score
+            rawAgenda.forEach(r => {
+                let score = 0;
+                if (r.dataIdealOriginal < hojeObj) score += 1000; // Atrasadas
+                if (r.strategyTag === 'revisaom' && r.recordCount <= 2) score += 500; // Revisão M em andamento
+                if (r.perf !== null) {
+                    if (r.perf <= 0.50) score += 300;
+                    else if (r.perf <= 0.85) score += 200;
+                    else score += 100;
+                } else { score += 150; } // Default if no perf
+                r.priorityScore = score;
+            });
+            
+            // 4. Scheduler Varrimento (Load Balancer & Hard Replace)
+            let agendaFinal = {}; 
+            let pool = [...rawAgenda];
+            let dataSweep = new Date(hojeObj);
+            let limitSafe = 0;
+
+            // Varrimento sequencial robusto que garante que nenhuma tarefa desaparece
+            while (pool.length > 0 && limitSafe < 1000) {
+                limitSafe++;
+                let dataStr = window.formatarDataLocalParaISO(dataSweep);
+
+                if (!availDays.includes(dataSweep.getDay())) {
+                    dataSweep.setDate(dataSweep.getDate() + 1);
+                    continue;
+                }
+
+                let candidatas = pool.filter(r => r.dataIdeal <= dataSweep);
+
+                if (candidatas.length > 0) {
+                    candidatas.sort((a,b) => {
+                        if (a.priorityScore !== b.priorityScore) return b.priorityScore - a.priorityScore;
+                        return a.dataIdealOriginal.getTime() - b.dataIdealOriginal.getTime();
+                    });
+
+                    let selecionadasParaHoje = [];
+
+                    if (limiteDiario === 0) { 
+                        selecionadasParaHoje = [...candidatas];
+                    } else {
+                        let vagas = limiteDiario;
+                        let obrigatorias = candidatas.filter(r => dataSweep >= r.deadlineDate);
+                        let normais = candidatas.filter(r => dataSweep < r.deadlineDate);
+
+                        for (let ob of obrigatorias) {
+                            if (vagas > 0) { selecionadasParaHoje.push(ob); vagas--; }
+                        }
+                        for (let norm of normais) {
+                            if (vagas > 0) { selecionadasParaHoje.push(norm); vagas--; }
+                        }
+                    }
+
+                    if (selecionadasParaHoje.length > 0) {
+                        agendaFinal[dataStr] = selecionadasParaHoje;
+                        pool = pool.filter(r => !selecionadasParaHoje.includes(r));
+                    }
+                }
+                dataSweep.setDate(dataSweep.getDate() + 1);
+            }
+
             return agendaFinal;
         };
 
@@ -1687,7 +1813,7 @@
             if (document.getElementById('view-revisoes').classList.contains('hidden')) return;
             const agenda = window.calcularAgendaRevisoes(); let hojeObj = new Date(); hojeObj.setHours(0,0,0,0); let stringHoje = window.formatarDataLocalParaISO(hojeObj);
             const contPrioridades = document.getElementById('lista-prioridades'); contPrioridades.innerHTML = '';
-            if (agenda[stringHoje] && agenda[stringHoje].length > 0) { agenda[stringHoje].forEach(rev => { contPrioridades.innerHTML += window.criarCartaoRevisaoHTML(rev, "Para Hoje"); }); } else { contPrioridades.innerHTML = '<p style="color: var(--text-muted); padding: 1rem; font-size: 0.9rem;">Nenhuma prioridade ou revisão atrasada para hoje! 🎉</p>'; }
+            if (agenda[stringHoje] && agenda[stringHoje].length > 0) { agenda[stringHoje].forEach(rev => { contPrioridades.innerHTML += window.criarCartaoRevisaoHTML(rev, "Para Hoje"); }); } else { contPrioridades.innerHTML = '<p style="color: var(--text-muted); padding: 1rem; font-size: 0.9rem;">Nenhuma prioridade ou revisão agendada para hoje! 🎉</p>'; }
             const contSemana = document.getElementById('lista-semana'); contSemana.innerHTML = ''; let itensSemana = 0; const diasSemanaNomes = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
             for (let i = 1; i <= 7; i++) { let diaFuturo = new Date(hojeObj); diaFuturo.setDate(diaFuturo.getDate() + i); let stringDia = window.formatarDataLocalParaISO(diaFuturo); if (agenda[stringDia]) { agenda[stringDia].forEach(rev => { let dataFormatada = `${diasSemanaNomes[diaFuturo.getDay()]} (${diaFuturo.getDate()}/${diaFuturo.getMonth()+1})`; contSemana.innerHTML += window.criarCartaoRevisaoHTML(rev, dataFormatada); itensSemana++; }); } }
             if (itensSemana === 0) contSemana.innerHTML = '<p style="color: var(--text-muted); padding: 1rem; font-size: 0.9rem;">Nenhuma revisão agendada para os próximos 7 dias úteis.</p>';
@@ -1707,22 +1833,34 @@
         // =====================================
         // DIAS DISPONÍVEIS E CONFIG REVISÃO UI
         // =====================================
-        window.abrirModalDiasDisponiveis = function() {
-            document.getElementById('modal-dias-disponiveis').classList.remove('hidden');
+        window.abrirModalConfigRevisaoGlobal = function() {
+            document.getElementById('modal-config-revisao-global').classList.remove('hidden');
             let avail = configuracoesGlobais.diasDisponiveis || [1,2,3,4,5];
-            document.querySelectorAll('input[name="chk-avail-day"]').forEach(cb => {
-                cb.checked = avail.includes(parseInt(cb.value));
-            });
+            document.querySelectorAll('input[name="chk-avail-day"]').forEach(cb => { cb.checked = avail.includes(parseInt(cb.value)); });
+            document.getElementById('config-global-limite').value = configuracoesGlobais.limiteDiario !== undefined ? configuracoesGlobais.limiteDiario : 3;
+            document.getElementById('config-global-deadline').value = configuracoesGlobais.deadlineDias !== undefined ? configuracoesGlobais.deadlineDias : 7;
+            
+            const sufocadoCb = document.getElementById('config-global-sufocado-ativo');
+            sufocadoCb.checked = configuracoesGlobais.sufocadoAtivo || false;
+            document.getElementById('div-sufocado-threshold').classList.toggle('hidden', !sufocadoCb.checked);
+            document.getElementById('config-global-sufocado-limite').value = configuracoesGlobais.sufocadoLimite !== undefined ? configuracoesGlobais.sufocadoLimite : 10;
         }
-        window.fecharModalDiasDisponiveis = function() { document.getElementById('modal-dias-disponiveis').classList.add('hidden'); }
-        window.salvarDiasDisponiveis = function() {
+
+        window.fecharModalConfigRevisaoGlobal = function() { document.getElementById('modal-config-revisao-global').classList.add('hidden'); }
+        
+        window.salvarConfigRevisaoGlobal = function() {
             let avail = Array.from(document.querySelectorAll('input[name="chk-avail-day"]:checked')).map(cb => parseInt(cb.value));
-            if(avail.length === 0) { window.mostrarAlerta("Tem de selecionar pelo menos um dia disponível."); return; }
+            if(avail.length === 0) { window.mostrarAlerta("Tem de selecionar pelo menos um dia disponível na semana."); return; }
             configuracoesGlobais.diasDisponiveis = avail;
+            configuracoesGlobais.limiteDiario = parseInt(document.getElementById('config-global-limite').value);
+            configuracoesGlobais.deadlineDias = parseInt(document.getElementById('config-global-deadline').value);
+            configuracoesGlobais.sufocadoAtivo = document.getElementById('config-global-sufocado-ativo').checked;
+            configuracoesGlobais.sufocadoLimite = parseInt(document.getElementById('config-global-sufocado-limite').value);
+
             window.salvarDadosGeraisNaNuvem();
             window.salvarDadosLocais();
             window.renderizarRevisoes();
-            window.fecharModalDiasDisponiveis();
+            window.fecharModalConfigRevisaoGlobal();
         }
 
         window.abrirConfigRevisao = function(discId) {
@@ -1736,9 +1874,9 @@
             document.getElementById('config-rev-tipo').value = conf.type;
             
             if (conf.type === 'weekly' && conf.settings.days) {
-                document.querySelectorAll('input[name="chk-weekly-day"]').forEach(cb => { cb.checked = conf.settings.days.includes(parseInt(cb.value)); });
+                document.querySelectorAll('input[name="chk-weekly-day-disc"]').forEach(cb => { cb.checked = conf.settings.days.includes(parseInt(cb.value)); });
             } else {
-                document.querySelectorAll('input[name="chk-weekly-day"]').forEach(cb => cb.checked = false);
+                document.querySelectorAll('input[name="chk-weekly-day-disc"]').forEach(cb => cb.checked = false);
             }
             window.toggleCamposConfigRevisao();
         }
@@ -1751,7 +1889,7 @@
             else if (tipo === 'spaced') helpMsg.innerText = "Padrão de repetição espaçada fixa: 24h, 7 dias, 15 dias, 30 dias e 60 dias após cada revisão concluída.";
             else if (tipo === 'revisaom') helpMsg.innerText = "Método M: 24h -> 7 dias -> passa a avaliar automaticamente pelo seu Desempenho (Performance).";
             else if (tipo === 'weekly') helpMsg.innerText = "Dias fixos na semana. A revisão surgirá sempre no dia selecionado após um estudo ou revisão concluída.";
-            else if (tipo === 'parallel') helpMsg.innerText = "Modo duplo: Vai agendar duas revisões em paralelo. Uma para repassar a teoria (Espaçada) e outra baseada no rendimento das Questões.";
+            else if (tipo === 'parallel') helpMsg.innerText = "Modo duplo: Vai agendar duas revisões em paralelo. Uma para repassar a teoria (Espaçada) e outra baseada no rendimento das Questões (Desempenho).";
         }
 
         window.fecharModalConfigRevisao = function() { document.getElementById('modal-config-revisao').classList.add('hidden'); }
@@ -1763,7 +1901,7 @@
             let tipo = document.getElementById('config-rev-tipo').value;
             let settings = {};
             if (tipo === 'weekly') {
-                let days = Array.from(document.querySelectorAll('input[name="chk-weekly-day"]:checked')).map(cb => parseInt(cb.value));
+                let days = Array.from(document.querySelectorAll('input[name="chk-weekly-day-disc"]:checked')).map(cb => parseInt(cb.value));
                 if (days.length === 0) { window.mostrarAlerta("Tem de selecionar pelo menos um dia para a revisão semanal."); return; }
                 settings.days = days;
             }
@@ -1805,80 +1943,112 @@
                 let agendaRevisoes = {};
                 try { agendaRevisoes = window.obterMapaProximasRevisoes(); } catch(e) { console.error("Aviso no mapa revisões:", e); }
 
+                // Lê filtros e ordenação da UI (com fallback para quando os selects ainda não existem)
+                const sortCol = document.getElementById('desemp-sort-col')?.value || 'nome';
+                const filterStatus = document.getElementById('desemp-filter-status')?.value || 'todos';
+                const filterDesemp = document.getElementById('desemp-filter-desemp')?.value || 'todos';
+
                 let htmlFinal = '';
 
                 disciplinasAtivas.forEach((disc, index) => {
-                    let linhasTopicos = '';
-                    
+                    // Monta os dados de cada tópico
+                    let topicosData = [];
+
                     if (Array.isArray(disc.topicos)) {
                         disc.topicos.forEach(topicoObj => {
                             let nomeTopico = typeof topicoObj === 'string' ? topicoObj : topicoObj.nome;
                             let statusTopico = typeof topicoObj === 'string' ? 'nao_iniciado' : (topicoObj.status || 'nao_iniciado');
 
-                            let tempoTotal = 0;
-                            let acertos = 0;
-                            let erros = 0;
-                            let ultimoContacto = null;
-
+                            let tempoTotal = 0, acertos = 0, erros = 0, ultimoContacto = null;
                             if (Array.isArray(registrosDeEstudo)) {
                                 registrosDeEstudo.forEach(reg => {
                                     if (reg.disciplina === disc.nome && reg.topico === nomeTopico) {
                                         if (reg.tempo) tempoTotal += (Number(reg.tempo.horas) * 60) + Number(reg.tempo.minutos);
                                         acertos += Number(reg.questoes?.acertos || 0);
                                         erros += Number(reg.questoes?.erros || 0);
-                                        if (!ultimoContacto || new Date(reg.data) > new Date(ultimoContacto)) {
-                                            ultimoContacto = reg.data;
-                                        }
+                                        if (!ultimoContacto || new Date(reg.data) > new Date(ultimoContacto)) ultimoContacto = reg.data;
                                     }
                                 });
                             }
 
                             let total = acertos + erros;
-                            let perc = total > 0 ? Math.round((acertos / total) * 100) : 0;
-                            let horasTxt = tempoTotal > 0 ? `${Math.floor(tempoTotal/60)}h ${tempoTotal%60}m` : '-';
-                            let dataUltimoTxt = ultimoContacto ? ultimoContacto.split('-').reverse().join('/') : '-';
-
+                            let perc = total > 0 ? Math.round((acertos / total) * 100) : null;
                             let chaveAgenda = disc.nome + "|||" + nomeTopico;
-                            let dataRevisao = agendaRevisoes[chaveAgenda] || '-';
-
-                            let statusCor = 'var(--status-gray)';
-                            let statusTexto = 'Não iniciado';
-                            if (statusTopico === 'estudando') { statusCor = 'var(--status-blue)'; statusTexto = 'Estudando'; }
-                            if (statusTopico === 'concluido') { statusCor = 'var(--status-green)'; statusTexto = 'Concluído'; }
-                            let statusHtml = `<span style="color:${statusCor}; display:flex; align-items:center; gap:5px; font-size:0.8rem; font-weight:500;"><i class="fa-solid fa-circle" style="font-size:6px;"></i> ${statusTexto}</span>`;
-
-                            let barColor = perc >= 80 ? 'var(--success-color)' : perc >= 60 ? 'var(--warning-color)' : 'var(--danger-color)';
-
-                            linhasTopicos += `
-                                <tr>
-                                    <td style="font-weight:600; color:var(--text-main); font-size:0.85rem;">${nomeTopico}</td>
-                                    <td>${statusHtml}</td>
-                                    <td style="font-size:0.85rem;"><i class="fa-regular fa-clock" style="color:var(--text-muted)"></i> ${horasTxt}</td>
-                                    <td>
-                                        <div style="display:flex; align-items:center; gap:10px;">
-                                            <span style="color:${barColor}; font-weight:bold; font-size:0.85rem; min-width:30px;">${perc}%</span>
-                                            <div class="progress-bar-container" style="width:60px; margin:0; height:4px; background:var(--bg-color);">
-                                                <div class="progress-bar-fill" style="width:${perc}%; background-color:${barColor}"></div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td style="color:var(--text-muted); font-size:0.85rem;">${dataUltimoTxt}</td>
-                                    <td style="color:var(--primary-color); font-weight:600; font-size:0.85rem;">${dataRevisao}</td>
-                                    <td style="color:var(--success-color); font-weight:bold; text-align:center;">${acertos}</td>
-                                    <td style="color:var(--danger-color); font-weight:bold; text-align:center;">${erros}</td>
-                                    <td style="font-weight:bold; text-align:center; color:var(--text-main);">${total}</td>
-                                </tr>
-                            `;
+                            topicosData.push({ nomeTopico, statusTopico, tempoTotal, acertos, erros, total, perc, ultimoContacto, dataRevisao: agendaRevisoes[chaveAgenda] || '-' });
                         });
                     }
 
-                    let isFirst = (index === 0); 
+                    // Aplicar FILTRO de status
+                    if (filterStatus !== 'todos') {
+                        topicosData = topicosData.filter(t => t.statusTopico === filterStatus);
+                    }
+
+                    // Aplicar FILTRO de desempenho
+                    if (filterDesemp !== 'todos') {
+                        topicosData = topicosData.filter(t => {
+                            if (filterDesemp === 'sem_questoes') return t.total === 0;
+                            if (filterDesemp === 'critico') return t.total > 0 && t.perc < 60;
+                            if (filterDesemp === 'medio') return t.total > 0 && t.perc >= 60 && t.perc < 80;
+                            if (filterDesemp === 'bom') return t.total > 0 && t.perc >= 80;
+                            return true;
+                        });
+                    }
+
+                    // Aplicar ORDENAÇÃO
+                    topicosData.sort((a, b) => {
+                        switch(sortCol) {
+                            case 'perc_asc': return (a.perc ?? -1) - (b.perc ?? -1);
+                            case 'perc_desc': return (b.perc ?? -1) - (a.perc ?? -1);
+                            case 'questoes_desc': return b.total - a.total;
+                            case 'questoes_asc': return a.total - b.total;
+                            case 'horas_desc': return b.tempoTotal - a.tempoTotal;
+                            case 'horas_asc': return a.tempoTotal - b.tempoTotal;
+                            case 'data_desc': return (b.ultimoContacto || '0') > (a.ultimoContacto || '0') ? 1 : -1;
+                            case 'data_asc': return (a.ultimoContacto || '9') > (b.ultimoContacto || '9') ? 1 : -1;
+                            default: return a.nomeTopico.localeCompare(b.nomeTopico);
+                        }
+                    });
+
+                    // Constrói HTML das linhas
+                    let linhasTopicos = '';
+                    topicosData.forEach(t => {
+                        let { nomeTopico, statusTopico, tempoTotal, acertos, erros, total, perc, ultimoContacto, dataRevisao } = t;
+                        let horasTxt = tempoTotal > 0 ? `${Math.floor(tempoTotal/60)}h ${tempoTotal%60}m` : '-';
+                        let dataUltimoTxt = ultimoContacto ? ultimoContacto.split('-').reverse().join('/') : '-';
+                        let statusCor = 'var(--status-gray)', statusTexto = 'Não iniciado';
+                        if (statusTopico === 'estudando') { statusCor = 'var(--status-blue)'; statusTexto = 'Estudando'; }
+                        if (statusTopico === 'concluido') { statusCor = 'var(--status-green)'; statusTexto = 'Concluído'; }
+                        let statusHtml = `<span style="color:${statusCor}; display:flex; align-items:center; gap:5px; font-size:0.8rem; font-weight:500;"><i class="fa-solid fa-circle" style="font-size:6px;"></i> ${statusTexto}</span>`;
+                        let percNum = perc !== null ? perc : 0;
+                        let barColor = percNum >= 80 ? 'var(--success-color)' : percNum >= 60 ? 'var(--warning-color)' : 'var(--danger-color)';
+                        let percDisplay = perc !== null ? `<span style="color:${barColor}; font-weight:bold; font-size:0.85rem; min-width:30px;">${perc}%</span><div class="progress-bar-container" style="width:60px; margin:0; height:4px; background:var(--bg-color);"><div class="progress-bar-fill" style="width:${perc}%; background-color:${barColor}"></div></div>` : `<span style="color:var(--text-muted); font-size:0.8rem;">-</span>`;
+
+                        linhasTopicos += `
+                            <tr>
+                                <td style="font-weight:600; color:var(--text-main); font-size:0.85rem;">${nomeTopico}</td>
+                                <td>${statusHtml}</td>
+                                <td style="font-size:0.85rem;"><i class="fa-regular fa-clock" style="color:var(--text-muted)"></i> ${horasTxt}</td>
+                                <td><div style="display:flex; align-items:center; gap:10px;">${percDisplay}</div></td>
+                                <td style="color:var(--text-muted); font-size:0.85rem;">${dataUltimoTxt}</td>
+                                <td style="color:var(--primary-color); font-weight:600; font-size:0.85rem;">${dataRevisao}</td>
+                                <td style="color:var(--success-color); font-weight:bold; text-align:center;">${acertos}</td>
+                                <td style="color:var(--danger-color); font-weight:bold; text-align:center;">${erros}</td>
+                                <td style="font-weight:bold; text-align:center; color:var(--text-main);">${total}</td>
+                            </tr>`;
+                    });
+
+                    // Conta quantos tópicos foram filtrados
+                    let totalTopicos = Array.isArray(disc.topicos) ? disc.topicos.length : 0;
+                    let filtradosBadge = (filterStatus !== 'todos' || filterDesemp !== 'todos') && topicosData.length !== totalTopicos
+                        ? `<span style="font-size:0.72rem; background:var(--icon-yellow-bg); color:var(--icon-yellow-text); padding:2px 8px; border-radius:10px; margin-left:8px; font-weight:600;">${topicosData.length}/${totalTopicos} assuntos</span>`
+                        : '';
+
+                    let isFirst = (index === 0);
                     let idUsado = disc.id || index;
-                    
                     htmlFinal += `
                         <div class="desempenho-card">
                             <div class="desempenho-header" onclick="window.toggleDesempenhoAccordion('${idUsado}')">
-                                <span><i class="fa-solid fa-book" style="color:var(--primary-color); margin-right:8px;"></i> <span style="color:var(--primary-color); font-size:1.1rem">${disc.nome}</span></span>
+                                <span><i class="fa-solid fa-book" style="color:var(--primary-color); margin-right:8px;"></i> <span style="color:var(--primary-color); font-size:1.1rem">${disc.nome}</span>${filtradosBadge}</span>
                                 <i class="fa-solid ${isFirst ? 'fa-chevron-up' : 'fa-chevron-down'}" id="icon-accordion-${idUsado}" style="color:var(--text-main);"></i>
                             </div>
                             <div class="desempenho-body ${isFirst ? '' : 'hidden'}" id="body-accordion-${idUsado}">
@@ -1886,19 +2056,19 @@
                                     <table>
                                         <thead>
                                             <tr>
-                                                <th style="width:25%;">Assunto</th>
+                                                <th style="width:25%; cursor:pointer;" onclick="document.getElementById('desemp-sort-col').value='nome'; window.renderizarDesempenho();">Assunto <i class="fa-solid fa-sort" style="font-size:0.7rem; opacity:0.5;"></i></th>
                                                 <th>Status</th>
-                                                <th>Horas Estudadas</th>
-                                                <th>Desempenho</th>
-                                                <th>Último Contato</th>
+                                                <th style="cursor:pointer;" onclick="document.getElementById('desemp-sort-col').value= document.getElementById('desemp-sort-col').value==='horas_desc'?'horas_asc':'horas_desc'; window.renderizarDesempenho();">Horas <i class="fa-solid fa-sort" style="font-size:0.7rem; opacity:0.5;"></i></th>
+                                                <th style="cursor:pointer;" onclick="document.getElementById('desemp-sort-col').value= document.getElementById('desemp-sort-col').value==='perc_desc'?'perc_asc':'perc_desc'; window.renderizarDesempenho();">Desempenho <i class="fa-solid fa-sort" style="font-size:0.7rem; opacity:0.5;"></i></th>
+                                                <th style="cursor:pointer;" onclick="document.getElementById('desemp-sort-col').value= document.getElementById('desemp-sort-col').value==='data_desc'?'data_asc':'data_desc'; window.renderizarDesempenho();">Último Contato <i class="fa-solid fa-sort" style="font-size:0.7rem; opacity:0.5;"></i></th>
                                                 <th>Revisão</th>
-                                                <th style="text-align:center">Acertos</th>
-                                                <th style="text-align:center">Erros</th>
-                                                <th style="text-align:center">Total</th>
+                                                <th style="text-align:center; cursor:pointer;" onclick="document.getElementById('desemp-sort-col').value= document.getElementById('desemp-sort-col').value==='questoes_desc'?'questoes_asc':'questoes_desc'; window.renderizarDesempenho();">Acertos <i class="fa-solid fa-sort" style="font-size:0.7rem; opacity:0.5;"></i></th>
+                                                <th style="text-align:center;">Erros</th>
+                                                <th style="text-align:center;">Total</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            ${linhasTopicos || '<tr><td colspan="9" style="text-align:center; color:var(--text-muted); padding:1rem;">Nenhum assunto cadastrado nesta disciplina.</td></tr>'}
+                                            ${linhasTopicos || '<tr><td colspan="9" style="text-align:center; color:var(--text-muted); padding:1rem;">Nenhum assunto corresponde aos filtros aplicados.</td></tr>'}
                                         </tbody>
                                     </table>
                                 </div>
@@ -2599,7 +2769,7 @@
         };
 
         window.mudarAbaCronograma = function(aba) { document.getElementById('tab-c-semanal').classList.remove('active'); document.getElementById('tab-c-ciclo').classList.remove('active'); document.getElementById('view-c-semanal').classList.add('hidden'); document.getElementById('view-c-ciclo').classList.add('hidden'); document.getElementById(`tab-c-${aba}`).classList.add('active'); document.getElementById(`view-c-${aba}`).classList.remove('hidden'); };
-        
+
         window.renderizarViewsCronograma = function() {
             const kContainer = document.getElementById('kanban-container'); kContainer.innerHTML = '';
             planejamentoDoUsuario.cronograma.forEach(diaData => {
@@ -2783,27 +2953,71 @@
 
             if (item.tipo === 'estudo') {
                 window.abrirModalEstudo();
+                // Pré-preenche título do modal para indicar origem
+                document.getElementById('modal-estudo-titulo').innerText = 'Registar Estudo Finalizado';
+
+                // Seleciona a disciplina pelo nome (o select usa o id como value)
+                const selDisc = document.getElementById('select-disciplina');
                 let d = editalDoUsuario.disciplinas.find(x => x.nome === item.disciplina);
-                if(d) { document.getElementById('select-disciplina').value = d.id; window.atualizarTopicosEstudo(); document.getElementById('select-topico').value = item.topico; }
-                document.getElementById('estudo-tarefa-id-conclusao').value = tarefaId; document.getElementById('estudo-tarefa-context-conclusao').value = contexto;
-                document.querySelectorAll('input[name="estudo-categoria"]').forEach(cb => { cb.checked = (item.categorias || []).includes(cb.value); });
-                document.querySelectorAll('input[name="estudo-material"]').forEach(cb => { cb.checked = (item.materiais || []).includes(cb.value); });
+                if (d) {
+                    selDisc.value = d.id;
+                    window.atualizarTopicosEstudo();
+                    // Aguarda o DOM atualizar os tópicos antes de selecionar
+                    setTimeout(() => {
+                        document.getElementById('select-topico').value = item.topico || '';
+                    }, 60);
+                }
+
+                // Pré-preenche categorias e materiais do planejamento
+                document.querySelectorAll('input[name="estudo-categoria"]').forEach(cb => {
+                    cb.checked = (item.categorias || []).includes(cb.value);
+                });
+                document.querySelectorAll('input[name="estudo-material"]').forEach(cb => {
+                    cb.checked = (item.materiais || []).includes(cb.value);
+                });
+
+                // Pré-preenche descrição/comentário do card planejado
                 document.getElementById('estudo-comentario').value = item.descricao || '';
+
+                // Vincula ao card do cronograma para marcá-lo como concluído ao salvar
+                document.getElementById('estudo-tarefa-id-conclusao').value = tarefaId;
+                document.getElementById('estudo-tarefa-context-conclusao').value = contexto;
+
             } else if (item.tipo === 'redacao') {
                 window.abrirModalRedacao();
-                document.getElementById('red-tema').value = item.tema || ''; document.getElementById('red-concurso').value = item.concurso || ''; document.getElementById('red-banca').value = item.banca || ''; document.getElementById('red-link').value = item.link || '';
-                document.getElementById('red-tarefa-id-conclusao').value = tarefaId; document.getElementById('red-tarefa-context-conclusao').value = contexto;
+                document.getElementById('redacao-titulo').innerText = 'Registar Redação';
+                document.getElementById('red-tema').value = item.tema || '';
+                document.getElementById('red-concurso').value = item.concurso || '';
+                document.getElementById('red-banca').value = item.banca || '';
+                document.getElementById('red-link').value = item.link || '';
                 document.getElementById('red-consideracoes').value = item.descricao || '';
+
+                document.getElementById('red-tarefa-id-conclusao').value = tarefaId;
+                document.getElementById('red-tarefa-context-conclusao').value = contexto;
+
             } else if (item.tipo === 'simulado') {
                 window.abrirModalSimulado();
-                document.getElementById('sim-cargo').value = item.cargo || ''; document.getElementById('sim-origem').value = item.origem || ''; document.getElementById('sim-estilo').value = item.estilo || 'multipla_escolha';
-                if(item.disciplinaVinculada) {
-                    document.getElementById('sim-vincular').checked = true; document.getElementById('div-sim-vinc-disc').classList.remove('hidden');
-                    const sDisc = document.getElementById('sim-disciplina-vinculada'); sDisc.innerHTML = '<option value="">Selecione...</option>';
-                    editalDoUsuario.disciplinas.filter(d => (d.statusDisciplina || 'ativa') === 'ativa').forEach(d => { const opt = document.createElement('option'); opt.value = d.id; opt.textContent = d.nome; sDisc.appendChild(opt); });
+                document.getElementById('simulado-titulo').innerText = 'Registar Simulado';
+                document.getElementById('sim-cargo').value = item.cargo || '';
+                document.getElementById('sim-origem').value = item.origem || '';
+                document.getElementById('sim-estilo').value = item.estilo || 'multipla_escolha';
+
+                if (item.disciplinaVinculada) {
+                    document.getElementById('sim-vincular').checked = true;
+                    document.getElementById('div-sim-vinc-disc').classList.remove('hidden');
+                    const sDisc = document.getElementById('sim-disciplina-vinculada');
+                    sDisc.innerHTML = '<option value="">Selecione...</option>';
+                    editalDoUsuario.disciplinas.filter(d => (d.statusDisciplina || 'ativa') === 'ativa').forEach(d => {
+                        const opt = document.createElement('option'); opt.value = d.id; opt.textContent = d.nome; sDisc.appendChild(opt);
+                    });
                     sDisc.value = item.disciplinaVinculada;
+                } else {
+                    document.getElementById('sim-vincular').checked = false;
+                    document.getElementById('div-sim-vinc-disc').classList.add('hidden');
                 }
-                document.getElementById('sim-tarefa-id-conclusao').value = tarefaId; document.getElementById('sim-tarefa-context-conclusao').value = contexto;
+
+                document.getElementById('sim-tarefa-id-conclusao').value = tarefaId;
+                document.getElementById('sim-tarefa-context-conclusao').value = contexto;
             }
         };
 
@@ -2825,333 +3039,512 @@
 
         // HISTÓRICO DE ESTUDO BASE COM PAGINAÇÃO
         window.mudarPaginaHistorico = function(delta) {
-            let dataLength = registrosDeEstudo.length;
-            if (historicoItensPorPagina === 'all') return;
-            let totalPages = Math.ceil(dataLength / parseInt(historicoItensPorPagina));
-            
+            let maxPages = historicoItensPorPagina === 'all' ? 1 : Math.ceil(registrosDeEstudo.length / historicoItensPorPagina);
             historicoPaginaAtual += delta;
-            if (historicoPaginaAtual < 1) historicoPaginaAtual = 1;
-            if (historicoPaginaAtual > totalPages) historicoPaginaAtual = totalPages;
-            
+            if(historicoPaginaAtual < 1) historicoPaginaAtual = 1;
+            if(historicoPaginaAtual > maxPages) historicoPaginaAtual = maxPages;
             window.renderizarHistorico();
-        }
-
-        window.mudarItensPorPaginaHistorico = function(valor) {
-            historicoItensPorPagina = valor;
+        };
+        window.mudarItensPorPaginaHistorico = function(val) {
+            historicoItensPorPagina = val === 'all' ? 'all' : parseInt(val);
             historicoPaginaAtual = 1;
             window.renderizarHistorico();
-        }
+        };
 
         window.renderizarHistorico = function() {
-            const container = document.getElementById('lista-historico'); if (!container) return; container.innerHTML = '';
-            const paginacaoWrapper = document.getElementById('historico-paginacao');
+            const tbody = document.getElementById('lista-historico'); tbody.innerHTML = '';
+            const pagContainer = document.getElementById('historico-paginacao');
             const pageInfo = document.getElementById('historico-page-info');
             
-            if (registrosDeEstudo.length === 0) { 
-                container.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-muted); padding: 2rem;">Nenhum estudo registado ainda.</td></tr>`; 
-                if (paginacaoWrapper) paginacaoWrapper.classList.add('hidden');
-                return; 
-            }
-
-            let itensRenderizar = registrosDeEstudo;
+            registrosDeEstudo.sort((a,b) => b.timestamp - a.timestamp);
             
-            if (historicoItensPorPagina !== 'all') {
-                let limit = parseInt(historicoItensPorPagina);
-                let totalPages = Math.ceil(registrosDeEstudo.length / limit);
-                if (historicoPaginaAtual > totalPages) historicoPaginaAtual = totalPages;
-                
-                let start = (historicoPaginaAtual - 1) * limit;
-                let end = start + limit;
-                itensRenderizar = registrosDeEstudo.slice(start, end);
-                
-                if (paginacaoWrapper) {
-                    paginacaoWrapper.classList.remove('hidden');
-                    pageInfo.innerText = `Página ${historicoPaginaAtual} de ${totalPages}`;
-                    document.getElementById('btn-hist-prev').disabled = historicoPaginaAtual === 1;
-                    document.getElementById('btn-hist-prev').style.opacity = historicoPaginaAtual === 1 ? '0.3' : '1';
-                    document.getElementById('btn-hist-next').disabled = historicoPaginaAtual === totalPages;
-                    document.getElementById('btn-hist-next').style.opacity = historicoPaginaAtual === totalPages ? '0.3' : '1';
-                }
-            } else {
-                if (paginacaoWrapper) paginacaoWrapper.classList.add('hidden');
+            if (registrosDeEstudo.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 1.5rem; color: var(--text-muted);">Nenhum estudo registado ainda.</td></tr>';
+                pagContainer.classList.add('hidden');
+                return;
             }
 
-            itensRenderizar.forEach(registro => {
-                const tr = document.createElement('tr'); const pData = registro.data.split('-'); const df = pData.length === 3 ? `${pData[2]}/${pData[1]}/${pData[0]}` : registro.data; const catHTML = (registro.categorias || []).map(cat => `<span class="badge">${cat}</span>`).join('');
-                let perfHTML = '-'; let acertosErrosHTML = '-'; const acertos = registro.questoes && registro.questoes.acertos ? registro.questoes.acertos : 0; const erros = registro.questoes && registro.questoes.erros ? registro.questoes.erros : 0; const totalQ = acertos + erros;
-                if (totalQ > 0) { acertosErrosHTML = `<span style="color: var(--success-color); font-weight: bold;">${acertos}</span> / <span style="color: var(--danger-color); font-weight: bold;">${erros}</span>`; const aproveitamento = Math.round((acertos / totalQ) * 100); let cor = '#dc2626'; if (aproveitamento >= 80) cor = 'var(--success-color)'; else if (aproveitamento >= 60) cor = 'var(--warning-color)'; perfHTML = `<span style="color: ${cor}; font-weight: bold;">${aproveitamento}%</span>`; }
-                let tempoTexto = '-'; if (registro.tempo) { let h = registro.tempo.horas > 0 ? `${registro.tempo.horas}h ` : ''; let m = registro.tempo.minutos > 0 ? `${registro.tempo.minutos}m` : ''; tempoTexto = (h + m).trim() || '-'; }
-                tr.innerHTML = `<td>${df}</td><td style="font-weight: 600;">${registro.disciplina}</td><td>${registro.topico}</td><td><span style="color: var(--text-muted); font-size: 0.85rem;"><i class="fa-regular fa-clock"></i> ${tempoTexto}</span></td><td>${catHTML}</td><td style="text-align: center;">${acertosErrosHTML}</td><td>${perfHTML}</td><td style="text-align: center; white-space: nowrap;"><button class="btn-icon" style="padding: 0.3rem 0.6rem; font-size: 0.8rem;" onclick="window.editarRegistroEstudo('${registro.idDoc || registro.timestamp}')" title="Editar"><i class="fa-solid fa-pen"></i></button><button class="btn-icon" style="padding: 0.3rem 0.6rem; font-size: 0.8rem; color: var(--danger-color);" onclick="window.excluirRegistroEstudo('${registro.idDoc || registro.timestamp}')" title="Eliminar"><i class="fa-solid fa-trash"></i></button></td>`;
-                container.appendChild(tr);
+            let registrosParaMostrar = registrosDeEstudo;
+            let totalItens = registrosDeEstudo.length;
+
+            if (historicoItensPorPagina !== 'all') {
+                let maxPages = Math.ceil(totalItens / historicoItensPorPagina);
+                if(historicoPaginaAtual > maxPages) historicoPaginaAtual = maxPages;
+                
+                let start = (historicoPaginaAtual - 1) * historicoItensPorPagina;
+                let end = start + historicoItensPorPagina;
+                registrosParaMostrar = registrosDeEstudo.slice(start, end);
+                
+                pagContainer.classList.remove('hidden');
+                pageInfo.innerText = `Página ${historicoPaginaAtual} de ${maxPages} (Total: ${totalItens})`;
+                document.getElementById('btn-hist-prev').disabled = historicoPaginaAtual === 1;
+                document.getElementById('btn-hist-next').disabled = historicoPaginaAtual === maxPages;
+            } else {
+                pagContainer.classList.remove('hidden');
+                pageInfo.innerText = `Mostrando todos os ${totalItens} registos`;
+                document.getElementById('btn-hist-prev').disabled = true;
+                document.getElementById('btn-hist-next').disabled = true;
+            }
+
+            registrosParaMostrar.forEach(reg => {
+                let cats = reg.categorias ? reg.categorias.join(', ') : '-';
+                let hasRevisao = reg.categorias && reg.categorias.includes("Revisão");
+                let badgeRev = hasRevisao ? `<span style="background:var(--icon-green-bg); color:var(--success-color); padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; margin-left: 5px; font-weight:bold;"><i class="fa-solid fa-bolt"></i> Rev</span>` : '';
+                let acertos = reg.questoes && reg.questoes.acertos ? reg.questoes.acertos : 0;
+                let erros = reg.questoes && reg.questoes.erros ? reg.questoes.erros : 0;
+                let totalQ = acertos + erros;
+                let perc = totalQ > 0 ? Math.round((acertos / totalQ)*100) : null;
+                let pColor = perc !== null ? (perc >= 80 ? 'var(--success-color)' : perc >= 60 ? 'var(--warning-color)' : 'var(--danger-color)') : 'var(--text-muted)';
+                let percTxt = perc !== null ? `<span style="background:${pColor}; color:white; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; font-weight:bold;">${perc}%</span>` : '-';
+                let hh = reg.tempo && reg.tempo.horas ? reg.tempo.horas : 0;
+                let mm = reg.tempo && reg.tempo.minutos ? reg.tempo.minutos : 0;
+                let tempoStr = hh > 0 ? `${hh}h ${mm}m` : `${mm}m`;
+                let dataFormatada = reg.data ? reg.data.split('-').reverse().join('/') : '-';
+                let idUsado = reg.idDoc || reg.timestamp;
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td style="font-size: 0.85rem; color: var(--text-muted);">${dataFormatada}</td>
+                        <td style="font-weight: 500; color: var(--text-main);">${reg.disciplina}</td>
+                        <td style="font-size: 0.85rem; color: var(--text-muted);">${reg.topico} ${badgeRev}</td>
+                        <td><i class="fa-regular fa-clock" style="color:var(--text-muted); font-size:0.8rem;"></i> ${tempoStr}</td>
+                        <td style="font-size: 0.8rem;">${cats}</td>
+                        <td style="text-align: center;"><span style="color:var(--success-color); font-weight:bold;">${acertos}</span> / <span style="color:var(--danger-color); font-weight:bold;">${erros}</span></td>
+                        <td>${percTxt}</td>
+                        <td style="text-align: center;">
+                            <button class="btn-icon" style="padding: 0.4rem; font-size: 0.8rem;" onclick="window.editarEstudo('${idUsado}')"><i class="fa-solid fa-pen"></i></button>
+                            <button class="btn-icon" style="padding: 0.4rem; font-size: 0.8rem; color: var(--danger-color); border-color: var(--danger-color);" onclick="window.excluirEstudo('${idUsado}')"><i class="fa-solid fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `;
             });
         };
 
+        // MODAL ESTUDO
         window.abrirModalEstudo = function() {
-            document.getElementById('modal-estudo').classList.remove('hidden'); document.getElementById('modal-estudo-titulo').innerText = "Registar Estudo Finalizado"; document.getElementById('estudo-edit-doc-id').value = '';
-            const hoje = new Date().toISOString().split('T')[0]; document.getElementById('estudo-data').value = hoje;
-            const selectDisciplina = document.getElementById('select-disciplina'); selectDisciplina.innerHTML = '<option value="">Selecione uma disciplina...</option>';
-            let disciplinasAtivas = editalDoUsuario.disciplinas.filter(d => (d.statusDisciplina || 'ativa') === 'ativa');
-            disciplinasAtivas.forEach(d => { const opt = document.createElement('option'); opt.value = d.id; opt.textContent = d.nome; selectDisciplina.appendChild(opt); });
-            document.getElementById('select-topico').innerHTML = '<option value="">Selecione primeiro a disciplina...</option>';
-            document.getElementById('estudo-horas').value = ''; document.getElementById('estudo-minutos').value = ''; document.getElementById('estudo-acertos').value = ''; document.getElementById('estudo-erros').value = ''; document.getElementById('estudo-comentario').value = '';
-            document.querySelectorAll('input[name^="estudo-"]:not(#estudo-agendar-revisao)').forEach(cb => { if(cb.type==='checkbox') cb.checked = false; }); document.getElementById('estudo-agendar-revisao').checked = true; 
+            document.getElementById('modal-estudo').classList.remove('hidden');
+            document.getElementById('modal-estudo-titulo').innerText = "Registar Estudo Finalizado";
+            document.getElementById('estudo-edit-doc-id').value = '';
+            document.getElementById('estudo-tarefa-id-conclusao').value = '';
+            document.getElementById('estudo-tarefa-context-conclusao').value = '';
+            document.getElementById('estudo-data').value = window.formatarDataLocalParaISO(new Date());
+            const selectDisc = document.getElementById('select-disciplina');
+            selectDisc.innerHTML = '<option value="">Selecione a disciplina...</option>';
+            editalDoUsuario.disciplinas.filter(d => (d.statusDisciplina || 'ativa') === 'ativa').forEach(d => {
+                const opt = document.createElement('option'); opt.value = d.nome; opt.textContent = d.nome; selectDisc.appendChild(opt);
+            });
+            document.getElementById('select-topico').innerHTML = '<option value="">Selecione o assunto...</option>';
+            document.getElementById('estudo-horas').value = ''; document.getElementById('estudo-minutos').value = '';
+            document.getElementById('estudo-acertos').value = ''; document.getElementById('estudo-erros').value = '';
+            document.getElementById('estudo-comentario').value = '';
+            document.querySelectorAll('input[name="estudo-categoria"]').forEach(cb => cb.checked = false);
+            document.querySelectorAll('input[name="estudo-material"]').forEach(cb => cb.checked = false);
+            document.getElementById('estudo-agendar-revisao').checked = true;
         };
 
         window.fecharModalEstudo = function() { document.getElementById('modal-estudo').classList.add('hidden'); };
-
+        
         window.atualizarTopicosEstudo = function() {
-            const disciplinaId = document.getElementById('select-disciplina').value; const selectTopico = document.getElementById('select-topico'); selectTopico.innerHTML = '<option value="">Selecione um tópico...</option>'; if (!disciplinaId) return;
-            const d = editalDoUsuario.disciplinas.find(d => d.id == disciplinaId); if (d && d.topicos) { d.topicos.forEach(topicoObj => { let nome = typeof topicoObj === 'string' ? topicoObj : topicoObj.nome; const opt = document.createElement('option'); opt.value = nome; opt.textContent = nome; selectTopico.appendChild(opt); }); }
+            const discNome = document.getElementById('select-disciplina').value;
+            const selectTopico = document.getElementById('select-topico');
+            selectTopico.innerHTML = '<option value="">Selecione o assunto...</option>';
+            if(discNome) {
+                const d = editalDoUsuario.disciplinas.find(x => x.nome === discNome);
+                if(d) { d.topicos.forEach(t => { let nome = typeof t === 'string' ? t : t.nome; const opt = document.createElement('option'); opt.value = nome; opt.textContent = nome; selectTopico.appendChild(opt); }); }
+            }
         };
 
-        window.editarRegistroEstudo = function(idReference) {
-            const registro = registrosDeEstudo.find(r => r.idDoc === idReference || r.timestamp == idReference); if (!registro) return;
-            window.abrirModalEstudo(); document.getElementById('modal-estudo-titulo').innerText = "Editar Registo de Estudo"; document.getElementById('estudo-edit-doc-id').value = idReference;
-            document.getElementById('estudo-data').value = registro.data;
-            let d = editalDoUsuario.disciplinas.find(x => x.nome === registro.disciplina);
-            if(d) { document.getElementById('select-disciplina').value = d.id; window.atualizarTopicosEstudo(); document.getElementById('select-topico').value = registro.topico; }
-            document.getElementById('estudo-horas').value = registro.tempo?.horas || ''; document.getElementById('estudo-minutos').value = registro.tempo?.minutos || ''; document.getElementById('estudo-acertos').value = registro.questoes?.acertos || ''; document.getElementById('estudo-erros').value = registro.questoes?.erros || ''; document.getElementById('estudo-comentario').value = registro.comentario || ''; document.getElementById('estudo-agendar-revisao').checked = registro.agendarRevisao;
-            document.querySelectorAll('input[name="estudo-categoria"]').forEach(cb => { cb.checked = (registro.categorias || []).includes(cb.value); }); document.querySelectorAll('input[name="estudo-material"]').forEach(cb => { cb.checked = (registro.materiais || []).includes(cb.value); });
-        }
-
-        window.excluirRegistroEstudo = async function(idReference) {
-            window.mostrarConfirmacao("Tem certeza que deseja eliminar este registo de estudo?", async () => {
-                if(currentUser && !currentUser.isAnonymous && typeof idReference === 'string') {
-                    try { await deleteDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'registros_estudos', idReference)); } catch(e) { console.error("Erro ao deletar:", e); }
-                } else { registrosDeEstudo = registrosDeEstudo.filter(r => r.timestamp != idReference); window.salvarDadosLocais(); window.atualizarTodasAsTelas(); }
-            });
-        }
-
-        window.excluirTodoHistorico = async function() {
-            window.mostrarConfirmacao("ATENÇÃO CRÍTICA: Deseja eliminar TODO o seu histórico de estudos?", async () => {
-                if(currentUser && !currentUser.isAnonymous && db) {
-                    try { for(let r of registrosDeEstudo) { if(r.idDoc) await deleteDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'registros_estudos', r.idDoc)); } } catch(e) { console.error(e); }
-                } else { registrosDeEstudo = []; window.salvarDadosLocais(); window.atualizarTodasAsTelas(); }
-            });
-        }
+        window.abrirModalEstudoPreenchido = function(disciplina, topico, contextInfo = '') {
+            window.abrirModalEstudo();
+            const selDisc = document.getElementById('select-disciplina');
+            for(let i=0; i<selDisc.options.length; i++){ if(selDisc.options[i].value === disciplina) { selDisc.selectedIndex = i; break; } }
+            window.atualizarTopicosEstudo();
+            setTimeout(() => {
+                const selTop = document.getElementById('select-topico');
+                for(let i=0; i<selTop.options.length; i++){ if(selTop.options[i].value === topico) { selTop.selectedIndex = i; break; } }
+            }, 50);
+            if (contextInfo) {
+                let parts = contextInfo.split('|');
+                document.getElementById('estudo-tarefa-context-conclusao').value = parts[0];
+                document.getElementById('estudo-tarefa-id-conclusao').value = parts[1] + '|' + parts[2];
+            }
+        };
 
         window.salvarEstudo = async function() {
-            const data = document.getElementById('estudo-data').value; const disciplinaId = document.getElementById('select-disciplina').value; const topico = document.getElementById('select-topico').value; const horas = document.getElementById('estudo-horas').value; const minutos = document.getElementById('estudo-minutos').value; const acertos = document.getElementById('estudo-acertos').value; const erros = document.getElementById('estudo-erros').value; const comentario = document.getElementById('estudo-comentario').value; const querAgendar = document.getElementById('estudo-agendar-revisao').checked; const editId = document.getElementById('estudo-edit-doc-id').value;
-            const tarIdConc = document.getElementById('estudo-tarefa-id-conclusao').value; const tarCtxConc = document.getElementById('estudo-tarefa-context-conclusao').value;
-            const categorias = Array.from(document.querySelectorAll('input[name="estudo-categoria"]:checked')).map(cb => cb.value); const materiais = Array.from(document.querySelectorAll('input[name="estudo-material"]:checked')).map(cb => cb.value);
+            let idDocEdit = document.getElementById('estudo-edit-doc-id').value;
+            let data = document.getElementById('estudo-data').value;
+            let disciplina = document.getElementById('select-disciplina').value;
+            let topico = document.getElementById('select-topico').value;
+            let horas = parseInt(document.getElementById('estudo-horas').value) || 0;
+            let minutos = parseInt(document.getElementById('estudo-minutos').value) || 0;
+            let agendarRevisao = document.getElementById('estudo-agendar-revisao').checked;
+            let acertos = parseInt(document.getElementById('estudo-acertos').value) || 0;
+            let erros = parseInt(document.getElementById('estudo-erros').value) || 0;
+            let comentario = document.getElementById('estudo-comentario').value;
+            let categorias = Array.from(document.querySelectorAll('input[name="estudo-categoria"]:checked')).map(cb => cb.value);
+            let materiais = Array.from(document.querySelectorAll('input[name="estudo-material"]:checked')).map(cb => cb.value);
 
-            if (!data || !disciplinaId || !topico) { window.mostrarAlerta("Preencha Data, Disciplina e Tópico!"); return; }
+            if(!data || !disciplina || !topico) { window.mostrarAlerta("Preencha data, disciplina e tópico."); return; }
 
-            const disciplinaNome = editalDoUsuario.disciplinas.find(d => d.id == disciplinaId).nome;
-            const isLocalMode = (!currentUser || currentUser.isAnonymous || !db);
-            let timestampUsado = isLocalMode && editId ? parseInt(editId) : Date.now();
+            let regData = {
+                data: data, disciplina: disciplina, topico: topico,
+                tempo: { horas: horas, minutos: minutos }, agendarRevisao: agendarRevisao,
+                categorias: categorias, materiais: materiais,
+                questoes: { acertos: acertos, erros: erros },
+                comentario: comentario, timestamp: Date.now()
+            };
 
-            const novoRegistro = { data: data, disciplina: disciplinaNome, topico: topico, tempo: { horas: parseInt(horas) || 0, minutos: parseInt(minutos) || 0 }, categorias: categorias, materiais: materiais, agendarRevisao: querAgendar, questoes: { acertos: parseInt(acertos) || 0, erros: parseInt(erros) || 0 }, comentario: comentario, timestamp: timestampUsado };
+            let contextConclusao = document.getElementById('estudo-tarefa-context-conclusao').value;
+            let idConclusao = document.getElementById('estudo-tarefa-id-conclusao').value;
 
-            if (!isLocalMode) {
+            if (currentUser && !currentUser.isAnonymous && db) {
                 try {
-                    if (editId && typeof editId === 'string') { await setDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'registros_estudos', editId), novoRegistro); } 
-                    else { const colRef = collection(db, 'artifacts', appId, 'users', currentUser.uid, 'registros_estudos'); await addDoc(colRef, novoRegistro); }
-                    if (tarIdConc && tarCtxConc) window.alternarStatusTarefaPlanejada(tarCtxConc, parseInt(tarIdConc), true);
-                    window.fecharModalEstudo();
-                } catch(e) { console.error("Erro ao salvar estudo na nuvem:", e); }
+                    if (idDocEdit) {
+                        await updateDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'registros_estudos', idDocEdit), regData);
+                        let index = registrosDeEstudo.findIndex(r => r.idDoc === idDocEdit);
+                        if(index !== -1) registrosDeEstudo[index] = { idDoc: idDocEdit, ...regData };
+                    } else {
+                        const docRef = await addDoc(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'registros_estudos'), regData);
+                        registrosDeEstudo.unshift({ idDoc: docRef.id, ...regData });
+                    }
+                } catch(e) { console.error("Erro guardar estudo:", e); }
             } else {
-                if (editId) { let index = registrosDeEstudo.findIndex(r => r.timestamp == editId); if (index !== -1) registrosDeEstudo[index] = novoRegistro; } 
-                else { registrosDeEstudo.unshift(novoRegistro); }
-                registrosDeEstudo.sort((a, b) => b.timestamp - a.timestamp);
-                if (tarIdConc && tarCtxConc) window.alternarStatusTarefaPlanejada(tarCtxConc, parseInt(tarIdConc), true);
-                window.salvarDadosLocais(); window.atualizarTodasAsTelas(); window.fecharModalEstudo();
+                if (idDocEdit) {
+                    let index = registrosDeEstudo.findIndex(r => r.timestamp == idDocEdit);
+                    if(index !== -1) registrosDeEstudo[index] = regData;
+                } else {
+                    registrosDeEstudo.unshift(regData);
+                }
+                window.salvarDadosLocais();
             }
+
+            if (contextConclusao === 'cronograma' || (contextConclusao && contextConclusao !== 'ciclo' && contextConclusao !== 'Ciclo')) {
+                // Novo formato: idConclusao é o tarefaId direto; contexto é o dia
+                let dia = planejamentoDoUsuario.cronograma.find(d => d.dia === contextConclusao);
+                if (dia) {
+                    let tarefaItem = dia.itens.find(i => i.id === parseInt(idConclusao));
+                    if (tarefaItem) tarefaItem.concluido = true;
+                    else {
+                        // Fallback: formato antigo parts[0]=dia, parts[1]=idx
+                        let parts = idConclusao.split('|'); let diaStr = parts[0]; let idx = parseInt(parts[1]);
+                        let diaAlt = planejamentoDoUsuario.cronograma.find(d => d.dia === diaStr);
+                        if(diaAlt && diaAlt.itens[idx]) diaAlt.itens[idx].concluido = true;
+                    }
+                }
+                window.salvarDadosGeraisNaNuvem(); window.salvarDadosLocais();
+            } else if (contextConclusao === 'ciclo' || contextConclusao === 'Ciclo') {
+                // Novo formato: idConclusao é o tarefaId direto
+                let tarefaItem = planejamentoDoUsuario.ciclo.find(i => i.id === parseInt(idConclusao));
+                if (tarefaItem) tarefaItem.concluido = true;
+                else {
+                    // Fallback: formato antigo
+                    let parts = idConclusao.split('|'); let idx = parseInt(parts[1]);
+                    if(planejamentoDoUsuario.ciclo[idx]) planejamentoDoUsuario.ciclo[idx].concluido = true;
+                }
+                window.salvarDadosGeraisNaNuvem(); window.salvarDadosLocais();
+            }
+
+            window.renderizarHistorico(); window.renderizarDesempenho(); window.renderizarDashboard(); window.renderizarRevisoes(); window.atualizarProximaAtividade();
+            window.fecharModalEstudo();
+        };
+
+        window.editarEstudo = function(idStr) {
+            let reg = registrosDeEstudo.find(r => r.idDoc === idStr || r.timestamp == idStr);
+            if(!reg) return;
+            window.abrirModalEstudo();
+            document.getElementById('modal-estudo-titulo').innerText = "Editar Estudo";
+            document.getElementById('estudo-edit-doc-id').value = idStr;
+            document.getElementById('estudo-data').value = reg.data;
+            const selDisc = document.getElementById('select-disciplina');
+            for(let i=0; i<selDisc.options.length; i++){ if(selDisc.options[i].value === reg.disciplina) { selDisc.selectedIndex = i; break; } }
+            window.atualizarTopicosEstudo();
+            setTimeout(() => {
+                const selTop = document.getElementById('select-topico');
+                for(let i=0; i<selTop.options.length; i++){ if(selTop.options[i].value === reg.topico) { selTop.selectedIndex = i; break; } }
+            }, 50);
+            document.getElementById('estudo-horas').value = reg.tempo?.horas || '';
+            document.getElementById('estudo-minutos').value = reg.tempo?.minutos || '';
+            document.getElementById('estudo-agendar-revisao').checked = reg.agendarRevisao !== false;
+            document.getElementById('estudo-acertos').value = reg.questoes?.acertos || '';
+            document.getElementById('estudo-erros').value = reg.questoes?.erros || '';
+            document.getElementById('estudo-comentario').value = reg.comentario || '';
+            if(reg.categorias) document.querySelectorAll('input[name="estudo-categoria"]').forEach(cb => cb.checked = reg.categorias.includes(cb.value));
+            if(reg.materiais) document.querySelectorAll('input[name="estudo-material"]').forEach(cb => cb.checked = reg.materiais.includes(cb.value));
+        };
+
+        window.excluirEstudo = async function(idStr) {
+            window.mostrarConfirmacao("Deseja realmente excluir este registo do histórico?", async () => {
+                if (currentUser && !currentUser.isAnonymous && db) {
+                    try {
+                        let reg = registrosDeEstudo.find(r => r.idDoc === idStr || r.timestamp == idStr);
+                        if(reg && reg.idDoc) {
+                            await deleteDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'registros_estudos', reg.idDoc));
+                        }
+                    } catch(e) { console.error("Erro excluir:", e); }
+                }
+                registrosDeEstudo = registrosDeEstudo.filter(r => r.idDoc !== idStr && r.timestamp != idStr);
+                window.salvarDadosLocais(); window.renderizarHistorico(); window.renderizarDesempenho(); window.renderizarDashboard(); window.renderizarRevisoes(); window.atualizarProximaAtividade();
+            });
+        };
+
+        window.excluirTodoHistorico = async function() {
+            window.mostrarConfirmacao("ATENÇÃO: Deseja EXCLUIR TODO o seu histórico de estudos? Esta ação não pode ser desfeita.", async () => {
+                if (currentUser && !currentUser.isAnonymous && db) {
+                    try {
+                        const { getDocs, writeBatch } = await import("https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js");
+                        const batch = writeBatch(db);
+                        const qSnap = await getDocs(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'registros_estudos'));
+                        qSnap.forEach(docSnap => batch.delete(docSnap.ref));
+                        await batch.commit();
+                    } catch(e) { console.error("Erro limpar tudo:", e); }
+                }
+                registrosDeEstudo = [];
+                window.salvarDadosLocais(); window.renderizarHistorico(); window.renderizarDesempenho(); window.renderizarDashboard(); window.renderizarRevisoes(); window.atualizarProximaAtividade();
+            });
+        };
+
+        // METAS
+        window.abrirModalMeta = function() { document.getElementById('modal-meta').classList.remove('hidden'); document.getElementById('meta-titulo').value = ''; document.getElementById('meta-alvo').value = ''; document.getElementById('meta-inicio').value = window.formatarDataLocalParaISO(new Date()); let dateFim = new Date(); dateFim.setDate(dateFim.getDate() + 30); document.getElementById('meta-fim').value = window.formatarDataLocalParaISO(dateFim); window.atualizarLabelAlvoMeta(); };
+        window.fecharModalMeta = function() { document.getElementById('modal-meta').classList.add('hidden'); };
+        window.atualizarLabelAlvoMeta = function() { let tipo = document.getElementById('meta-tipo').value; document.getElementById('label-meta-alvo').innerText = tipo === 'horas' ? 'Quantidade (em Horas)' : 'Quantidade de Questões'; };
+        window.salvarMeta = function() {
+            let m = { id: Date.now().toString(), titulo: document.getElementById('meta-titulo').value, tipo: document.getElementById('meta-tipo').value, alvo: parseInt(document.getElementById('meta-alvo').value), dataInicio: document.getElementById('meta-inicio').value, dataFim: document.getElementById('meta-fim').value };
+            if(!m.titulo || !m.alvo || !m.dataInicio || !m.dataFim) { window.mostrarAlerta("Preencha todos os campos da meta."); return; }
+            metasDoUsuario.push(m); window.salvarDadosGeraisNaNuvem(); window.salvarDadosLocais(); window.renderizarMetas(); window.renderizarDashboard(); window.fecharModalMeta();
+        };
+        window.excluirMeta = function(id) { window.mostrarConfirmacao("Excluir esta meta?", () => { metasDoUsuario = metasDoUsuario.filter(m => m.id !== id); window.salvarDadosGeraisNaNuvem(); window.salvarDadosLocais(); window.renderizarMetas(); window.renderizarDashboard(); }); };
+        
+        window.renderizarMetas = function() {
+            const container = document.getElementById('lista-metas'); container.innerHTML = '';
+            if(metasDoUsuario.length === 0) { container.innerHTML = '<div class="panel text-center text-muted">Nenhuma meta configurada. Crie o seu primeiro desafio!</div>'; return; }
+            metasDoUsuario.forEach(meta => {
+                let progressoAtual = 0;
+                registrosDeEstudo.forEach(reg => { if (reg.data && reg.data >= meta.dataInicio && reg.data <= meta.dataFim) { if (meta.tipo === 'horas' && reg.tempo) progressoAtual += (reg.tempo.horas * 60) + reg.tempo.minutos; else if (meta.tipo === 'questoes' && reg.questoes) progressoAtual += (reg.questoes.acertos || 0) + (reg.questoes.erros || 0); } });
+                if (meta.tipo === 'horas') progressoAtual = progressoAtual / 60;
+                let percentualRaw = (progressoAtual / meta.alvo) * 100; if(isNaN(percentualRaw) || !isFinite(percentualRaw)) percentualRaw = 0;
+                let percentualLimpo = Math.min(Math.max(Math.round(percentualRaw), 0), 100);
+                let textType = meta.tipo === 'horas' ? 'Horas' : 'Questões';
+                let today = window.formatarDataLocalParaISO(new Date()); let statusStr = ''; let statusClass = '';
+                if (percentualLimpo >= 100) { statusStr = '<i class="fa-solid fa-trophy"></i> Meta Concluída!'; statusClass = 'background: var(--icon-green-bg); color: var(--success-color); border: 1px solid var(--success-color);'; } 
+                else if (today > meta.dataFim) { statusStr = '<i class="fa-solid fa-circle-xmark"></i> Prazo Expirado'; statusClass = 'background: var(--icon-red-bg); color: var(--danger-color); border: 1px solid var(--danger-color);'; } 
+                else { statusStr = '<i class="fa-solid fa-spinner fa-spin"></i> Em andamento'; statusClass = 'background: var(--icon-blue-bg); color: var(--primary-color); border: 1px solid var(--primary-color);'; }
+                
+                let dataIStr = meta.dataInicio.split('-').reverse().join('/'); let dataFStr = meta.dataFim.split('-').reverse().join('/');
+                let blockProgressHtml = ''; let blocosTotais = 50; let blocosPintados = Math.floor((percentualLimpo / 100) * blocosTotais);
+                for(let i=0; i<blocosTotais; i++) { blockProgressHtml += `<div class="block-progress-item ${i < blocosPintados ? 'filled' : ''}"></div>`; }
+                
+                container.innerHTML += `<div class="meta-card"><div style="position: absolute; top: 1.5rem; right: 1.5rem;"><button class="btn-icon" style="color:var(--danger-color); border-color:var(--danger-color);" onclick="window.excluirMeta('${meta.id}')"><i class="fa-solid fa-trash"></i></button></div><h3><i class="fa-solid fa-bullseye" style="color:var(--danger-color);"></i> ${meta.titulo}</h3><div class="meta-status-pill" style="${statusClass}">${statusStr}</div><div class="meta-msg">${progressoAtual.toFixed(1)} ${textType} realizados de um total de ${meta.alvo} ${textType}.</div><div class="block-progress-container" style="margin-bottom: 10px; flex-wrap:wrap;">${blockProgressHtml} <span class="meta-perc-text">${percentualLimpo}%</span></div><div class="meta-date-info"><i class="fa-regular fa-calendar"></i> Período: ${dataIStr} a ${dataFStr}</div></div>`;
+            });
         };
 
         // SIMULADOS E REDAÇÕES
-        window.mudarAbaSim = function(aba) { document.getElementById('tab-s-simulados').classList.remove('active'); document.getElementById('tab-s-redacoes').classList.remove('active'); document.getElementById('view-s-simulados').classList.add('hidden'); document.getElementById('view-s-redacoes').classList.add('hidden'); document.getElementById(`tab-s-${aba}`).classList.add('active'); document.getElementById(`view-s-${aba}`).classList.remove('hidden'); }
-        window.abrirModalSimulado = function() { 
-            document.getElementById('modal-simulado').classList.remove('hidden'); document.getElementById('simulado-titulo').innerText = "Registar Simulado"; document.getElementById('sim-edit-id').value = ''; 
-            const hoje = new Date().toISOString().split('T')[0]; document.getElementById('sim-data').value = hoje; document.getElementById('sim-cargo').value = ''; document.getElementById('sim-origem').value = ''; document.getElementById('sim-estilo').value = 'multipla_escolha'; document.getElementById('sim-tempo').value = ''; document.getElementById('sim-acertos').value = ''; document.getElementById('sim-erros').value = ''; document.getElementById('sim-brancos').value = ''; document.getElementById('sim-pontos').value = ''; document.getElementById('sim-vincular').checked = false; document.getElementById('div-sim-vinc-disc').classList.add('hidden');
-            const sDisc = document.getElementById('sim-disciplina-vinculada'); sDisc.innerHTML = '<option value="">Selecione...</option>';
-            editalDoUsuario.disciplinas.filter(d => (d.statusDisciplina || 'ativa') === 'ativa').forEach(d => { const opt = document.createElement('option'); opt.value = d.id; opt.textContent = d.nome; sDisc.appendChild(opt); });
-        }
-        window.editarSimulado = function(id) { 
-            let sim = simuladosDoUsuario.find(s => s.id === id); if(!sim) return; document.getElementById('modal-simulado').classList.remove('hidden'); document.getElementById('simulado-titulo').innerText = "Editar Simulado"; document.getElementById('sim-edit-id').value = sim.id; document.getElementById('sim-data').value = sim.data; document.getElementById('sim-cargo').value = sim.cargo; document.getElementById('sim-origem').value = sim.origem; document.getElementById('sim-estilo').value = sim.estilo || 'multipla_escolha'; document.getElementById('sim-tempo').value = sim.tempo || ''; document.getElementById('sim-acertos').value = sim.acertos; document.getElementById('sim-erros').value = sim.erros; document.getElementById('sim-brancos').value = sim.brancos; document.getElementById('sim-pontos').value = sim.pontos; document.getElementById('sim-vincular').checked = false; document.getElementById('div-sim-vinc-disc').classList.add('hidden'); 
-        }
-        window.fecharModalSimulado = function() { document.getElementById('modal-simulado').classList.add('hidden'); }
+        window.mudarAbaSim = function(aba) { document.getElementById('tab-s-simulados').classList.remove('active'); document.getElementById('tab-s-redacoes').classList.remove('active'); document.getElementById('view-s-simulados').classList.add('hidden'); document.getElementById('view-s-redacoes').classList.add('hidden'); document.getElementById(`tab-s-${aba}`).classList.add('active'); document.getElementById(`view-s-${aba}`).classList.remove('hidden'); };
         
-        window.salvarSimulado = async function() {
-            let editId = document.getElementById('sim-edit-id').value; let cargo = document.getElementById('sim-cargo').value; let origem = document.getElementById('sim-origem').value; let estilo = document.getElementById('sim-estilo').value; let data = document.getElementById('sim-data').value; let tempo = document.getElementById('sim-tempo').value; let acertos = parseInt(document.getElementById('sim-acertos').value) || 0; let erros = parseInt(document.getElementById('sim-erros').value) || 0; let brancos = parseInt(document.getElementById('sim-brancos').value) || 0; let pontosInput = document.getElementById('sim-pontos').value;
-            const tarIdConc = document.getElementById('sim-tarefa-id-conclusao').value; const tarCtxConc = document.getElementById('sim-tarefa-context-conclusao').value;
-            let vincular = document.getElementById('sim-vincular').checked; let discVinculadaId = document.getElementById('sim-disciplina-vinculada').value;
-
-            if(!cargo || !data) { window.mostrarAlerta("Cargo e Data são obrigatórios."); return; }
-            let pontosLíquidos = 0; if (pontosInput !== '') { pontosLíquidos = parseFloat(pontosInput); } else { if (estilo === 'cespe') { pontosLíquidos = acertos - erros; } else { pontosLíquidos = acertos; } }
-            let novoSimulado = { id: editId ? parseInt(editId) : Date.now(), cargo: cargo, origem: origem, estilo: estilo, data: data, tempo: tempo, acertos: acertos, erros: erros, brancos: brancos, pontos: pontosLíquidos };
-            if (editId) { let index = simuladosDoUsuario.findIndex(s => s.id === parseInt(editId)); if (index > -1) simuladosDoUsuario[index] = novoSimulado; } else { simuladosDoUsuario.unshift(novoSimulado); }
-            simuladosDoUsuario.sort((a, b) => new Date(b.data) - new Date(a.data)); 
-
-            if (vincular && discVinculadaId && !editId) {
-                let d = editalDoUsuario.disciplinas.find(x => x.id == discVinculadaId);
-                if(d) {
-                    let tIndex = d.topicos.findIndex(t => (typeof t === 'string' ? t : t.nome) === "Simulados e outras questões");
-                    if (tIndex === -1) d.topicos.push({ nome: "Simulados e outras questões", status: 'concluido' });
-                    let mins = window.parseTempoToMinutos(tempo);
-                    let fakeReg = { data: data, disciplina: d.nome, topico: "Simulados e outras questões", tempo: { horas: Math.floor(mins/60), minutos: mins%60 }, categorias: ["Simulado"], materiais: [], agendarRevisao: false, questoes: { acertos: acertos, erros: erros }, comentario: "Simulado: " + cargo, timestamp: Date.now() + 1 };
-                    if (currentUser && !currentUser.isAnonymous && db) { await addDoc(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'registros_estudos'), fakeReg); } 
-                    else { registrosDeEstudo.unshift(fakeReg); registrosDeEstudo.sort((a, b) => b.timestamp - a.timestamp); }
-                }
+        window.abrirModalSimulado = function() {
+            document.getElementById('modal-simulado').classList.remove('hidden'); document.getElementById('simulado-titulo').innerText = "Registar Simulado";
+            document.getElementById('sim-edit-id').value = ''; document.getElementById('sim-tarefa-id-conclusao').value = ''; document.getElementById('sim-tarefa-context-conclusao').value = '';
+            document.getElementById('sim-cargo').value = ''; document.getElementById('sim-origem').value = ''; document.getElementById('sim-estilo').value = 'multipla_escolha'; document.getElementById('sim-data').value = window.formatarDataLocalParaISO(new Date()); document.getElementById('sim-tempo').value = ''; document.getElementById('sim-acertos').value = ''; document.getElementById('sim-erros').value = ''; document.getElementById('sim-brancos').value = ''; document.getElementById('sim-pontos').value = ''; document.getElementById('sim-vincular').checked = false; document.getElementById('div-sim-vinc-disc').classList.add('hidden');
+            
+            const selectDisc = document.getElementById('sim-disciplina-vinculada'); selectDisc.innerHTML = '<option value="">Selecione uma disciplina...</option>';
+            editalDoUsuario.disciplinas.filter(d => (d.statusDisciplina || 'ativa') === 'ativa').forEach(d => { const opt = document.createElement('option'); opt.value = d.id; opt.textContent = d.nome; selectDisc.appendChild(opt); });
+        };
+        window.fecharModalSimulado = function() { document.getElementById('modal-simulado').classList.add('hidden'); };
+        window.abrirModalSimuladoPreenchido = function(tarefa, contextInfo) { window.abrirModalSimulado(); document.getElementById('sim-cargo').value = tarefa.cargo || ''; document.getElementById('sim-origem').value = tarefa.origem || ''; document.getElementById('sim-estilo').value = tarefa.estilo || 'multipla_escolha'; if (tarefa.disciplinaVinculada) { document.getElementById('sim-vincular').checked = true; document.getElementById('div-sim-vinc-disc').classList.remove('hidden'); setTimeout(()=>{ const s = document.getElementById('sim-disciplina-vinculada'); for(let i=0; i<s.options.length; i++){ if(s.options[i].text === tarefa.disciplinaVinculada){ s.selectedIndex=i; break; } } }, 100); } let parts = contextInfo.split('|'); document.getElementById('sim-tarefa-context-conclusao').value = parts[0]; document.getElementById('sim-tarefa-id-conclusao').value = parts[1] + '|' + parts[2]; };
+        
+        window.salvarSimulado = function() {
+            let idEdit = document.getElementById('sim-edit-id').value;
+            let data = document.getElementById('sim-data').value; let cargo = document.getElementById('sim-cargo').value; let origem = document.getElementById('sim-origem').value;
+            if(!data || !cargo || !origem) { window.mostrarAlerta("Preencha Cargo, Origem e Data."); return; }
+            
+            let a = parseInt(document.getElementById('sim-acertos').value) || 0; let e = parseInt(document.getElementById('sim-erros').value) || 0; let b = parseInt(document.getElementById('sim-brancos').value) || 0;
+            let pontosUser = document.getElementById('sim-pontos').value; let estilo = document.getElementById('sim-estilo').value;
+            let pts = pontosUser !== '' ? parseFloat(pontosUser) : (estilo === 'cespe' ? (a - e) : a);
+            
+            let s = { cargo: cargo, origem: origem, estilo: estilo, data: data, tempo: document.getElementById('sim-tempo').value, acertos: a, erros: e, brancos: b, pontos: pts, timestamp: Date.now() };
+            
+            if(document.getElementById('sim-vincular').checked) { let dId = document.getElementById('sim-disciplina-vinculada').value; if(dId) s.disciplinaVinculada = editalDoUsuario.disciplinas.find(d => d.id === parseInt(dId))?.nome || ''; }
+            
+            if(idEdit) { let idx = simuladosDoUsuario.findIndex(x => x.id === idEdit); if(idx !== -1) { s.id = idEdit; simuladosDoUsuario[idx] = s; } } else { s.id = Date.now().toString(); simuladosDoUsuario.unshift(s); }
+            
+            let contextConclusao = document.getElementById('sim-tarefa-context-conclusao').value;
+            let idConclusao = document.getElementById('sim-tarefa-id-conclusao').value;
+            if (contextConclusao && contextConclusao !== 'ciclo' && contextConclusao !== 'Ciclo') {
+                let dia = planejamentoDoUsuario.cronograma.find(d => d.dia === contextConclusao);
+                if (dia) { let t = dia.itens.find(i => i.id === parseInt(idConclusao)); if (t) t.concluido = true; }
+            } else if (contextConclusao === 'ciclo' || contextConclusao === 'Ciclo') {
+                let t = planejamentoDoUsuario.ciclo.find(i => i.id === parseInt(idConclusao)); if (t) t.concluido = true;
             }
-
-            if (tarIdConc && tarCtxConc) window.alternarStatusTarefaPlanejada(tarCtxConc, parseInt(tarIdConc), true);
-            window.salvarDadosGeraisNaNuvem(); window.salvarDadosLocais(); window.atualizarTodasAsTelas(); window.fecharModalSimulado();
-        }
-        
-        window.excluirSimulado = function(id) { window.mostrarConfirmacao("Eliminar este simulado?", () => { simuladosDoUsuario = simuladosDoUsuario.filter(s => s.id !== id); window.salvarDadosGeraisNaNuvem(); window.salvarDadosLocais(); window.atualizarTodasAsTelas(); }); }
+            
+            window.salvarDadosGeraisNaNuvem(); window.salvarDadosLocais(); window.renderizarSimulados(); window.renderizarViewsCronograma(); window.fecharModalSimulado();
+        };
+        window.excluirSimulado = function(id) { window.mostrarConfirmacao("Excluir registo de simulado?", () => { simuladosDoUsuario = simuladosDoUsuario.filter(x => x.id !== id); window.salvarDadosGeraisNaNuvem(); window.salvarDadosLocais(); window.renderizarSimulados(); }); };
         
         window.renderizarSimulados = function() {
-            const tbody = document.getElementById('lista-simulados'); const painelMelhor = document.getElementById('painel-melhor-simulado'); if(!tbody || !painelMelhor) return; tbody.innerHTML = '';
-            if(simuladosDoUsuario.length === 0) { tbody.innerHTML = `<tr><td colspan="11" style="text-align:center; padding: 2rem; color:var(--text-muted);">Nenhum simulado registado.</td></tr>`; painelMelhor.innerHTML = `<p style="color:var(--text-muted); font-size:0.9rem;">Aguardando o seu primeiro teste...</p>`; return; }
-            let melhorSimulado = null; let melhorPercentual = -1;
-            simuladosDoUsuario.forEach(sim => {
-                let total = sim.acertos + sim.erros + sim.brancos; let perc = total > 0 ? (sim.pontos / total) * 100 : 0; let percLimpo = Math.max(0, Math.min(Math.round(perc), 100)); 
-                if (percLimpo > melhorPercentual) { melhorPercentual = percLimpo; melhorSimulado = sim; }
-                let blocosHTML = ''; for(let i=1; i<=10; i++) { let fill = percLimpo >= (i * 10) ? 'filled' : ''; blocosHTML += `<div class="block-progress-item ${fill}"></div>`; }
-                let pData = sim.data.split('-'); let df = pData.length === 3 ? `${pData[2]}/${pData[1]}/${pData[0]}` : sim.data;
-                tbody.innerHTML += `<tr><td style="font-weight:600;"><i class="fa-solid fa-pen-to-square" style="color:var(--text-muted);"></i> ${sim.cargo}</td><td>${sim.origem}</td><td><i class="fa-regular fa-hourglass-half" style="color:var(--text-muted);"></i> ${sim.tempo || '-'}</td><td><i class="fa-regular fa-calendar" style="color:var(--text-muted);"></i> ${df}</td><td style="text-align:center; font-weight:bold; color:var(--success-color);">${sim.acertos}</td><td style="text-align:center; font-weight:bold; color:var(--danger-color);">${sim.erros}</td><td style="text-align:center; font-weight:bold; color:var(--text-muted);">${sim.brancos}</td><td style="text-align:center; font-weight:bold; color:var(--primary-color);">${sim.pontos}</td><td style="min-width:180px;"><div class="block-progress-container">${blocosHTML} <span style="font-size:0.8rem; font-weight:600; color:var(--text-muted); margin-left:5px;">${percLimpo}%</span></div></td><td style="text-align:center; font-weight:bold;">${total}</td><td style="text-align:center; white-space:nowrap;"><button class="btn-icon" style="padding: 0.3rem 0.6rem; font-size: 0.8rem;" onclick="window.editarSimulado(${sim.id})" title="Editar"><i class="fa-solid fa-pen"></i></button><button class="btn-icon" style="padding: 0.3rem 0.6rem; font-size: 0.8rem; color: var(--danger-color);" onclick="window.excluirSimulado(${sim.id})" title="Eliminar"><i class="fa-solid fa-trash"></i></button></td></tr>`;
+            const tbody = document.getElementById('lista-simulados'); tbody.innerHTML = '';
+            if(simuladosDoUsuario.length === 0) { tbody.innerHTML = '<tr><td colspan="10" class="text-center text-muted" style="padding:1rem;">Nenhum simulado registado.</td></tr>'; document.getElementById('painel-melhor-simulado').innerHTML = '<p class="text-muted" style="font-size:0.85rem;">Faça simulados para ver o ranking aqui.</p>'; return; }
+            
+            simuladosDoUsuario.sort((a,b) => new Date(b.data) - new Date(a.data));
+            let melhor = null; let maxScore = -9999;
+            
+            simuladosDoUsuario.forEach(s => {
+                let totalQ = s.acertos + s.erros + s.brancos;
+                let perc = totalQ > 0 ? Math.round((s.pontos / totalQ)*100) : 0;
+                if(s.pontos > maxScore) { maxScore = s.pontos; melhor = s; }
+                let dStr = s.data.split('-').reverse().join('/');
+                let bClass = s.estilo === 'cespe' ? 'badge-spaced' : 'badge-performance'; let bTxt = s.estilo === 'cespe' ? 'Certo/Errado' : 'Múltipla Escolha';
+                let pColor = perc >= 80 ? 'var(--success-color)' : perc >= 60 ? 'var(--warning-color)' : 'var(--danger-color)';
+                
+                tbody.innerHTML += `<tr>
+                    <td style="font-weight:600; color:var(--text-main);">${s.cargo} <div style="font-size:0.7rem; color:var(--text-muted); font-weight:normal; margin-top:2px;">${s.disciplinaVinculada ? `Específico: ${s.disciplinaVinculada}` : 'Geral'}</div></td>
+                    <td>${s.origem} <br><span class="revisao-badge ${bClass}" style="margin:2px 0 0 0;">${bTxt}</span></td>
+                    <td><i class="fa-regular fa-clock" style="color:var(--text-muted); font-size:0.8rem;"></i> ${s.tempo || '-'}</td>
+                    <td style="font-size:0.85rem; color:var(--text-muted);">${dStr}</td>
+                    <td class="text-center" style="color:var(--success-color); font-weight:bold;">${s.acertos}</td>
+                    <td class="text-center" style="color:var(--danger-color); font-weight:bold;">${s.erros}</td>
+                    <td class="text-center text-muted">${s.brancos}</td>
+                    <td class="text-center" style="color:var(--primary-color); font-weight:bold; font-size:1.1rem;">${s.pontos}</td>
+                    <td><span style="background:${pColor}; color:white; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; font-weight:bold;">${perc}%</span></td>
+                    <td class="text-center font-weight-bold">${totalQ}</td>
+                    <td class="text-center"><button class="btn-icon" style="padding:0.3rem; color:var(--danger-color); border:none;" onclick="window.excluirSimulado('${s.id}')"><i class="fa-solid fa-trash"></i></button></td>
+                </tr>`;
             });
-            if (melhorSimulado) {
-                let mTotal = melhorSimulado.acertos + melhorSimulado.erros + melhorSimulado.brancos; let mPData = melhorSimulado.data.split('-'); let mDf = mPData.length === 3 ? `${mPData[2]}/${mPData[1]}/${mPData[0]}` : melhorSimulado.data; let mBlocosHTML = ''; for(let i=1; i<=10; i++) { let fill = melhorPercentual >= (i * 10) ? 'filled' : ''; mBlocosHTML += `<div class="block-progress-item ${fill}"></div>`; }
-                let badgeEstilo = melhorSimulado.estilo === 'cespe' ? '<span class="badge" style="background:var(--icon-red-bg); color:var(--danger-color); margin-bottom:10px;">Cespe (C/E)</span>' : '<span class="badge" style="background:var(--hover-bg); color:var(--text-main); margin-bottom:10px;">Múltipla Escolha</span>';
-                painelMelhor.innerHTML = `<div style="font-weight: 700; font-size: 1.1rem; color: var(--text-main); margin-bottom: 5px;"><i class="fa-solid fa-pen-to-square" style="color:var(--text-muted);"></i> ${melhorSimulado.cargo}</div><div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 5px;"><i class="fa-regular fa-building"></i> ${melhorSimulado.origem}</div>${badgeEstilo}<br><div class="record-pill">Novo Recorde!</div><ul class="record-item-list"><li><i class="fa-regular fa-calendar"></i> Realizado a ${mDf}</li><li><i class="fa-solid fa-trophy" style="color:var(--warning-color);"></i> Obteve <strong style="color:var(--text-main);">${melhorSimulado.pontos}</strong> pontos líquidos</li><li style="margin-top: 10px; margin-bottom: 10px;"><div class="block-progress-container">${mBlocosHTML} <span style="font-size:0.8rem; font-weight:600; color:var(--text-muted); margin-left:5px;">${melhorPercentual}%</span></div></li><li><i class="fa-solid fa-list-ol"></i> Total de Questões: <strong style="color:var(--text-main);">${mTotal}</strong></li><li><span style="color:var(--success-color);"><i class="fa-solid fa-check"></i> ${melhorSimulado.acertos}</span> &nbsp;|&nbsp; <span style="color:var(--danger-color);"><i class="fa-solid fa-xmark"></i> ${melhorSimulado.erros}</span></li><li><i class="fa-regular fa-hourglass-half"></i> Duração: <strong style="color:var(--text-main);">${melhorSimulado.tempo || '-'}</strong></li></ul>`;
+            
+            const pMelhor = document.getElementById('painel-melhor-simulado');
+            if(melhor) {
+                let totalQ = melhor.acertos + melhor.erros + melhor.brancos;
+                let perc = totalQ > 0 ? Math.round((melhor.pontos / totalQ)*100) : 0;
+                pMelhor.innerHTML = `<span class="record-pill">Recorde Atual</span><div style="font-size:1.1rem; font-weight:bold; color:var(--text-main); margin-bottom:5px;">${melhor.cargo} - ${melhor.origem}</div><div style="font-size:2rem; font-weight:800; color:var(--primary-color); margin-bottom:10px;">${melhor.pontos} <span style="font-size:1rem; color:var(--text-muted); font-weight:500;">pts líquidos</span></div><div class="progress-bar-container" style="height:8px; margin-bottom:15px;"><div class="progress-bar-fill" style="width:${perc}%;"></div></div><ul class="record-item-list"><li><i class="fa-solid fa-check" style="color:var(--success-color); width:15px;"></i> ${melhor.acertos} Acertos</li><li><i class="fa-solid fa-xmark" style="color:var(--danger-color); width:15px;"></i> ${melhor.erros} Erros</li><li><i class="fa-regular fa-calendar" style="color:var(--text-muted); width:15px;"></i> Realizado em ${melhor.data.split('-').reverse().join('/')}</li></ul>`;
             }
-        }
-
-        window.abrirModalRedacao = function() { document.getElementById('modal-redacao').classList.remove('hidden'); document.getElementById('redacao-titulo').innerText = "Registar Redação"; document.getElementById('red-edit-id').value = ''; const hoje = new Date().toISOString().split('T')[0]; document.getElementById('red-data').value = hoje; document.getElementById('red-tema').value = ''; document.getElementById('red-concurso').value = ''; document.getElementById('red-banca').value = ''; document.getElementById('red-link').value = ''; document.getElementById('red-tempo').value = ''; document.getElementById('red-pontos').value = ''; document.getElementById('red-consideracoes').value = ''; }
+        };
         
-        window.editarRedacao = function(id) { let red = redacoesDoUsuario.find(r => r.id === id); if(!red) return; document.getElementById('modal-redacao').classList.remove('hidden'); document.getElementById('redacao-titulo').innerText = "Editar Redação"; document.getElementById('red-edit-id').value = red.id; document.getElementById('red-data').value = red.data; document.getElementById('red-tema').value = red.tema; document.getElementById('red-concurso').value = red.concurso || ''; document.getElementById('red-banca').value = red.banca || ''; document.getElementById('red-link').value = red.link || ''; document.getElementById('red-tempo').value = red.tempo || ''; document.getElementById('red-pontos').value = red.pontos !== null ? red.pontos : ''; document.getElementById('red-consideracoes').value = red.consideracoes || ''; }
-        
-        window.fecharModalRedacao = function() { document.getElementById('modal-redacao').classList.add('hidden'); }
+        window.abrirModalRedacao = function() {
+            document.getElementById('modal-redacao').classList.remove('hidden'); document.getElementById('redacao-titulo').innerText = "Registar Redação";
+            document.getElementById('red-edit-id').value = ''; document.getElementById('red-tarefa-id-conclusao').value = ''; document.getElementById('red-tarefa-context-conclusao').value = '';
+            document.getElementById('red-tema').value = ''; document.getElementById('red-concurso').value = ''; document.getElementById('red-banca').value = ''; document.getElementById('red-link').value = ''; document.getElementById('red-data').value = window.formatarDataLocalParaISO(new Date()); document.getElementById('red-tempo').value = ''; document.getElementById('red-pontos').value = ''; document.getElementById('red-consideracoes').value = '';
+        };
+        window.fecharModalRedacao = function() { document.getElementById('modal-redacao').classList.add('hidden'); };
+        window.abrirModalRedacaoPreenchida = function(tarefa, contextInfo) { window.abrirModalRedacao(); document.getElementById('red-tema').value = tarefa.tema || ''; document.getElementById('red-concurso').value = tarefa.concurso || ''; document.getElementById('red-banca').value = tarefa.banca || ''; document.getElementById('red-link').value = tarefa.link || ''; let parts = contextInfo.split('|'); document.getElementById('red-tarefa-context-conclusao').value = parts[0]; document.getElementById('red-tarefa-id-conclusao').value = parts[1] + '|' + parts[2]; };
         
         window.salvarRedacao = function() {
-            let editId = document.getElementById('red-edit-id').value; let tema = document.getElementById('red-tema').value; let concurso = document.getElementById('red-concurso').value; let banca = document.getElementById('red-banca').value; let link = document.getElementById('red-link').value; let data = document.getElementById('red-data').value; let tempo = document.getElementById('red-tempo').value; let pontos = document.getElementById('red-pontos').value; let cons = document.getElementById('red-consideracoes').value;
-            const tarIdConc = document.getElementById('red-tarefa-id-conclusao').value; const tarCtxConc = document.getElementById('red-tarefa-context-conclusao').value;
-            if(!tema || !data) { window.mostrarAlerta("Tema e Data são obrigatórios."); return; }
-            let novaRedacao = { id: editId ? parseInt(editId) : Date.now(), tema: tema, concurso: concurso, banca: banca, link: link, data: data, tempo: tempo, pontos: pontos !== '' ? parseFloat(pontos) : null, consideracoes: cons };
-            if (editId) { let index = redacoesDoUsuario.findIndex(r => r.id === parseInt(editId)); if (index > -1) redacoesDoUsuario[index] = novaRedacao; } else { redacoesDoUsuario.unshift(novaRedacao); }
-            redacoesDoUsuario.sort((a, b) => new Date(b.data) - new Date(a.data)); 
+            let idEdit = document.getElementById('red-edit-id').value; let tema = document.getElementById('red-tema').value; let data = document.getElementById('red-data').value;
+            if(!tema || !data) { window.mostrarAlerta("Preencha o Tema e a Data."); return; }
+            let r = { tema: tema, concurso: document.getElementById('red-concurso').value, banca: document.getElementById('red-banca').value, link: document.getElementById('red-link').value, data: data, tempo: document.getElementById('red-tempo').value, pontos: document.getElementById('red-pontos').value, consideracoes: document.getElementById('red-consideracoes').value, timestamp: Date.now() };
+            if(idEdit) { let idx = redacoesDoUsuario.findIndex(x => x.id === idEdit); if(idx !== -1) { r.id = idEdit; redacoesDoUsuario[idx] = r; } } else { r.id = Date.now().toString(); redacoesDoUsuario.unshift(r); }
             
-            if (tarIdConc && tarCtxConc) window.alternarStatusTarefaPlanejada(tarCtxConc, parseInt(tarIdConc), true);
-            window.salvarDadosGeraisNaNuvem(); window.salvarDadosLocais(); window.atualizarTodasAsTelas(); window.fecharModalRedacao();
-        }
-        
-        window.excluirRedacao = function(id) { window.mostrarConfirmacao("Eliminar esta redação?", () => { redacoesDoUsuario = redacoesDoUsuario.filter(r => r.id !== id); window.salvarDadosGeraisNaNuvem(); window.salvarDadosLocais(); window.atualizarTodasAsTelas(); }); }
+            let contextConclusao = document.getElementById('red-tarefa-context-conclusao').value; let idConclusao = document.getElementById('red-tarefa-id-conclusao').value;
+            if (contextConclusao && contextConclusao !== 'ciclo' && contextConclusao !== 'Ciclo') {
+                let dia = planejamentoDoUsuario.cronograma.find(d => d.dia === contextConclusao);
+                if (dia) { let t = dia.itens.find(i => i.id === parseInt(idConclusao)); if (t) t.concluido = true; }
+            } else if (contextConclusao === 'ciclo' || contextConclusao === 'Ciclo') {
+                let t = planejamentoDoUsuario.ciclo.find(i => i.id === parseInt(idConclusao)); if (t) t.concluido = true;
+            }
+            
+            window.salvarDadosGeraisNaNuvem(); window.salvarDadosLocais(); window.renderizarRedacoes(); window.renderizarViewsCronograma(); window.fecharModalRedacao();
+        };
+        window.excluirRedacao = function(id) { window.mostrarConfirmacao("Excluir este registo de redação?", () => { redacoesDoUsuario = redacoesDoUsuario.filter(x => x.id !== id); window.salvarDadosGeraisNaNuvem(); window.salvarDadosLocais(); window.renderizarRedacoes(); }); };
         
         window.renderizarRedacoes = function() {
-            const tbody = document.getElementById('lista-redacoes'); if(!tbody) return; tbody.innerHTML = '';
-            if(redacoesDoUsuario.length === 0) { tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding: 2rem; color:var(--text-muted);">Nenhuma redação registada.</td></tr>`; return; }
-            redacoesDoUsuario.forEach(red => {
-                let pData = red.data.split('-'); let df = pData.length === 3 ? `${pData[2]}/${pData[1]}/${pData[0]}` : red.data; let pontosStr = red.pontos !== null ? red.pontos : '-';
-                let linkIcon = red.link ? `<a href="${red.link}" target="_blank" style="color:var(--primary-color);" title="Abrir Redação"><i class="fa-solid fa-arrow-up-right-from-square"></i></a>` : '-';
-                tbody.innerHTML += `<tr><td style="font-weight:600; color:var(--text-main);"><i class="fa-regular fa-file-lines" style="color:var(--text-muted);"></i> ${red.tema}</td><td>${red.concurso || '-'}</td><td><span class="badge" style="background:var(--hover-bg); color:var(--text-muted);">${red.banca || '-'}</span></td><td style="text-align:center; font-weight:bold; color:var(--primary-color);">${pontosStr}</td><td><i class="fa-regular fa-calendar" style="color:var(--text-muted);"></i> ${df}</td><td><i class="fa-regular fa-hourglass-half" style="color:var(--text-muted);"></i> ${red.tempo || '-'}</td><td style="font-size:0.8rem;">${red.consideracoes || '-'}</td><td style="text-align:center;">${linkIcon}</td><td style="text-align:center; white-space:nowrap;"><button class="btn-icon" style="padding: 0.3rem 0.6rem; font-size: 0.8rem;" onclick="window.editarRedacao(${red.id})" title="Editar"><i class="fa-solid fa-pen"></i></button><button class="btn-icon" style="padding: 0.3rem 0.6rem; font-size: 0.8rem; color: var(--danger-color);" onclick="window.excluirRedacao(${red.id})" title="Eliminar"><i class="fa-solid fa-trash"></i></button></td></tr>`;
+            const tbody = document.getElementById('lista-redacoes'); tbody.innerHTML = '';
+            if(redacoesDoUsuario.length === 0) { tbody.innerHTML = '<tr><td colspan="9" class="text-center text-muted" style="padding:1rem;">Nenhuma redação registada.</td></tr>'; return; }
+            redacoesDoUsuario.sort((a,b) => new Date(b.data) - new Date(a.data));
+            redacoesDoUsuario.forEach(r => {
+                let dStr = r.data.split('-').reverse().join('/');
+                let linkHtml = r.link ? `<a href="${r.link}" target="_blank" style="color:var(--primary-color); text-decoration:none;"><i class="fa-solid fa-arrow-up-right-from-square"></i> Abrir</a>` : '-';
+                tbody.innerHTML += `<tr>
+                    <td style="font-weight:600; color:var(--text-main);">${r.tema}</td>
+                    <td style="color:var(--text-muted);">${r.concurso || '-'}</td>
+                    <td>${r.banca ? `<span class="revisao-badge badge-revisaom" style="margin:0;">${r.banca}</span>` : '-'}</td>
+                    <td class="text-center" style="color:var(--success-color); font-weight:bold; font-size:1.1rem;">${r.pontos || '-'}</td>
+                    <td style="font-size:0.85rem; color:var(--text-muted);">${dStr}</td>
+                    <td><i class="fa-regular fa-clock" style="color:var(--text-muted); font-size:0.8rem;"></i> ${r.tempo || '-'}</td>
+                    <td style="font-size:0.8rem; color:var(--text-muted); font-style:italic; max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${r.consideracoes || '-'}</td>
+                    <td class="text-center">${linkHtml}</td>
+                    <td class="text-center"><button class="btn-icon" style="padding:0.3rem; color:var(--danger-color); border:none;" onclick="window.excluirRedacao('${r.id}')"><i class="fa-solid fa-trash"></i></button></td>
+                </tr>`;
             });
-        }
-
-        // =========================================================================
-        // === LOGIN, ADMIN E SINCRONIZAÇÃO ===
-        // =========================================================================
-        window.abrirModalLogin = function() { document.getElementById('modal-login').classList.remove('hidden'); }
-        window.fecharModalLogin = function() { document.getElementById('modal-login').classList.add('hidden'); }
-        
-        window.fazerLogin = async function() {
-            const email = document.getElementById('login-email').value;
-            const senha = document.getElementById('login-senha').value;
-            if(!email || !senha) { window.mostrarAlerta("Preencha e-mail e senha para entrar."); return; }
-            if(!auth) { window.mostrarAlerta("Firebase offline."); return; }
-            
-            try {
-                await signInWithEmailAndPassword(auth, email, senha);
-                window.mostrarAlerta("Login efetuado! A sincronizar dados com a nuvem...");
-                window.fecharModalLogin();
-                // Força o carregamento de dados imediatamente após o login
-                window.carregarDadosDaNuvem(); 
-            } catch (error) {
-                window.mostrarAlerta("Acesso negado. Credenciais inválidas ou conta inexistente.");
-            }
-        }
-
-        window.fazerLogout = async function() {
-            try {
-                if(auth) await signOut(auth); 
-                localStorage.clear(); 
-                window.location.reload();
-            } catch(e) { console.error("Erro no logout", e); }
-        }
-
-        let unsubDadosGerais = null;
-        let unsubRegistros = null;
-
-        window.carregarDadosDaNuvem = function() {
-            if (!currentUser || currentUser.isAnonymous || !db) return;
-
-            // 1. Puxar Configurações Gerais (Edital, Cronograma, Metas, Simulados, etc.)
-            const docGeraisRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'config', 'dadosGerais');
-            if (unsubDadosGerais) unsubDadosGerais(); // Limpa o listener anterior se existir
-            unsubDadosGerais = onSnapshot(docGeraisRef, (docSnap) => {
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    if(data.configuracoesGlobais) configuracoesGlobais = data.configuracoesGlobais;
-                    if(data.edital) editalDoUsuario = data.edital;
-                    if(data.planejamento) planejamentoDoUsuario = data.planejamento;
-                    if(data.metas) metasDoUsuario = data.metas;
-                    if(data.simulados) simuladosDoUsuario = data.simulados;
-                    if(data.redacoes) redacoesDoUsuario = data.redacoes;
-                    
-                    window.sanitizarDados();
-                    window.atualizarTodasAsTelas();
-                }
-            }, (error) => console.error("Erro ao puxar dados gerais do Firebase:", error));
-
-            // 2. Puxar Histórico de Estudos (Registos individuais)
-            const colRegistrosRef = collection(db, 'artifacts', appId, 'users', currentUser.uid, 'registros_estudos');
-            if (unsubRegistros) unsubRegistros(); // Limpa o listener anterior se existir
-            unsubRegistros = onSnapshot(colRegistrosRef, (querySnapshot) => {
-                registrosDeEstudo = [];
-                querySnapshot.forEach((docSnap) => {
-                    let reg = docSnap.data();
-                    reg.idDoc = docSnap.id; // Guarda a referência do Firestore localmente
-                    registrosDeEstudo.push(reg);
-                });
-                
-                // Ordenar do mais recente para o mais antigo
-                registrosDeEstudo.sort((a, b) => b.timestamp - a.timestamp);
-                window.atualizarTodasAsTelas();
-            }, (error) => console.error("Erro ao puxar registos de estudo do Firebase:", error));
         };
 
-        window.importarEditalJson = function() {
+        // AUTH & ADMIN
+        window.abrirModalLogin = function() { document.getElementById('modal-login').classList.remove('hidden'); };
+        window.fecharModalLogin = function() { document.getElementById('modal-login').classList.add('hidden'); };
+
+        window.fazerLogin = function() {
+            const email = document.getElementById('login-email').value;
+            const senha = document.getElementById('login-senha').value;
+            if (!email || !senha) { window.mostrarAlerta("Preencha E-mail e Senha!"); return; }
+            
+            signInWithEmailAndPassword(auth, email, senha)
+                .then((userCredential) => {
+                    window.mostrarAlerta("Acesso Autorizado! Bem-vindo de volta.", "Sucesso");
+                    // O onAuthStateChanged cuidará de fechar a modal e carregar os dados
+                })
+                .catch((error) => {
+                    console.error(error);
+                    window.mostrarAlerta("Falha no login. Verifique as credenciais.");
+                });
+        };
+
+        window.fazerLogout = function() {
+            window.mostrarConfirmacao("Deseja realmente sair da aplicação?", () => {
+                signOut(auth).then(() => {
+                    currentUser = null;
+                    registrosDeEstudo = [];
+                    window.salvarDadosLocais();
+                    location.reload();
+                }).catch(err => console.error("Erro no logout", err));
+            });
+        };
+
+        window.carregarDadosDaNuvem = async function() {
+            if (!currentUser || currentUser.isAnonymous || !db) return;
+            try {
+                const { getDoc, collection, getDocs } = await import("https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js");
+                
+                const docGeraisRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'config', 'dadosGerais');
+                const docGeraisSnap = await getDoc(docGeraisRef);
+                if (docGeraisSnap.exists()) {
+                    const d = docGeraisSnap.data();
+                    if (d.configuracoesGlobais) configuracoesGlobais = d.configuracoesGlobais;
+                    if (d.edital) editalDoUsuario = d.edital;
+                    if (d.planejamento) planejamentoDoUsuario = d.planejamento;
+                    if (d.metas) metasDoUsuario = d.metas;
+                    if (d.simulados) simuladosDoUsuario = d.simulados;
+                    if (d.redacoes) redacoesDoUsuario = d.redacoes;
+                }
+
+                const regColRef = collection(db, 'artifacts', appId, 'users', currentUser.uid, 'registros_estudos');
+                const regSnap = await getDocs(regColRef);
+                registrosDeEstudo = [];
+                regSnap.forEach(docSnap => {
+                    registrosDeEstudo.push({ idDoc: docSnap.id, ...docSnap.data() });
+                });
+                
+                window.salvarDadosLocais();
+                window.atualizarTodasAsTelas();
+            } catch (error) {
+                console.error("Erro ao puxar dados da nuvem:", error);
+            }
+        };
+
+        window.importarEditalJson = async function() {
             const fileInput = document.getElementById('file-edital');
-            if(!fileInput.files.length) return window.mostrarAlerta("Selecione um ficheiro JSON do Edital.");
+            if (!fileInput.files.length) { window.mostrarAlerta("Selecione um ficheiro .json"); return; }
             const file = fileInput.files[0];
             const reader = new FileReader();
             
             reader.onload = async function(e) {
                 try {
-                    const dados = JSON.parse(e.target.result);
-                    if(!dados.nome || !Array.isArray(dados.disciplinas)) {
-                        return window.mostrarAlerta("O JSON do Edital está inválido. Deve conter 'nome' e 'disciplinas'.");
-                    }
+                    const json = JSON.parse(e.target.result);
+                    if (!json.nome || !json.disciplinas) { window.mostrarAlerta("Formato JSON inválido. Requer 'nome' e array de 'disciplinas'."); return; }
                     
-                    window.mostrarConfirmacao(`Deseja enviar o edital "${dados.nome}" para a base pública?`, async () => {
-                        if (!db || !currentUser || currentUser.isAnonymous) {
-                            return window.mostrarAlerta("Erro: Precisa de estar autenticado como Administrador para enviar para a base pública.");
-                        }
-                        
-                        try {
-                            const { addDoc, collection } = await import("https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js");
-                            const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'editais_base');
-                            await addDoc(colRef, dados);
-                            window.mostrarAlerta("Edital público importado e disponibilizado na nuvem com sucesso!");
-                            fileInput.value = ''; // Limpar input
-                        } catch (err) {
-                            console.error("Erro ao fazer upload do edital:", err);
-                            window.mostrarAlerta("Falha ao guardar o edital na base de dados.");
-                        }
-                    });
-                } catch (error) {
-                    console.error("Erro na leitura do JSON:", error);
+                    if (db) {
+                        const { addDoc, collection } = await import("https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js");
+                        await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'editais_base'), json);
+                        window.mostrarAlerta("Edital importado e partilhado publicamente com sucesso!");
+                        fileInput.value = '';
+                    }
+                } catch(error) {
+                    console.error("Erro JSON:", error);
                     window.mostrarAlerta("Erro ao ler o ficheiro. Certifique-se que é um JSON válido.");
                 }
             };
