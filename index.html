@@ -2952,21 +2952,20 @@
             if(!item) return;
 
             if (item.tipo === 'estudo') {
+                // abrirModalEstudo() reseta e repopula o select com opt.value = d.nome
                 window.abrirModalEstudo();
-                // Pré-preenche título do modal para indicar origem
-                document.getElementById('modal-estudo-titulo').innerText = 'Registar Estudo Finalizado';
 
-                // Seleciona a disciplina pelo nome (o select usa o id como value)
+                // O select usa d.nome como value — setar APÓS abrirModalEstudo popular as opções
                 const selDisc = document.getElementById('select-disciplina');
-                let d = editalDoUsuario.disciplinas.find(x => x.nome === item.disciplina);
-                if (d) {
-                    selDisc.value = d.id;
-                    window.atualizarTopicosEstudo();
-                    // Aguarda o DOM atualizar os tópicos antes de selecionar
-                    setTimeout(() => {
-                        document.getElementById('select-topico').value = item.topico || '';
-                    }, 60);
-                }
+                selDisc.value = item.disciplina; // item.disciplina já é o nome da disciplina
+
+                // Popular os tópicos com base na disciplina selecionada
+                window.atualizarTopicosEstudo();
+
+                // Setar o tópico após o select de tópicos ser populado (síncrono aqui, mas setTimeout garante)
+                setTimeout(() => {
+                    document.getElementById('select-topico').value = item.topico || '';
+                }, 50);
 
                 // Pré-preenche categorias e materiais do planejamento
                 document.querySelectorAll('input[name="estudo-categoria"]').forEach(cb => {
@@ -2976,10 +2975,10 @@
                     cb.checked = (item.materiais || []).includes(cb.value);
                 });
 
-                // Pré-preenche descrição/comentário do card planejado
+                // Pré-preenche comentário com a descrição do card
                 document.getElementById('estudo-comentario').value = item.descricao || '';
 
-                // Vincula ao card do cronograma para marcá-lo como concluído ao salvar
+                // Vincula ao card para marcá-lo como concluído ao salvar
                 document.getElementById('estudo-tarefa-id-conclusao').value = tarefaId;
                 document.getElementById('estudo-tarefa-context-conclusao').value = contexto;
 
