@@ -498,9 +498,9 @@
                         <div style="display: flex; align-items: center; gap: 10px;">
                             <span style="color: var(--text-muted);">Mostrar:</span>
                             <select id="select-historico-limit" class="form-control" style="width: auto; padding: 0.3rem 0.5rem; font-size: 0.85rem; background: var(--bg-color);" onchange="window.mudarItensPorPaginaHistorico(this.value)">
-                                <option value="20">20 itens</option>
+                                <option value="20" selected>20 itens</option>
                                 <option value="50">50 itens</option>
-                                <option value="80" selected>80 itens</option>
+                                <option value="80">80 itens</option>
                                 <option value="all">Todos</option>
                             </select>
                         </div>
@@ -925,7 +925,7 @@
         
         // Paginação do Histórico
         let historicoPaginaAtual = 1;
-        let historicoItensPorPagina = 80;
+        let historicoItensPorPagina = 20;
 
         // =====================================================================
         // === MOTOR DE REVISÃO (REVIEW ENGINE)                              ===
