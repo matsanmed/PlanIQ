@@ -190,6 +190,9 @@
         .revisao-card.weekly { border-left-color: #ec4899; } 
         .badge-weekly { background: rgba(236, 72, 153, 0.2); color: #f472b6; }
 
+        .revisao-card.custom { border-left-color: #f97316; } 
+        .badge-custom { background: rgba(249, 115, 22, 0.2); color: #fb923c; }
+
         .revisao-card-title { font-weight: 700; font-size: 0.95rem; color: var(--text-main); margin-bottom: 0.3rem; }
         .revisao-card-subtitle { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.8rem; display: flex; align-items: center; gap: 5px; }
         .revisao-badge { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 600; margin-bottom: 0.5rem; width: fit-content; }
@@ -485,6 +488,16 @@
                         <button class="btn-danger-outline" style="width: auto; padding: 0.6rem 1.2rem; font-weight: 600;" onclick="window.excluirTodoHistorico()"><i class="fa-solid fa-trash"></i> Excluir Histórico</button>
                         <button class="btn-primary" style="width: auto; padding: 0.6rem 1.2rem;" onclick="window.abrirModalEstudo()"><i class="fa-solid fa-plus"></i> Adicionar Estudo Direto</button>
                     </div>
+                </div>
+                <!-- Barra de filtros do Histórico -->
+                <div style="background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 0.75rem 1rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                    <i class="fa-solid fa-filter" style="color: var(--text-muted); font-size: 0.85rem;"></i>
+                    <input type="text" id="hist-filter-texto" class="form-control" placeholder="Buscar disciplina ou assunto..." style="max-width: 260px; padding: 0.35rem 0.7rem; font-size: 0.82rem;" oninput="window.filtrarHistorico()">
+                    <input type="date" id="hist-filter-data" class="form-control" style="width: auto; padding: 0.35rem 0.7rem; font-size: 0.82rem;" onchange="window.filtrarHistorico()">
+                    <select id="hist-filter-disc" class="form-control" style="width: auto; padding: 0.35rem 0.7rem; font-size: 0.82rem;" onchange="window.filtrarHistorico()">
+                        <option value="">Todas as disciplinas</option>
+                    </select>
+                    <button class="btn-icon" style="font-size:0.78rem; padding: 0.35rem 0.8rem; margin-left: auto;" onclick="window.limparFiltrosHistorico()"><i class="fa-solid fa-rotate-left"></i> Limpar</button>
                 </div>
                 <div class="panel" style="overflow-x: auto;">
                     <table>
@@ -852,6 +865,7 @@
                         <option value="spaced">Espaçada Fixa (24h, 7d, 15d, 30d...)</option>
                         <option value="weekly">Semanal Fixa (Dias específicos)</option>
                         <option value="parallel">Paralela (Agenda de Teoria + Agenda de Questões)</option>
+                        <option value="custom">Personalizada (Intervalo fixo em dias)</option>
                     </select>
                 </div>
 
@@ -866,6 +880,15 @@
                         <label class="checkbox-item"><input type="checkbox" name="chk-weekly-day-disc" value="6"> Sábado</label>
                         <label class="checkbox-item"><input type="checkbox" name="chk-weekly-day-disc" value="0"> Domingo</label>
                     </div>
+                </div>
+
+                <div id="div-config-custom" class="form-group hidden" style="background: var(--hover-bg); padding: 15px; border-radius: 6px;">
+                    <label>Revisar a cada quantos dias?</label>
+                    <div style="display: flex; align-items: center; gap: 10px; margin-top: 8px;">
+                        <input type="number" id="config-rev-custom-days" class="form-control" min="1" max="365" value="7" style="max-width: 100px;">
+                        <span style="color: var(--text-muted); font-size: 0.9rem;">dias após cada revisão concluída</span>
+                    </div>
+                    <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 8px;"><i class="fa-solid fa-circle-info"></i> Independente do desempenho, sempre agendará no intervalo definido. Pode alterar quando quiser sem perder o histórico.</p>
                 </div>
 
                 <div style="margin-top: 15px; font-size: 0.85rem; color: var(--text-muted); background: var(--bg-color); padding: 10px; border-left: 3px solid var(--primary-color); border-radius: 4px;" id="config-rev-help">
@@ -951,8 +974,8 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, updateDoc, collection, onSnapshot, addDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInWithCustomToken, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, updateDoc, collection, addDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCcweqqOKak3jQVng2lyE1l2_YStpDpXg0",
@@ -964,7 +987,6 @@
         };
         const appId = 'planiq-producao';
         
-        const ADMIN_EMAILS = ['matsanmed@gmail.com']; 
 
         let app, auth, db;
         try {
@@ -1130,6 +1152,20 @@
                     resTheory.parallelSub = 'Teoria';
                     resQuest.parallelSub = 'Questões';
                     return [resTheory, resQuest];
+                },
+
+                custom: function(records, config) {
+                    // Revisão personalizada: intervalo fixo em dias definido pelo utilizador
+                    // Funciona independentemente de quantos registros já existam —
+                    // sempre agenda a partir do último registro + N dias.
+                    let intervalDays = parseInt(config.intervalDays) || 7;
+                    if (intervalDays < 1) intervalDays = 1;
+
+                    let lastRev = records[records.length - 1];
+                    let base = new Date(lastRev.data + "T00:00:00");
+                    base.setDate(base.getDate() + intervalDays);
+                    let perf = window.ReviewEngine.calculatePerformancePerf(records);
+                    return { date: base, perf: perf, type: 'custom' };
                 }
             }
         };
@@ -1636,6 +1672,12 @@
             let pool = [...rawAgenda];
             let dataSweep = new Date(hojeObj);
             let limitSafe = 0;
+            let stringHoje = window.formatarDataLocalParaISO(hojeObj);
+
+            // CORREÇÃO: Conta quantas revisões já foram concluídas HOJE no histórico
+            let revisoesConcluidasHoje = registrosDeEstudo.filter(reg => {
+                return reg.data === stringHoje && reg.categorias && reg.categorias.includes("Revisão");
+            }).length;
 
             // Varrimento sequencial robusto que garante que nenhuma tarefa desaparece
             while (pool.length > 0 && limitSafe < 1000) {
@@ -1660,7 +1702,12 @@
                     if (limiteDiario === 0) { 
                         selecionadasParaHoje = [...candidatas];
                     } else {
+                        // CORREÇÃO: Desconta as revisões já feitas do limite diário caso estejamos a calcular os slots de "Hoje"
                         let vagas = limiteDiario;
+                        if (dataStr === stringHoje) {
+                            vagas = Math.max(0, limiteDiario - revisoesConcluidasHoje);
+                        }
+
                         let obrigatorias = candidatas.filter(r => dataSweep >= r.deadlineDate);
                         let normais = candidatas.filter(r => dataSweep < r.deadlineDate);
 
@@ -1749,7 +1796,7 @@
             let badgeClass = `badge-${baseColorClass}`;
             
             let nameLabels = {
-                'performance': 'Desempenho', 'revisaom': 'Revisão M', 'spaced': 'Espaçada', 'weekly': 'Semanal'
+                'performance': 'Desempenho', 'revisaom': 'Revisão M', 'spaced': 'Espaçada', 'weekly': 'Semanal', 'custom': 'Personalizada'
             };
             let typeLabel = nameLabels[baseColorClass] || 'Revisão';
 
@@ -1880,18 +1927,25 @@
             } else {
                 document.querySelectorAll('input[name="chk-weekly-day-disc"]').forEach(cb => cb.checked = false);
             }
+            if (conf.type === 'custom' && conf.settings.intervalDays) {
+                document.getElementById('config-rev-custom-days').value = conf.settings.intervalDays;
+            } else {
+                document.getElementById('config-rev-custom-days').value = 7;
+            }
             window.toggleCamposConfigRevisao();
         }
 
         window.toggleCamposConfigRevisao = function() {
             let tipo = document.getElementById('config-rev-tipo').value;
             document.getElementById('div-config-weekly').classList.toggle('hidden', tipo !== 'weekly');
+            document.getElementById('div-config-custom').classList.toggle('hidden', tipo !== 'custom');
             let helpMsg = document.getElementById('config-rev-help');
             if (tipo === 'performance') helpMsg.innerText = "As revisões são agendadas unicamente baseadas no seu desempenho (%) das questões que registar no estudo.";
             else if (tipo === 'spaced') helpMsg.innerText = "Padrão de repetição espaçada fixa: 24h, 7 dias, 15 dias, 30 dias e 60 dias após cada revisão concluída.";
             else if (tipo === 'revisaom') helpMsg.innerText = "Método M: 24h -> 7 dias -> passa a avaliar automaticamente pelo seu Desempenho (Performance).";
             else if (tipo === 'weekly') helpMsg.innerText = "Dias fixos na semana. A revisão surgirá sempre no dia selecionado após um estudo ou revisão concluída.";
             else if (tipo === 'parallel') helpMsg.innerText = "Modo duplo: Vai agendar duas revisões em paralelo. Uma para repassar a teoria (Espaçada) e outra baseada no rendimento das Questões (Desempenho).";
+            else if (tipo === 'custom') helpMsg.innerText = "Intervalo fixo personalizado: a revisão será sempre agendada N dias após o último estudo ou revisão concluída, independente do desempenho.";
         }
 
         window.fecharModalConfigRevisao = function() { document.getElementById('modal-config-revisao').classList.add('hidden'); }
@@ -1906,6 +1960,11 @@
                 let days = Array.from(document.querySelectorAll('input[name="chk-weekly-day-disc"]:checked')).map(cb => parseInt(cb.value));
                 if (days.length === 0) { window.mostrarAlerta("Tem de selecionar pelo menos um dia para a revisão semanal."); return; }
                 settings.days = days;
+            }
+            if (tipo === 'custom') {
+                let dias = parseInt(document.getElementById('config-rev-custom-days').value);
+                if (!dias || dias < 1) { window.mostrarAlerta("Insira um intervalo de pelo menos 1 dia."); return; }
+                settings.intervalDays = dias;
             }
 
             d.reviewConfig = { type: tipo, settings: settings };
@@ -3071,7 +3130,18 @@
 
         // HISTÓRICO DE ESTUDO BASE COM PAGINAÇÃO
         window.mudarPaginaHistorico = function(delta) {
-            let maxPages = historicoItensPorPagina === 'all' ? 1 : Math.ceil(registrosDeEstudo.length / historicoItensPorPagina);
+            // Use filtered count for correct page bounds
+            let filtroTexto = (document.getElementById('hist-filter-texto')?.value || '').toLowerCase().trim();
+            let filtroData = document.getElementById('hist-filter-data')?.value || '';
+            let filtroDisc = document.getElementById('hist-filter-disc')?.value || '';
+            let filtrados = registrosDeEstudo.filter(reg => {
+                if (filtroDisc && reg.disciplina !== filtroDisc) return false;
+                if (filtroData && reg.data !== filtroData) return false;
+                if (filtroTexto && !((reg.disciplina||'').toLowerCase().includes(filtroTexto)||(reg.topico||'').toLowerCase().includes(filtroTexto))) return false;
+                return true;
+            });
+            let maxPages = historicoItensPorPagina === 'all' ? 1 : Math.ceil(filtrados.length / historicoItensPorPagina);
+            if (maxPages < 1) maxPages = 1;
             historicoPaginaAtual += delta;
             if(historicoPaginaAtual < 1) historicoPaginaAtual = 1;
             if(historicoPaginaAtual > maxPages) historicoPaginaAtual = maxPages;
@@ -3089,15 +3159,39 @@
             const pageInfo = document.getElementById('historico-page-info');
             
             registrosDeEstudo.sort((a,b) => b.timestamp - a.timestamp);
+
+            // Populate disciplina filter select (only when empty or stale)
+            const selDisc = document.getElementById('hist-filter-disc');
+            if (selDisc) {
+                let currentVal = selDisc.value;
+                let nomes = [...new Set(registrosDeEstudo.map(r => r.disciplina).filter(Boolean))].sort();
+                selDisc.innerHTML = '<option value="">Todas as disciplinas</option>';
+                nomes.forEach(n => { let opt = document.createElement('option'); opt.value = n; opt.textContent = n; selDisc.appendChild(opt); });
+                if (currentVal) selDisc.value = currentVal;
+            }
+
+            // Apply filters
+            let filtroTexto = (document.getElementById('hist-filter-texto')?.value || '').toLowerCase().trim();
+            let filtroData = document.getElementById('hist-filter-data')?.value || '';
+            let filtroDisc = document.getElementById('hist-filter-disc')?.value || '';
+            let registrosFiltrados = registrosDeEstudo.filter(reg => {
+                if (filtroDisc && reg.disciplina !== filtroDisc) return false;
+                if (filtroData && reg.data !== filtroData) return false;
+                if (filtroTexto && !(
+                    (reg.disciplina || '').toLowerCase().includes(filtroTexto) ||
+                    (reg.topico || '').toLowerCase().includes(filtroTexto)
+                )) return false;
+                return true;
+            });
             
-            if (registrosDeEstudo.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 1.5rem; color: var(--text-muted);">Nenhum estudo registado ainda.</td></tr>';
+            if (registrosFiltrados.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 1.5rem; color: var(--text-muted);">Nenhum registo encontrado com os filtros aplicados.</td></tr>';
                 pagContainer.classList.add('hidden');
                 return;
             }
 
-            let registrosParaMostrar = registrosDeEstudo;
-            let totalItens = registrosDeEstudo.length;
+            let registrosParaMostrar = registrosFiltrados;
+            let totalItens = registrosFiltrados.length;
 
             if (historicoItensPorPagina !== 'all') {
                 let maxPages = Math.ceil(totalItens / historicoItensPorPagina);
@@ -3108,7 +3202,9 @@
                 registrosParaMostrar = registrosDeEstudo.slice(start, end);
                 
                 pagContainer.classList.remove('hidden');
-                pageInfo.innerText = `Página ${historicoPaginaAtual} de ${maxPages} (Total: ${totalItens})`;
+                let filtroAtivo = (document.getElementById('hist-filter-texto')?.value || '') + (document.getElementById('hist-filter-data')?.value || '') + (document.getElementById('hist-filter-disc')?.value || '');
+                let totalLabel = filtroAtivo ? `${totalItens} filtrados de ${registrosDeEstudo.length}` : `Total: ${totalItens}`;
+                pageInfo.innerText = `Página ${historicoPaginaAtual} de ${maxPages} (${totalLabel})`;
                 document.getElementById('btn-hist-prev').disabled = historicoPaginaAtual === 1;
                 document.getElementById('btn-hist-next').disabled = historicoPaginaAtual === maxPages;
             } else {
@@ -3150,6 +3246,19 @@
                     </tr>
                 `;
             });
+        };
+
+        window.filtrarHistorico = function() {
+            historicoPaginaAtual = 1;
+            window.renderizarHistorico();
+        };
+
+        window.limparFiltrosHistorico = function() {
+            let tf = document.getElementById('hist-filter-texto'); if (tf) tf.value = '';
+            let df = document.getElementById('hist-filter-data'); if (df) df.value = '';
+            let sd = document.getElementById('hist-filter-disc'); if (sd) sd.value = '';
+            historicoPaginaAtual = 1;
+            window.renderizarHistorico();
         };
 
         // MODAL ESTUDO
@@ -3630,10 +3739,8 @@
             onAuthStateChanged(auth, (user) => {
                 currentUser = user;
                 if (user && !user.isAnonymous) {
-                    if (ADMIN_EMAILS.includes(user.email)) {
-                        const adminPanel = document.getElementById('config-admin-panel');
-                        if (adminPanel) adminPanel.classList.remove('hidden');
-                    }
+                    const adminPanel = document.getElementById('config-admin-panel');
+                    if (adminPanel) adminPanel.classList.remove('hidden');
                     // Fecha a modal de login se o login for válido
                     window.fecharModalLogin();
                     
