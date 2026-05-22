@@ -3199,7 +3199,7 @@
                 
                 let start = (historicoPaginaAtual - 1) * historicoItensPorPagina;
                 let end = start + historicoItensPorPagina;
-                registrosParaMostrar = registrosDeEstudo.slice(start, end);
+                registrosParaMostrar = registrosFiltrados.slice(start, end);
                 
                 pagContainer.classList.remove('hidden');
                 let filtroAtivo = (document.getElementById('hist-filter-texto')?.value || '') + (document.getElementById('hist-filter-data')?.value || '') + (document.getElementById('hist-filter-disc')?.value || '');
