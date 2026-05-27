@@ -107,12 +107,12 @@
         .progress-bar-container { width: 100%; height: 8px; background: var(--border-color); border-radius: 4px; margin-top: 10px; overflow: hidden; }
         .progress-bar-fill { height: 100%; background: var(--primary-color); border-radius: 4px; transition: width 0.4s ease; }
 
-        .dash-cards-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 1.5rem; }
-        .dash-top-card { background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 10px; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); display: flex; flex-direction: column; }
+        .dash-cards-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 1.5rem; align-items: stretch; }
+        .dash-top-card { background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 10px; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); display: flex; flex-direction: column; justify-content: space-between; gap: 10px; }
         .dash-card-title { font-size: 0.9rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
         .dash-card-big-number { font-size: 2.2rem; font-weight: 800; color: var(--text-main); margin-bottom: 10px; }
         .dash-card-substats { display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-muted); margin-top: 10px; font-weight: 500; }
-        .dashboard-main-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; margin-top: 1rem; align-items: start; }
+        .dashboard-main-grid { display: grid; grid-template-columns: 2.5fr 1fr; gap: 1.5rem; margin-top: 1rem; }
 
         .edital-container { background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; }
         .edital-tabs { display: flex; gap: 15px; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; }
@@ -272,6 +272,10 @@
 
         .sufocado-banner { background-color: var(--danger-color); color: white; padding: 0.75rem; border-radius: 8px; font-weight: 600; display: flex; align-items: center; gap: 10px; margin-bottom: 1.5rem; font-size: 0.9rem;}
 
+        /* Toggle switch para pausa */
+        #config-global-pausa-ativa:checked + #pausa-toggle-span { background: #7c3aed; }
+        #config-global-pausa-ativa:checked + #pausa-toggle-span #pausa-toggle-knob { transform: translateX(22px); }
+
         @media (max-width: 768px) {
             body { flex-direction: column; overflow: auto; }
             .mobile-header { display: flex; }
@@ -340,8 +344,10 @@
             
             <section class="dash-cards-grid">
                 <div class="dash-top-card">
-                    <div class="dash-card-title"><i class="fa-regular fa-clock" style="color: var(--primary-color); font-size: 1.2rem;"></i> Horas Totais</div>
-                    <div class="dash-card-big-number" id="dash-horas-totais">0h 0m</div>
+                    <div>
+                        <div class="dash-card-title"><i class="fa-regular fa-clock" style="color: var(--primary-color); font-size: 1.2rem;"></i> Horas Totais</div>
+                        <div class="dash-card-big-number" id="dash-horas-totais">0h 0m</div>
+                    </div>
                 </div>
                 
                 <div class="dash-top-card">
@@ -539,6 +545,19 @@
                     <div><strong>Modo Sufocado Ativo!</strong></div>
                     <div style="font-size: 0.8rem; font-weight: normal; margin-top: 2px;">Você atingiu o limite de matérias atrasadas. As revisões de assuntos já dominados (>85%) estão suspensas temporariamente para focar nas urgências.</div>
                 </div>
+            </div>
+
+            <div id="pausa-revisoes-banner" class="hidden" style="background: linear-gradient(135deg, #7c3aed, #4f46e5); color: white; padding: 0.9rem 1.2rem; border-radius: 8px; font-weight: 600; display: flex; align-items: center; gap: 12px; margin-bottom: 1.5rem; font-size: 0.9rem; justify-content: space-between;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <i class="fa-solid fa-pause-circle" style="font-size: 1.4rem;"></i>
+                    <div>
+                        <div><strong>Revisões Automáticas Pausadas</strong></div>
+                        <div style="font-size: 0.8rem; font-weight: normal; margin-top: 2px;" id="pausa-banner-info">As tasks estão congeladas. Os estudos normais continuam funcionando.</div>
+                    </div>
+                </div>
+                <button onclick="window.abrirModalConfigRevisaoGlobal()" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4); color: white; padding: 0.4rem 1rem; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.8rem; white-space: nowrap;">
+                    <i class="fa-solid fa-play"></i> Retomar
+                </button>
             </div>
 
             <section style="margin-bottom: 2.5rem;"><h2 class="panel-title" style="color: var(--danger-color); border-bottom-color: var(--danger-color); font-size: 1.2rem;"><i class="fa-solid fa-triangle-exclamation"></i> Prioridades (Hoje & Atrasadas)</h2><div id="lista-prioridades" class="revisoes-horizontal-scroll"></div></section>
@@ -965,6 +984,66 @@
                 </div>
 
                 <button class="btn-success" onclick="window.salvarConfigRevisaoGlobal()"><i class="fa-solid fa-save"></i> Guardar Opções da Agenda</button>
+
+                <h3 style="font-size: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 5px; margin-top: 20px; margin-bottom: 10px; color: #7c3aed;"><i class="fa-solid fa-pause-circle"></i> Pausa de Revisões</h3>
+                <div class="form-group" style="background: var(--bg-color); padding: 15px; border-radius: 6px; border: 1px solid var(--border-color);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <div>
+                            <label style="font-weight: 600; color: var(--text-main); font-size: 0.95rem;"><i class="fa-solid fa-pause"></i> Pausar Revisões Automáticas</label>
+                            <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">Congela todas as tasks de revisão sem perder o histórico. Os estudos normais continuam funcionando.</p>
+                        </div>
+                        <label style="position: relative; display: inline-block; width: 48px; height: 26px; flex-shrink: 0; margin-left: 12px;">
+                            <input type="checkbox" id="config-global-pausa-ativa" style="opacity:0; width:0; height:0;" onchange="window.onTogglePausaRevisoes(this.checked)">
+                            <span id="pausa-toggle-span" style="position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background:var(--border-color); border-radius:26px; transition:0.3s;">
+                                <span style="position:absolute; content:''; height:20px; width:20px; left:3px; bottom:3px; background:white; border-radius:50%; transition:0.3s;" id="pausa-toggle-knob"></span>
+                            </span>
+                        </label>
+                    </div>
+                    <div id="div-pausa-info" class="hidden" style="background: rgba(124,58,237,0.1); border: 1px solid rgba(124,58,237,0.3); border-radius: 6px; padding: 10px; font-size: 0.82rem; color: var(--text-main);">
+                        <i class="fa-solid fa-circle-info" style="color:#7c3aed;"></i> <span id="pausa-modal-info-text"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal: Resume Protocol -->
+        <div id="modal-resume-protocol" class="modal-overlay hidden">
+            <div class="modal-content" style="max-width: 500px;">
+                <div class="modal-header">
+                    <h2><i class="fa-solid fa-play-circle" style="color: #7c3aed;"></i> Retomar Revisões</h2>
+                    <button class="btn-close" onclick="window.fecharModalResumeProtocol()"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;">Escolha como deseja retomar as revisões automáticas:</p>
+
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    <label id="resume-opt-recalcular" onclick="window.selecionarResumeOpt('recalcular')" style="cursor:pointer; background: var(--hover-bg); border: 2px solid var(--primary-color); border-radius: 8px; padding: 14px; display: flex; gap: 12px; align-items: flex-start; transition: all 0.2s;">
+                        <input type="radio" name="resume-opt" value="recalcular" checked style="margin-top: 3px; accent-color: var(--primary-color);">
+                        <div>
+                            <div style="font-weight: 700; color: var(--text-main);">🔄 Recalcular do Zero <span style="font-size: 0.75rem; background: var(--icon-blue-bg); color: var(--icon-blue-text); padding: 2px 6px; border-radius: 4px; margin-left: 4px;">Padrão</span></div>
+                            <div style="font-size: 0.82rem; color: var(--text-muted); margin-top: 4px;">Recria toda a agenda usando a data atual como referência. Deadlines e datas ideais são recalculadas a partir de hoje.</div>
+                        </div>
+                    </label>
+                    <label id="resume-opt-continuar" onclick="window.selecionarResumeOpt('continuar')" style="cursor:pointer; background: var(--bg-color); border: 2px solid var(--border-color); border-radius: 8px; padding: 14px; display: flex; gap: 12px; align-items: flex-start; transition: all 0.2s;">
+                        <input type="radio" name="resume-opt" value="continuar" style="margin-top: 3px; accent-color: var(--primary-color);">
+                        <div>
+                            <div style="font-weight: 700; color: var(--text-main);">▶️ Continuar de Onde Parou</div>
+                            <div style="font-size: 0.82rem; color: var(--text-muted); margin-top: 4px;">Retoma as tasks pausadas com as datas originais e redistribui via scheduler. Pode gerar backlog se a pausa foi longa.</div>
+                        </div>
+                    </label>
+                    <label id="resume-opt-reiniciar" onclick="window.selecionarResumeOpt('reiniciar')" style="cursor:pointer; background: var(--bg-color); border: 2px solid var(--border-color); border-radius: 8px; padding: 14px; display: flex; gap: 12px; align-items: flex-start; transition: all 0.2s;">
+                        <input type="radio" name="resume-opt" value="reiniciar" style="margin-top: 3px; accent-color: var(--primary-color);">
+                        <div>
+                            <div style="font-weight: 700; color: var(--text-main);">🔁 Recomeçar Ciclos</div>
+                            <div style="font-size: 0.82rem; color: var(--text-muted); margin-top: 4px;">Reseta os ciclos automáticos (datas manuais e overrides) mantendo todo o histórico de estudo e desempenho.</div>
+                        </div>
+                    </label>
+                </div>
+
+                <div style="margin-top: 16px; background: var(--bg-color); border-left: 3px solid #7c3aed; padding: 10px; border-radius: 4px; font-size: 0.82rem; color: var(--text-muted);">
+                    <i class="fa-solid fa-shield-halved" style="color:#7c3aed;"></i> O histórico de estudos e desempenho nunca é apagado por esta operação.
+                </div>
+
+                <button class="btn-success" style="margin-top: 16px; background: #7c3aed;" onclick="window.confirmarResumeProtocol()"><i class="fa-solid fa-play"></i> Confirmar e Retomar</button>
             </div>
         </div>
 
@@ -1016,7 +1095,7 @@
         let simuladosDoUsuario = []; 
         let redacoesDoUsuario = [];
         let planejamentoDoUsuario = { cronograma: [], ciclo: [] };
-        let configuracoesGlobais = { diasDisponiveis: [1, 2, 3, 4, 5], limiteDiario: 3, deadlineDias: 7, sufocadoAtivo: false, sufocadoLimite: 10 }; 
+        let configuracoesGlobais = { diasDisponiveis: [1, 2, 3, 4, 5], limiteDiario: 3, deadlineDias: 7, sufocadoAtivo: false, sufocadoLimite: 10, pausaRevisoesAtiva: false, pausaRevisoesAt: null }; 
         
         let abaAtivaEdital = 'ativas'; 
         let disciplinaSelecionadaId = null; 
@@ -1267,6 +1346,8 @@
             if (configuracoesGlobais.deadlineDias === undefined) configuracoesGlobais.deadlineDias = 7;
             if (configuracoesGlobais.sufocadoAtivo === undefined) configuracoesGlobais.sufocadoAtivo = false;
             if (configuracoesGlobais.sufocadoLimite === undefined) configuracoesGlobais.sufocadoLimite = 10;
+            if (configuracoesGlobais.pausaRevisoesAtiva === undefined) configuracoesGlobais.pausaRevisoesAtiva = false;
+            if (configuracoesGlobais.pausaRevisoesAt === undefined) configuracoesGlobais.pausaRevisoesAt = null;
 
             if (!editalDoUsuario || typeof editalDoUsuario !== 'object') {
                 editalDoUsuario = { concursoSelecionado: "Edital Base", disciplinas: [] };
@@ -1909,6 +1990,117 @@
             window.renderizarRevisoes();
             window.fecharModalConfigRevisaoGlobal();
         }
+
+        // =====================================================================
+        // === REVIEW PAUSE ENGINE                                             ===
+        // =====================================================================
+
+        // Chamado quando o toggle muda no modal
+        window.onTogglePausaRevisoes = function(checked) {
+            const span = document.getElementById('pausa-toggle-span');
+            const knob = document.getElementById('pausa-toggle-knob');
+            const infoDiv = document.getElementById('div-pausa-info');
+            const infoText = document.getElementById('pausa-modal-info-text');
+
+            if (checked) {
+                // Ativar pausa: salva imediatamente sem fechar o modal
+                span.style.background = '#7c3aed';
+                knob.style.transform = 'translateX(22px)';
+                configuracoesGlobais.pausaRevisoesAtiva = true;
+                configuracoesGlobais.pausaRevisoesAt = window.formatarDataLocalParaISO(new Date());
+                infoDiv.classList.remove('hidden');
+                infoText.innerText = `Pausado em ${configuracoesGlobais.pausaRevisoesAt}. Tasks congeladas em status PAUSED. Estudos normais continuam.`;
+                window.salvarDadosGeraisNaNuvem();
+                window.salvarDadosLocais();
+                window.atualizarBannerPausa();
+            } else {
+                // Desativar pausa: abrir Resume Protocol
+                span.style.background = '';
+                knob.style.transform = '';
+                infoDiv.classList.add('hidden');
+                // Abre o modal de resume sem commitar ainda
+                window.fecharModalConfigRevisaoGlobal();
+                window.abrirModalResumeProtocol();
+            }
+        };
+
+        window.atualizarBannerPausa = function() {
+            const banner = document.getElementById('pausa-revisoes-banner');
+            const infoEl = document.getElementById('pausa-banner-info');
+            if (!banner) return;
+            if (configuracoesGlobais.pausaRevisoesAtiva) {
+                banner.classList.remove('hidden');
+                if (infoEl && configuracoesGlobais.pausaRevisoesAt) {
+                    infoEl.innerText = `Pausado desde ${configuracoesGlobais.pausaRevisoesAt}. Tasks congeladas. Estudos normais continuam funcionando.`;
+                }
+            } else {
+                banner.classList.add('hidden');
+            }
+        };
+
+        window.abrirModalResumeProtocol = function() {
+            document.getElementById('modal-resume-protocol').classList.remove('hidden');
+            window.selecionarResumeOpt('recalcular'); // default
+        };
+
+        window.fecharModalResumeProtocol = function() {
+            // Fechar sem retomar = manter pausa
+            document.getElementById('modal-resume-protocol').classList.add('hidden');
+        };
+
+        window.selecionarResumeOpt = function(opt) {
+            ['recalcular', 'continuar', 'reiniciar'].forEach(o => {
+                const el = document.getElementById(`resume-opt-${o}`);
+                if (!el) return;
+                if (o === opt) {
+                    el.style.border = '2px solid var(--primary-color)';
+                    el.style.background = 'var(--hover-bg)';
+                    el.querySelector('input').checked = true;
+                } else {
+                    el.style.border = '2px solid var(--border-color)';
+                    el.style.background = 'var(--bg-color)';
+                    el.querySelector('input').checked = false;
+                }
+            });
+        };
+
+        window.confirmarResumeProtocol = function() {
+            const opt = document.querySelector('input[name="resume-opt"]:checked')?.value || 'recalcular';
+
+            // Desativa a pausa
+            configuracoesGlobais.pausaRevisoesAtiva = false;
+            configuracoesGlobais.pausaRevisoesAt = null;
+
+            if (opt === 'recalcular') {
+                // Limpa dataRevisaoManual de todos os registros: força recalcular do zero a partir de hoje
+                registrosDeEstudo.forEach(reg => {
+                    if (reg.dataRevisaoManual) {
+                        delete reg.dataRevisaoManual;
+                    }
+                });
+                window.mostrarAlerta("Agenda recalculada a partir de hoje. Revisões retomadas!", "Revisões Retomadas");
+            } else if (opt === 'continuar') {
+                // Retomar com datas originais — o scheduler redistribui automaticamente
+                window.mostrarAlerta("Revisões retomadas de onde pararam. O scheduler redistribuiu as tasks.", "Revisões Retomadas");
+            } else if (opt === 'reiniciar') {
+                // Resetar ciclos: limpa dataRevisaoManual mas mantém histórico completo
+                registrosDeEstudo.forEach(reg => {
+                    if (reg.dataRevisaoManual) {
+                        delete reg.dataRevisaoManual;
+                    }
+                });
+                window.mostrarAlerta("Ciclos resetados. Histórico mantido. Revisões retomadas do zero!", "Ciclos Resetados");
+            }
+
+            // Persistir
+            window.salvarDadosGeraisNaNuvem();
+            window.salvarDadosLocais();
+
+            // Atualizar UI
+            document.getElementById('modal-resume-protocol').classList.add('hidden');
+            window.atualizarBannerPausa();
+            window.atualizarTodasAsTelas();
+        };
 
         window.abrirConfigRevisao = function(discId) {
             let d = editalDoUsuario.disciplinas.find(x => x.id === discId);
