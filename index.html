@@ -1387,26 +1387,34 @@
             if (!Array.isArray(redacoesDoUsuario)) redacoesDoUsuario = [];
         }
 
+        // Gera prefixo de chave isolado por usuário para evitar vazamento de dados entre contas
+        window.getStoragePrefix = function() {
+            let uid = (currentUser && !currentUser.isAnonymous) ? currentUser.uid : 'guest';
+            return `PlanIQ_${uid}_`;
+        };
+
         window.salvarDadosLocais = function() {
             window.sanitizarDados();
-            localStorage.setItem('PlanIQ_config', JSON.stringify(configuracoesGlobais));
-            localStorage.setItem('PlanIQ_edital', JSON.stringify(editalDoUsuario));
-            localStorage.setItem('PlanIQ_registros', JSON.stringify(registrosDeEstudo));
-            localStorage.setItem('PlanIQ_planejamento', JSON.stringify(planejamentoDoUsuario));
-            localStorage.setItem('PlanIQ_metas', JSON.stringify(metasDoUsuario));
-            localStorage.setItem('PlanIQ_simulados', JSON.stringify(simuladosDoUsuario));
-            localStorage.setItem('PlanIQ_redacoes', JSON.stringify(redacoesDoUsuario));
+            let p = window.getStoragePrefix();
+            localStorage.setItem(p + 'config', JSON.stringify(configuracoesGlobais));
+            localStorage.setItem(p + 'edital', JSON.stringify(editalDoUsuario));
+            localStorage.setItem(p + 'registros', JSON.stringify(registrosDeEstudo));
+            localStorage.setItem(p + 'planejamento', JSON.stringify(planejamentoDoUsuario));
+            localStorage.setItem(p + 'metas', JSON.stringify(metasDoUsuario));
+            localStorage.setItem(p + 'simulados', JSON.stringify(simuladosDoUsuario));
+            localStorage.setItem(p + 'redacoes', JSON.stringify(redacoesDoUsuario));
         }
 
         window.carregarDadosLocais = function() {
             try {
-                const savedConfig = localStorage.getItem('PlanIQ_config'); if (savedConfig) configuracoesGlobais = JSON.parse(savedConfig);
-                const savedEdital = localStorage.getItem('PlanIQ_edital'); if (savedEdital) editalDoUsuario = JSON.parse(savedEdital);
-                const savedRegistros = localStorage.getItem('PlanIQ_registros'); if (savedRegistros) { registrosDeEstudo = JSON.parse(savedRegistros); registrosDeEstudo.sort((a, b) => b.timestamp - a.timestamp); }
-                const savedPlan = localStorage.getItem('PlanIQ_planejamento'); if (savedPlan) planejamentoDoUsuario = JSON.parse(savedPlan);
-                const savedMetas = localStorage.getItem('PlanIQ_metas'); if (savedMetas) metasDoUsuario = JSON.parse(savedMetas);
-                const savedSimulados = localStorage.getItem('PlanIQ_simulados'); if (savedSimulados) simuladosDoUsuario = JSON.parse(savedSimulados);
-                const savedRedacoes = localStorage.getItem('PlanIQ_redacoes'); if (savedRedacoes) redacoesDoUsuario = JSON.parse(savedRedacoes);
+                let p = window.getStoragePrefix();
+                const savedConfig = localStorage.getItem(p + 'config'); if (savedConfig) configuracoesGlobais = JSON.parse(savedConfig);
+                const savedEdital = localStorage.getItem(p + 'edital'); if (savedEdital) editalDoUsuario = JSON.parse(savedEdital);
+                const savedRegistros = localStorage.getItem(p + 'registros'); if (savedRegistros) { registrosDeEstudo = JSON.parse(savedRegistros); registrosDeEstudo.sort((a, b) => b.timestamp - a.timestamp); }
+                const savedPlan = localStorage.getItem(p + 'planejamento'); if (savedPlan) planejamentoDoUsuario = JSON.parse(savedPlan);
+                const savedMetas = localStorage.getItem(p + 'metas'); if (savedMetas) metasDoUsuario = JSON.parse(savedMetas);
+                const savedSimulados = localStorage.getItem(p + 'simulados'); if (savedSimulados) simuladosDoUsuario = JSON.parse(savedSimulados);
+                const savedRedacoes = localStorage.getItem(p + 'redacoes'); if (savedRedacoes) redacoesDoUsuario = JSON.parse(savedRedacoes);
             } catch(e) { console.error("Erro no local storage", e); }
             window.sanitizarDados();
         }
@@ -3809,7 +3817,7 @@
             
             window.salvarDadosGeraisNaNuvem(); window.salvarDadosLocais(); window.renderizarRedacoes(); window.renderizarViewsCronograma(); window.fecharModalRedacao();
         };
-        window.excluirRedacao = function(id) { window.mostrarConfirmacao("Excluir este registo de redação?", () => { redacoesDoUsuario = redacoesDoUsuario.filter(x => x.id !== id); window.salvarDadosGeraisNaNuvem(); window.salvarDadosLocais(); window.renderizarRedacoes(); }); };
+        window.excluirRedacao = function(id) { window.mostrarConfirmacao("Excluir este registo de redação?", async () => { redacoesDoUsuario = redacoesDoUsuario.filter(x => String(x.id) !== String(id)); window.salvarDadosGeraisNaNuvem(); window.salvarDadosLocais(); window.renderizarRedacoes(); window.renderizarDashboard(); }); };
         
         window.renderizarRedacoes = function() {
             const tbody = document.getElementById('lista-redacoes'); tbody.innerHTML = '';
@@ -3927,6 +3935,16 @@
         // Monitorizar estado da autenticação e Puxar Dados
         if (auth) {
             onAuthStateChanged(auth, (user) => {
+                // Resetar dados em memória sempre que o estado de autenticação mudar
+                // para evitar que dados de um usuário apareçam para outro
+                editalDoUsuario = { concursoSelecionado: "Edital Base", disciplinas: [] };
+                registrosDeEstudo = [];
+                metasDoUsuario = [];
+                simuladosDoUsuario = [];
+                redacoesDoUsuario = [];
+                planejamentoDoUsuario = { cronograma: [], ciclo: [] };
+                configuracoesGlobais = { diasDisponiveis: [1, 2, 3, 4, 5], limiteDiario: 3, deadlineDias: 7, sufocadoAtivo: false, sufocadoLimite: 10, pausaRevisoesAtiva: false, pausaRevisoesAt: null };
+
                 currentUser = user;
                 if (user && !user.isAnonymous) {
                     const adminPanel = document.getElementById('config-admin-panel');
@@ -3934,7 +3952,7 @@
                     // Fecha a modal de login se o login for válido
                     window.fecharModalLogin();
                     
-                    // Puxa os dados da nuvem
+                    // Puxa os dados da nuvem (já inclui salvarDadosLocais com prefixo do novo uid)
                     window.carregarDadosDaNuvem(); 
                 } else {
                     const adminPanel = document.getElementById('config-admin-panel');
