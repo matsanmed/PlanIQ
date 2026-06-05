@@ -1392,9 +1392,11 @@
             }
             editalDoUsuario.disciplinas.forEach(d => {
                 if(!d.statusDisciplina) d.statusDisciplina = 'ativa';
-                if(!d.reviewConfig) d.reviewConfig = { type: 'performance', settings: {} }; 
+                if(!d.reviewConfig) d.reviewConfig = { type: 'performance', settings: {}, isPaused: false }; 
+                if(d.reviewConfig.isPaused === undefined) d.reviewConfig.isPaused = false;
+                if(!d.reviewConfig.settings) d.reviewConfig.settings = {};
                 if (!Array.isArray(d.topicos)) d.topicos = [];
-                d.topicos = d.topicos.map(t => typeof t === 'string' ? { nome: t, status: 'nao_iniciado' } : t);
+                d.topicos = d.topicos.map(t => typeof t === 'string' ? { nome: t, status: 'nao_iniciado', classeBloco: '' } : { classeBloco: '', ...t });
                 // Remove "Simulados e outras questões" do edital — ele é virtual, calculado dinamicamente
                 d.topicos = d.topicos.filter(t => (typeof t === 'string' ? t : t.nome) !== 'Simulados e outras questões');
             });
@@ -1701,11 +1703,22 @@
         // =====================================
         // LOAD BALANCER & SCHEDULER ENGINE
         // =====================================
+        // Feature 2: setter de classe com persistência imediata (corrige bug "não salva ao sair")
+        window.setClasseBloco = function(disciplinaId, topicoIndex, valor) {
+            let d = editalDoUsuario.disciplinas.find(x => x.id === disciplinaId);
+            if (!d) return;
+            if (typeof d.topicos[topicoIndex] === 'string') {
+                d.topicos[topicoIndex] = { nome: d.topicos[topicoIndex], status: 'nao_iniciado', classeBloco: valor.trim() };
+            } else {
+                d.topicos[topicoIndex].classeBloco = valor.trim();
+            }
+            window.salvarDadosGeraisNaNuvem();
+            window.salvarDadosLocais();
+        };
+
         window.calcularAgendaRevisoes = function() {
             let topicHistory = {};
             registrosDeEstudo.forEach(reg => {
-                // CORREÇÃO: Filtramos logo no início. Assim, se desmarcar a revisão 
-                // ao terminar a teoria, o motor continua a calcular pelas suas revisões passadas!
                 if (!reg.agendarRevisao) return; 
                 let chave = reg.disciplina + "|||" + reg.topico; 
                 if (!topicHistory[chave]) topicHistory[chave] = { disciplina: reg.disciplina, topico: reg.topico, records: [] };
@@ -1717,46 +1730,114 @@
             let delayLimite = configuracoesGlobais.deadlineDias !== undefined ? configuracoesGlobais.deadlineDias : 7;
             let limiteDiario = configuracoesGlobais.limiteDiario !== undefined ? configuracoesGlobais.limiteDiario : 3;
 
-            // 1. Gera todas as pendências
+            // Agrupa tópicos por disciplina para processar revisao_bloco separadamente
+            let topicsByDisc = {};
             Object.values(topicHistory).forEach(tHist => {
-                let discObj = editalDoUsuario.disciplinas.find(d => window.normalizarDisciplina(d.nome) === window.normalizarDisciplina(tHist.disciplina));
+                if (!topicsByDisc[tHist.disciplina]) topicsByDisc[tHist.disciplina] = [];
+                topicsByDisc[tHist.disciplina].push(tHist);
+            });
+
+            // 1. Gera todas as pendências
+            Object.entries(topicsByDisc).forEach(([discNome, histList]) => {
+                let discObj = editalDoUsuario.disciplinas.find(d => window.normalizarDisciplina(d.nome) === window.normalizarDisciplina(discNome));
                 if (!discObj) return;
-                
+
+                // Feature 1: Pausa por matéria — pula tópicos desta disciplina inteiramente
+                if (discObj.reviewConfig?.isPaused === true) return;
+
                 let revType = discObj.reviewConfig?.type || 'performance';
                 let revSettings = discObj.reviewConfig?.settings || {};
 
-                tHist.records.sort((a,b) => new Date(a.data) - new Date(b.data));
-                let lastRecord = tHist.records[tHist.records.length - 1];
-                
-                if (lastRecord.dataRevisaoManual) {
-                    let mDate = new Date(lastRecord.dataRevisaoManual + "T00:00:00");
-                    let res = { date: mDate, perf: null, type: revType };
-                    let adjustedDate = window.ReviewEngine.adjustToAvailability(res.date, availDays);
-                    let deadlineDate = new Date(adjustedDate); deadlineDate.setDate(deadlineDate.getDate() + delayLimite);
-                    rawAgenda.push({
-                        registroOriginal: lastRecord, perf: res.perf,
-                        dataIdealOriginal: res.date, dataIdeal: adjustedDate, deadlineDate: deadlineDate,
-                        disciplina: tHist.disciplina, topico: tHist.topico,
-                        strategyTag: res.type, recordCount: tHist.records.length
+                // Feature 2: Revisão em Bloco — lógica de agrupamento por classe
+                if (revType === 'revisao_bloco') {
+                    let classesIntervals = revSettings.classesIntervals || {};
+                    // Mapa topicoNome -> classeBloco (da definição do edital)
+                    let topicoClasseMap = {};
+                    discObj.topicos.forEach(t => {
+                        if (typeof t === 'object' && t.classeBloco) {
+                            topicoClasseMap[t.nome] = t.classeBloco.trim();
+                        }
                     });
-                    return;
+
+                    // Agrupa histórico de estudos pela classe do tópico
+                    let classeHistMap = {}; // classeNome -> [{data, record}, ...]
+                    histList.forEach(tHist => {
+                        tHist.records.sort((a,b) => new Date(a.data) - new Date(b.data));
+                        let classe = topicoClasseMap[tHist.topico] || null;
+                        if (!classe) return; // ignora tópicos sem classe
+                        if (!classeHistMap[classe]) classeHistMap[classe] = [];
+                        // guarda o último registro de cada tópico desta classe
+                        let lastRec = tHist.records[tHist.records.length - 1];
+                        classeHistMap[classe].push({ data: lastRec.data, record: lastRec, tHist });
+                    });
+
+                    // Para cada classe, gera um único card consolidado
+                    Object.entries(classeHistMap).forEach(([classe, entries]) => {
+                        let intervalDays = parseInt(classesIntervals[classe]) || 15;
+                        // Encontra a data mais recente entre todos os assuntos da classe
+                        entries.sort((a,b) => new Date(b.data) - new Date(a.data));
+                        let mostRecentEntry = entries[0];
+                        let baseDate = new Date(mostRecentEntry.data + "T00:00:00");
+                        baseDate.setDate(baseDate.getDate() + intervalDays);
+
+                        // Calcula perf média dos tópicos da classe (ignora nulos)
+                        let perfs = entries.map(e => {
+                            let rs = e.tHist.records;
+                            return window.ReviewEngine.calculatePerformancePerf(rs);
+                        }).filter(p => p !== null);
+                        let avgPerf = perfs.length > 0 ? perfs.reduce((a,b) => a+b, 0) / perfs.length : null;
+
+                        let adjustedDate = window.ReviewEngine.adjustToAvailability(baseDate, availDays);
+                        let deadlineDate = new Date(adjustedDate); deadlineDate.setDate(deadlineDate.getDate() + delayLimite);
+
+                        rawAgenda.push({
+                            registroOriginal: mostRecentEntry.record,
+                            perf: avgPerf,
+                            dataIdealOriginal: baseDate,
+                            dataIdeal: adjustedDate,
+                            deadlineDate: deadlineDate,
+                            disciplina: discNome,
+                            topico: `Revisão em Bloco: ${classe}`,
+                            strategyTag: 'revisao_bloco',
+                            recordCount: entries.length
+                        });
+                    });
+
+                    return; // não processa os tópicos individualmente nesta disciplina
                 }
 
-                let engineFunc = window.ReviewEngine.strategies[revType] || window.ReviewEngine.strategies.performance;
-                let results = engineFunc(tHist.records, revSettings);
-                
-                if (!Array.isArray(results)) results = [results];
-                
-                results.forEach(res => {
-                    let adjustedDate = window.ReviewEngine.adjustToAvailability(res.date, availDays);
-                    let deadlineDate = new Date(adjustedDate); deadlineDate.setDate(deadlineDate.getDate() + delayLimite);
-                    let nomeTopicoFinal = res.parallelSub ? `${tHist.topico} (${res.parallelSub})` : tHist.topico;
+                // Estratégias normais — processa cada tópico individualmente
+                histList.forEach(tHist => {
+                    tHist.records.sort((a,b) => new Date(a.data) - new Date(b.data));
+                    let lastRecord = tHist.records[tHist.records.length - 1];
+                    
+                    if (lastRecord.dataRevisaoManual) {
+                        let mDate = new Date(lastRecord.dataRevisaoManual + "T00:00:00");
+                        let res = { date: mDate, perf: null, type: revType };
+                        let adjustedDate = window.ReviewEngine.adjustToAvailability(res.date, availDays);
+                        let deadlineDate = new Date(adjustedDate); deadlineDate.setDate(deadlineDate.getDate() + delayLimite);
+                        rawAgenda.push({
+                            registroOriginal: lastRecord, perf: res.perf,
+                            dataIdealOriginal: res.date, dataIdeal: adjustedDate, deadlineDate: deadlineDate,
+                            disciplina: tHist.disciplina, topico: tHist.topico,
+                            strategyTag: res.type, recordCount: tHist.records.length
+                        });
+                        return;
+                    }
 
-                    rawAgenda.push({
-                        registroOriginal: lastRecord, perf: res.perf,
-                        dataIdealOriginal: res.date, dataIdeal: adjustedDate, deadlineDate: deadlineDate,
-                        disciplina: tHist.disciplina, topico: nomeTopicoFinal,
-                        strategyTag: res.type, recordCount: tHist.records.length
+                    let engineFunc = window.ReviewEngine.strategies[revType] || window.ReviewEngine.strategies.performance;
+                    let results = engineFunc(tHist.records, revSettings);
+                    if (!Array.isArray(results)) results = [results];
+                    results.forEach(res => {
+                        let adjustedDate = window.ReviewEngine.adjustToAvailability(res.date, availDays);
+                        let deadlineDate = new Date(adjustedDate); deadlineDate.setDate(deadlineDate.getDate() + delayLimite);
+                        let nomeTopicoFinal = res.parallelSub ? `${tHist.topico} (${res.parallelSub})` : tHist.topico;
+                        rawAgenda.push({
+                            registroOriginal: lastRecord, perf: res.perf,
+                            dataIdealOriginal: res.date, dataIdeal: adjustedDate, deadlineDate: deadlineDate,
+                            disciplina: tHist.disciplina, topico: nomeTopicoFinal,
+                            strategyTag: res.type, recordCount: tHist.records.length
+                        });
                     });
                 });
             });
@@ -1779,13 +1860,13 @@
             // 3. Atribuir Priority Score
             rawAgenda.forEach(r => {
                 let score = 0;
-                if (r.dataIdealOriginal < hojeObj) score += 1000; // Atrasadas
-                if (r.strategyTag === 'revisaom' && r.recordCount <= 2) score += 500; // Revisão M em andamento
+                if (r.dataIdealOriginal < hojeObj) score += 1000;
+                if (r.strategyTag === 'revisaom' && r.recordCount <= 2) score += 500;
                 if (r.perf !== null) {
                     if (r.perf <= 0.50) score += 300;
                     else if (r.perf <= 0.85) score += 200;
                     else score += 100;
-                } else { score += 150; } // Default if no perf
+                } else { score += 150; }
                 r.priorityScore = score;
             });
             
@@ -1796,12 +1877,10 @@
             let limitSafe = 0;
             let stringHoje = window.formatarDataLocalParaISO(hojeObj);
 
-            // CORREÇÃO: Conta quantas revisões já foram concluídas HOJE no histórico
             let revisoesConcluidasHoje = registrosDeEstudo.filter(reg => {
                 return reg.data === stringHoje && reg.categorias && reg.categorias.includes("Revisão");
             }).length;
 
-            // Varrimento sequencial robusto que garante que nenhuma tarefa desaparece
             while (pool.length > 0 && limitSafe < 1000) {
                 limitSafe++;
                 let dataStr = window.formatarDataLocalParaISO(dataSweep);
@@ -1824,21 +1903,14 @@
                     if (limiteDiario === 0) { 
                         selecionadasParaHoje = [...candidatas];
                     } else {
-                        // CORREÇÃO: Desconta as revisões já feitas do limite diário caso estejamos a calcular os slots de "Hoje"
                         let vagas = limiteDiario;
                         if (dataStr === stringHoje) {
                             vagas = Math.max(0, limiteDiario - revisoesConcluidasHoje);
                         }
-
                         let obrigatorias = candidatas.filter(r => dataSweep >= r.deadlineDate);
                         let normais = candidatas.filter(r => dataSweep < r.deadlineDate);
-
-                        for (let ob of obrigatorias) {
-                            if (vagas > 0) { selecionadasParaHoje.push(ob); vagas--; }
-                        }
-                        for (let norm of normais) {
-                            if (vagas > 0) { selecionadasParaHoje.push(norm); vagas--; }
-                        }
+                        for (let ob of obrigatorias) { if (vagas > 0) { selecionadasParaHoje.push(ob); vagas--; } }
+                        for (let norm of normais) { if (vagas > 0) { selecionadasParaHoje.push(norm); vagas--; } }
                     }
 
                     if (selecionadasParaHoje.length > 0) {
@@ -1918,7 +1990,7 @@
             let badgeClass = `badge-${baseColorClass}`;
             
             let nameLabels = {
-                'performance': 'Desempenho', 'revisaom': 'Revisão M', 'spaced': 'Espaçada', 'weekly': 'Semanal', 'custom': 'Personalizada'
+                'performance': 'Desempenho', 'revisaom': 'Revisão M', 'spaced': 'Espaçada', 'weekly': 'Semanal', 'custom': 'Personalizada', 'revisao_bloco': 'Bloco'
             };
             let typeLabel = nameLabels[baseColorClass] || 'Revisão';
 
@@ -2153,18 +2225,24 @@
             document.getElementById('config-rev-disciplina-id').value = d.id;
             
             let conf = d.reviewConfig || { type: 'performance', settings: {} };
-            document.getElementById('config-rev-tipo').value = conf.type;
+            document.getElementById('config-rev-tipo').value = conf.type || 'performance';
+
+            // Feature 1: Pausa por matéria
+            document.getElementById('config-rev-is-paused').checked = !!(conf.isPaused);
             
-            if (conf.type === 'weekly' && conf.settings.days) {
+            if (conf.type === 'weekly' && conf.settings && conf.settings.days) {
                 document.querySelectorAll('input[name="chk-weekly-day-disc"]').forEach(cb => { cb.checked = conf.settings.days.includes(parseInt(cb.value)); });
             } else {
                 document.querySelectorAll('input[name="chk-weekly-day-disc"]').forEach(cb => cb.checked = false);
             }
-            if (conf.type === 'custom' && conf.settings.intervalDays) {
+            if (conf.type === 'custom' && conf.settings && conf.settings.intervalDays) {
                 document.getElementById('config-rev-custom-days').value = conf.settings.intervalDays;
             } else {
                 document.getElementById('config-rev-custom-days').value = 7;
             }
+
+            // Feature 2: Revisão em Bloco — passa a disciplina para o toggle gerar inputs de classes
+            window._configRevDiscId = discId;
             window.toggleCamposConfigRevisao();
         }
 
@@ -2172,6 +2250,51 @@
             let tipo = document.getElementById('config-rev-tipo').value;
             document.getElementById('div-config-weekly').classList.toggle('hidden', tipo !== 'weekly');
             document.getElementById('div-config-custom').classList.toggle('hidden', tipo !== 'custom');
+            document.getElementById('div-config-revisao-bloco').classList.toggle('hidden', tipo !== 'revisao_bloco');
+
+            // Popular inputs de classes quando revisao_bloco está selecionado
+            if (tipo === 'revisao_bloco') {
+                let discId = window._configRevDiscId;
+                let d = discId ? editalDoUsuario.disciplinas.find(x => x.id === discId) : null;
+                let container = document.getElementById('config-rev-classes-container');
+                container.innerHTML = '';
+
+                if (d && d.topicos) {
+                    // Coleta classes únicas (não vazias) dos tópicos
+                    let classesSet = new Set();
+                    d.topicos.forEach(t => {
+                        let cb = typeof t === 'object' ? (t.classeBloco || '').trim() : '';
+                        if (cb) classesSet.add(cb);
+                    });
+
+                    let classesArr = Array.from(classesSet).sort();
+                    let savedIntervals = (d.reviewConfig?.settings?.classesIntervals) || {};
+
+                    if (classesArr.length === 0) {
+                        container.innerHTML = '<p style="font-size: 0.82rem; color: var(--text-muted); font-style: italic;">Nenhuma classe atribuída aos assuntos desta matéria ainda.<br>Volte à lista de assuntos, ative "Revisão em Bloco" e preencha os campos de Classe em cada tópico.</p>';
+                    } else {
+                        classesArr.forEach(classe => {
+                            let valorSalvo = savedIntervals[classe] || 15;
+                            let safe = classe.replace(/"/g, '&quot;');
+                            container.innerHTML += `
+                                <div style="display:flex; align-items:center; justify-content:space-between; background: var(--panel-bg); border: 1px solid var(--border-color); border-radius:6px; padding: 10px 14px; gap: 12px;">
+                                    <div style="display:flex; align-items:center; gap: 8px; flex:1;">
+                                        <i class="fa-solid fa-layer-group" style="color: var(--primary-color); font-size:0.85rem;"></i>
+                                        <span style="font-weight:600; font-size:0.9rem; color:var(--text-main);">${safe}</span>
+                                        <span style="font-size:0.75rem; color:var(--text-muted);">(${d.topicos.filter(t => typeof t === 'object' && t.classeBloco === classe).length} assunto(s))</span>
+                                    </div>
+                                    <div style="display:flex; align-items:center; gap: 8px; flex-shrink:0;">
+                                        <input type="number" id="cls-interval-${safe}" class="form-control" min="1" max="365" value="${valorSalvo}" style="max-width:75px; text-align:center; padding: 0.4rem;">
+                                        <span style="font-size:0.8rem; color:var(--text-muted); white-space:nowrap;">dias</span>
+                                    </div>
+                                </div>`;
+                        });
+                    }
+                } else {
+                    container.innerHTML = '<p style="font-size: 0.82rem; color: var(--text-muted); font-style: italic;">Selecione uma disciplina primeiro.</p>';
+                }
+            }
+
             let helpMsg = document.getElementById('config-rev-help');
             if (tipo === 'performance') helpMsg.innerText = "As revisões são agendadas unicamente baseadas no seu desempenho (%) das questões que registar no estudo.";
             else if (tipo === 'spaced') helpMsg.innerText = "Padrão de repetição espaçada fixa: 24h, 7 dias, 15 dias, 30 dias e 60 dias após cada revisão concluída.";
@@ -2179,16 +2302,23 @@
             else if (tipo === 'weekly') helpMsg.innerText = "Dias fixos na semana. A revisão surgirá sempre no dia selecionado após um estudo ou revisão concluída.";
             else if (tipo === 'parallel') helpMsg.innerText = "Modo duplo: Vai agendar duas revisões em paralelo. Uma para repassar a teoria (Espaçada) e outra baseada no rendimento das Questões (Desempenho).";
             else if (tipo === 'custom') helpMsg.innerText = "Intervalo fixo personalizado: a revisão será sempre agendada N dias após o último estudo ou revisão concluída, independente do desempenho.";
+            else if (tipo === 'revisao_bloco') helpMsg.innerText = "Revisão em Bloco: agrupa assuntos por Classe. Usa a data de estudo mais recente de cada classe + o intervalo configurado para gerar um único card consolidado por classe.";
         }
 
-        window.fecharModalConfigRevisao = function() { document.getElementById('modal-config-revisao').classList.add('hidden'); }
+        window.fecharModalConfigRevisao = function() {
+            document.getElementById('modal-config-revisao').classList.add('hidden');
+            window._configRevDiscId = null;
+        }
+
         window.salvarConfigRevisao = function() {
             let discId = parseInt(document.getElementById('config-rev-disciplina-id').value);
             let d = editalDoUsuario.disciplinas.find(x => x.id === discId);
             if(!d) return;
 
             let tipo = document.getElementById('config-rev-tipo').value;
+            let isPaused = document.getElementById('config-rev-is-paused').checked; // Feature 1
             let settings = {};
+
             if (tipo === 'weekly') {
                 let days = Array.from(document.querySelectorAll('input[name="chk-weekly-day-disc"]:checked')).map(cb => parseInt(cb.value));
                 if (days.length === 0) { window.mostrarAlerta("Tem de selecionar pelo menos um dia para a revisão semanal."); return; }
@@ -2199,8 +2329,34 @@
                 if (!dias || dias < 1) { window.mostrarAlerta("Insira um intervalo de pelo menos 1 dia."); return; }
                 settings.intervalDays = dias;
             }
+            // Feature 2: coleta intervalos das classes
+            if (tipo === 'revisao_bloco') {
+                let classesIntervals = {};
+                let d2 = editalDoUsuario.disciplinas.find(x => x.id === discId);
+                if (d2 && d2.topicos) {
+                    let classesSet = new Set();
+                    d2.topicos.forEach(t => {
+                        let cb = typeof t === 'object' ? (t.classeBloco || '').trim() : '';
+                        if (cb) classesSet.add(cb);
+                    });
+                    classesSet.forEach(classe => {
+                        let safe = classe.replace(/"/g, '&quot;');
+                        let inputEl = document.getElementById(`cls-interval-${safe}`);
+                        let val = inputEl ? parseInt(inputEl.value) : 15;
+                        if (!val || val < 1) val = 15;
+                        classesIntervals[classe] = val;
+                    });
+                }
+                settings.classesIntervals = classesIntervals;
+            }
 
-            d.reviewConfig = { type: tipo, settings: settings };
+            // Preserva classesIntervals já salvas se mudar de estratégia (não apaga)
+            let oldSettings = d.reviewConfig?.settings || {};
+            if (tipo !== 'revisao_bloco' && oldSettings.classesIntervals) {
+                settings.classesIntervals = oldSettings.classesIntervals;
+            }
+
+            d.reviewConfig = { type: tipo, settings: settings, isPaused: isPaused }; // Feature 1: salva isPaused
             window.salvarDadosGeraisNaNuvem(); window.salvarDadosLocais();
             window.atualizarTodasAsTelas();
             window.fecharModalConfigRevisao();
