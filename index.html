@@ -2067,10 +2067,45 @@
             let totalCelulas = primeiroDiaDoMes + diasNoMes; let celulasRestantes = (7 - (totalCelulas % 7)) % 7; for (let i = 0; i < celulasRestantes; i++) { grid.innerHTML += `<div class="calendar-day empty"></div>`; }
         };
         
-        window.prepararConclusaoRevisao = function(disciplina, topico) { 
-            let realTopico = topico.replace(" (Teoria)", "").replace(" (Questões)", "");
-            window.abrirModalEstudoPreenchido(disciplina, realTopico); 
-            let cbRevisao = document.querySelector('input[name="estudo-categoria"][value="Revisão"]'); if(cbRevisao) cbRevisao.checked = true; document.getElementById('estudo-agendar-revisao').checked = true; 
+        window.prepararConclusaoRevisao = function(disciplina, topico) {
+            // Revisão em Bloco: o tópico não existe no edital individualmente.
+            // Direciona para 'Simulados e outras questões' para acumular no desempenho geral.
+            let isBlocoReview = topico.startsWith('Revisão em Bloco:');
+            let nomeClasse = isBlocoReview ? topico.replace('Revisão em Bloco: ', '').trim() : null;
+            let realTopico = isBlocoReview
+                ? 'Simulados e outras questões'
+                : topico.replace(' (Teoria)', '').replace(' (Questões)', '');
+
+            window.abrirModalEstudoPreenchido(disciplina, realTopico);
+
+            // Preenche Revisão nas categorias e desativa agendamento de nova revisão
+            let cbRevisao = document.querySelector('input[name="estudo-categoria"][value="Revisão"]');
+            if(cbRevisao) cbRevisao.checked = true;
+            // Para bloco, não reagenda (o scheduler já recalcula pelo histórico da classe)
+            document.getElementById('estudo-agendar-revisao').checked = !isBlocoReview;
+
+            // Banner informativo no modal para contexto de bloco
+            let bannerEl = document.getElementById('estudo-bloco-banner');
+            if (isBlocoReview) {
+                if (!bannerEl) {
+                    bannerEl = document.createElement('div');
+                    bannerEl.id = 'estudo-bloco-banner';
+                    bannerEl.style.cssText = 'background:rgba(14,165,233,0.12); border:1px solid #0ea5e9; border-radius:6px; padding:10px 14px; margin-bottom:14px; font-size:0.85rem; color:#38bdf8; display:flex; align-items:center; gap:10px;';
+                    // Insere antes do primeiro form-group
+                    let modalContent = document.querySelector('#modal-estudo .modal-content');
+                    let firstGroup = modalContent.querySelector('.form-group');
+                    if (firstGroup) modalContent.insertBefore(bannerEl, firstGroup);
+                }
+                bannerEl.innerHTML = '<i class="fa-solid fa-layer-group" style="font-size:1.1rem;"></i>' +
+                    '<div><strong>Revisão em Bloco — ' + nomeClasse + '</strong><br>' +
+                    '<span style="font-size:0.78rem; opacity:0.85;">O tópico foi fixado em <em>Simulados e outras questões</em>. ' +
+                    'Registre o tempo e as questões desta sessão de bloco — os dados irão para o desempenho geral de ' + disciplina + '.</span></div>';
+                bannerEl.classList.remove('hidden');
+                document.getElementById('modal-estudo-titulo').innerText = 'Registar Revisão em Bloco: ' + nomeClasse;
+            } else {
+                if (bannerEl) bannerEl.classList.add('hidden');
+                document.getElementById('modal-estudo-titulo').innerText = 'Registar Estudo Finalizado';
+            }
         };
 
         // =====================================
@@ -3510,7 +3545,6 @@
 
         window.alternarStatusTarefaPlanejada = function(contexto, itemId, novoStatus) { if (contexto === 'Ciclo') { let item = planejamentoDoUsuario.ciclo.find(i => i.id === itemId); if(item) item.concluido = novoStatus; let arrayPendentes = []; let arrayConcluidos = []; planejamentoDoUsuario.ciclo.forEach(p => { if (p.concluido) arrayConcluidos.push(p); else arrayPendentes.push(p); }); planejamentoDoUsuario.ciclo = [...arrayPendentes, ...arrayConcluidos]; } else { let diaData = planejamentoDoUsuario.cronograma.find(d => d.dia === contexto); if (diaData) { let item = diaData.itens.find(i => i.id === itemId); if(item) item.concluido = novoStatus; } } window.salvarDadosGeraisNaNuvem(); window.salvarDadosLocais(); window.renderizarViewsCronograma(); };
         window.excluirTarefaPlanejada = function(contexto, itemId) { window.mostrarConfirmacao("Deseja realmente eliminar este planejamento?", () => { if (contexto === 'Ciclo') { planejamentoDoUsuario.ciclo = planejamentoDoUsuario.ciclo.filter(i => i.id !== itemId); } else { let diaData = planejamentoDoUsuario.cronograma.find(d => d.dia === contexto); if (diaData) diaData.itens = diaData.itens.filter(i => i.id !== itemId); } window.salvarDadosGeraisNaNuvem(); window.salvarDadosLocais(); window.renderizarViewsCronograma(); }); };
-        window.abrirModalEstudoPreenchido = function(disciplinaNome, topicoNome) { window.abrirModalEstudo(); let d = editalDoUsuario.disciplinas.find(x => x.nome === disciplinaNome); if(d) { document.getElementById('select-disciplina').value = d.id; window.atualizarTopicosEstudo(); document.getElementById('select-topico').value = topicoNome; } };
         
         window.reiniciarCronograma = function() { window.mostrarConfirmacao("Reiniciar o Cronograma Semanal? Isto irá desmarcar todos os itens estudados nesta semana.", () => { planejamentoDoUsuario.cronograma.forEach(dia => { dia.itens.forEach(item => item.concluido = false); }); window.salvarDadosGeraisNaNuvem(); window.salvarDadosLocais(); window.renderizarViewsCronograma(); }); };
         window.limparCronograma = function() { 
@@ -3677,6 +3711,9 @@
             document.querySelectorAll('input[name="estudo-categoria"]').forEach(cb => cb.checked = false);
             document.querySelectorAll('input[name="estudo-material"]').forEach(cb => cb.checked = false);
             document.getElementById('estudo-agendar-revisao').checked = true;
+            // Esconde banner de bloco ao abrir para estudo normal
+            let bannerEl = document.getElementById('estudo-bloco-banner');
+            if (bannerEl) bannerEl.classList.add('hidden');
         };
 
         window.fecharModalEstudo = function() { document.getElementById('modal-estudo').classList.add('hidden'); };
@@ -3687,7 +3724,14 @@
             selectTopico.innerHTML = '<option value="">Selecione o assunto...</option>';
             if(discNome) {
                 const d = editalDoUsuario.disciplinas.find(x => x.nome === discNome);
-                if(d) { d.topicos.forEach(t => { let nome = typeof t === 'string' ? t : t.nome; const opt = document.createElement('option'); opt.value = nome; opt.textContent = nome; selectTopico.appendChild(opt); }); }
+                if(d) {
+                    d.topicos.forEach(t => { let nome = typeof t === 'string' ? t : t.nome; const opt = document.createElement('option'); opt.value = nome; opt.textContent = nome; selectTopico.appendChild(opt); });
+                    // Opção virtual para Revisão em Bloco e registros gerais de questões
+                    const optSim = document.createElement('option');
+                    optSim.value = 'Simulados e outras questões';
+                    optSim.textContent = '📊 Simulados e outras questões (Desempenho Geral)';
+                    selectTopico.appendChild(optSim);
+                }
             }
         };
 
