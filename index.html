@@ -193,6 +193,22 @@
         .revisao-card.custom { border-left-color: #f97316; } 
         .badge-custom { background: rgba(249, 115, 22, 0.2); color: #fb923c; }
 
+        .revisao-card.revisao_bloco { border-left-color: #0ea5e9; }
+        .badge-revisao_bloco { background: rgba(14, 165, 233, 0.18); color: #38bdf8; }
+
+        .classe-bloco-input { border: 1px solid var(--border-color); border-radius: 4px; padding: 2px 6px; font-size: 0.72rem; color: var(--text-main); background: var(--bg-color); width: 90px; outline: none; font-weight: 500; transition: border-color 0.2s; }
+        .classe-bloco-input:focus { border-color: var(--primary-color); }
+        .classe-bloco-label { font-size: 0.72rem; color: var(--text-muted); white-space: nowrap; display: flex; align-items: center; gap: 4px; }
+
+        .toggle-pausa-wrap { display: flex; align-items: center; gap: 10px; background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 6px; padding: 10px 14px; margin-bottom: 1rem; }
+        .toggle-pausa-wrap label { font-size: 0.9rem; font-weight: 500; color: var(--text-main); flex: 1; cursor: pointer; }
+        .toggle-switch { position: relative; width: 40px; height: 22px; flex-shrink: 0; }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .toggle-switch .slider { position: absolute; cursor: pointer; inset: 0; background: var(--border-color); border-radius: 22px; transition: .3s; }
+        .toggle-switch .slider:before { position: absolute; content:""; height: 16px; width: 16px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: .3s; }
+        .toggle-switch input:checked + .slider { background: var(--danger-color); }
+        .toggle-switch input:checked + .slider:before { transform: translateX(18px); }
+
         .revisao-card-title { font-weight: 700; font-size: 0.95rem; color: var(--text-main); margin-bottom: 0.3rem; }
         .revisao-card-subtitle { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.8rem; display: flex; align-items: center; gap: 5px; }
         .revisao-badge { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 600; margin-bottom: 0.5rem; width: fit-content; }
@@ -883,7 +899,17 @@
                         <option value="weekly">Semanal Fixa (Dias específicos)</option>
                         <option value="parallel">Paralela (Agenda de Teoria + Agenda de Questões)</option>
                         <option value="custom">Personalizada (Intervalo fixo em dias)</option>
+                        <option value="revisao_bloco">Revisão em Bloco (Agrupa assuntos por Classe)</option>
                     </select>
+                </div>
+
+                <!-- Feature 1: Toggle Pausa por Matéria -->
+                <div class="toggle-pausa-wrap">
+                    <label for="config-rev-is-paused"><i class="fa-solid fa-pause-circle" style="color:var(--danger-color);"></i> Pausar revisões desta matéria</label>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="config-rev-is-paused">
+                        <span class="slider"></span>
+                    </label>
                 </div>
 
                 <div id="div-config-weekly" class="form-group hidden" style="background: var(--hover-bg); padding: 15px; border-radius: 6px;">
@@ -906,6 +932,15 @@
                         <span style="color: var(--text-muted); font-size: 0.9rem;">dias após cada revisão concluída</span>
                     </div>
                     <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 8px;"><i class="fa-solid fa-circle-info"></i> Independente do desempenho, sempre agendará no intervalo definido. Pode alterar quando quiser sem perder o histórico.</p>
+                </div>
+
+                <!-- Feature 2: Revisão em Bloco — intervalos por classe -->
+                <div id="div-config-revisao-bloco" class="form-group hidden" style="background: var(--hover-bg); padding: 15px; border-radius: 6px;">
+                    <label style="font-weight: 600; margin-bottom: 10px; display:block;"><i class="fa-solid fa-layer-group"></i> Intervalos por Classe</label>
+                    <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">Defina o intervalo (em dias) para cada Classe atribuída aos assuntos desta matéria. Assuntos sem classe são ignorados nesta estratégia.</p>
+                    <div id="config-rev-classes-container" style="display: flex; flex-direction: column; gap: 10px;">
+                        <p style="font-size: 0.82rem; color: var(--text-muted); font-style: italic;">Nenhuma classe atribuída aos assuntos desta matéria ainda.</p>
+                    </div>
                 </div>
 
                 <div style="margin-top: 15px; font-size: 0.85rem; color: var(--text-muted); background: var(--bg-color); padding: 10px; border-left: 3px solid var(--primary-color); border-radius: 4px;" id="config-rev-help">
@@ -2897,17 +2932,24 @@
                     let horasFinais = Math.floor(totalMinutosEstudados / 60); let minutosFinais = totalMinutosEstudados % 60; let textoTempo = '0h 0m';
                     if (totalMinutosEstudados > 0) textoTempo = `${horasFinais > 0 ? horasFinais+'h ' : ''}${minutosFinais > 0 ? minutosFinais+'m' : ''}`.trim();
                     let totalQuestoes = acertosTotais + errosTotais; let progressoGeral = window.calcularProgressoDisciplina(d); let statusAtual = d.statusDisciplina || 'ativa'; let isDesativada = statusAtual === 'desativada';
+                    let isBlocoStrategy = d.reviewConfig?.type === 'revisao_bloco';
                     
                     let topicosHTML = d.topicos.map((topicoObj, index) => { 
                         let nome = typeof topicoObj === 'string' ? topicoObj : topicoObj.nome; 
                         if(nome === "Simulados e outras questões") return '';
-                        let status = typeof topicoObj === 'string' ? 'nao_iniciado' : (topicoObj.status || 'nao_iniciado'); 
-                        return `<li class="topico-item" draggable="true" ondragstart="window.dragStartTopico(event, ${d.id}, ${index})" ondragover="window.dragOverTopico(event)" ondragleave="window.dragLeaveTopico(event)" ondrop="window.dropTopico(event, ${d.id}, ${index})" ondragend="window.dragEndTopico(event)"><div style="display: flex; align-items: center; gap: 10px;"><i class="fa-solid fa-grip-vertical" style="color:var(--text-muted); cursor:grab;"></i> <span class="status-dot status-${status}"></span><span>${nome}</span></div><div style="display: flex; align-items: center; gap: 15px;"><select class="select-status" onchange="window.mudarStatusTopico(${d.id}, ${index}, this.value)"><option value="nao_iniciado" ${status === 'nao_iniciado' ? 'selected' : ''}>Não iniciado</option><option value="estudando" ${status === 'estudando' ? 'selected' : ''}>Estudando</option><option value="concluido" ${status === 'concluido' ? 'selected' : ''}>Concluído</option></select><div><button onclick="window.editarTopico(${d.id}, ${index})" title="Editar Assunto"><i class="fa-solid fa-pen"></i></button><button class="btn-delete" onclick="window.excluirTopico(${d.id}, ${index})" title="Eliminar Assunto"><i class="fa-solid fa-trash"></i></button></div></div></li>` 
+                        let status = typeof topicoObj === 'string' ? 'nao_iniciado' : (topicoObj.status || 'nao_iniciado');
+                        let classeBloco = typeof topicoObj === 'object' ? (topicoObj.classeBloco || '') : '';
+                        // Input de Classe só aparece se a estratégia for revisao_bloco, mas o campo fica sempre salvo
+                        let classeBlocoHTML = isBlocoStrategy
+                            ? `<span class="classe-bloco-label" title="Classe para Revisão em Bloco"><i class="fa-solid fa-layer-group" style="color:var(--primary-color);"></i><input type="text" class="classe-bloco-input" placeholder="ex: Classe A" value="${classeBloco}" onchange="window.setClasseBloco(${d.id}, ${index}, this.value)" onclick="event.stopPropagation()" title="Atribuir Classe de Bloco"></span>`
+                            : `<span class="classe-bloco-label" title="Classe para Revisão em Bloco (ative a estratégia 'Revisão em Bloco' para editar)"><i class="fa-solid fa-layer-group" style="color:var(--border-color);"></i>${classeBloco ? `<span style="font-size:0.7rem;color:var(--text-muted);">${classeBloco}</span>` : ''}</span>`;
+                        return `<li class="topico-item" draggable="true" ondragstart="window.dragStartTopico(event, ${d.id}, ${index})" ondragover="window.dragOverTopico(event)" ondragleave="window.dragLeaveTopico(event)" ondrop="window.dropTopico(event, ${d.id}, ${index})" ondragend="window.dragEndTopico(event)"><div style="display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0;"><i class="fa-solid fa-grip-vertical" style="color:var(--text-muted); cursor:grab;"></i> <span class="status-dot status-${status}"></span><span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${nome}</span></div><div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">${classeBlocoHTML}<select class="select-status" onchange="window.mudarStatusTopico(${d.id}, ${index}, this.value)"><option value="nao_iniciado" ${status === 'nao_iniciado' ? 'selected' : ''}>Não iniciado</option><option value="estudando" ${status === 'estudando' ? 'selected' : ''}>Estudando</option><option value="concluido" ${status === 'concluido' ? 'selected' : ''}>Concluído</option></select><div><button onclick="window.editarTopico(${d.id}, ${index})" title="Editar Assunto"><i class="fa-solid fa-pen"></i></button><button class="btn-delete" onclick="window.excluirTopico(${d.id}, ${index})" title="Eliminar Assunto"><i class="fa-solid fa-trash"></i></button></div></div></li>` 
                     }).join('');
                     if(topicosHTML.trim() === '') topicosHTML = '<li class="topico-item text-muted">Nenhum assunto registado nesta matéria.</li>';
                     
                     let botoesStatusHtml = isDesativada ? `<button class="btn-success-outline btn-icon" onclick="window.alternarStatusDisciplina(${d.id})"><i class="fa-solid fa-power-off"></i> Reativar Disciplina</button>` : `<button class="btn-danger-outline btn-icon" onclick="window.alternarStatusDisciplina(${d.id})"><i class="fa-solid fa-power-off"></i> Desativar Disciplina</button>`;
-                    detailContainer.innerHTML = `<div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--border-color); padding-bottom: 15px; margin-bottom: 15px; flex-wrap:wrap; gap: 10px;"><h2 style="font-size: 1.5rem; color: var(--primary-color);"><i class="fa-solid fa-book"></i> ${d.nome}</h2><div style="display: flex; gap: 10px; flex-wrap:wrap;">${botoesStatusHtml}<button class="btn-primary" style="padding: 0.5rem 1rem; width: auto; background: var(--hover-bg); color: var(--primary-color);" onclick="window.abrirConfigRevisao(${d.id})"><i class="fa-solid fa-gears"></i> Motor de Revisão</button><button class="btn-icon" onclick="window.editarDisciplina(${d.id})" title="Renomear Disciplina"><i class="fa-solid fa-pen"></i></button><button class="btn-icon" style="color: var(--danger-color); border-color: var(--danger-color);" onclick="window.excluirDisciplina(${d.id})" title="Excluir Definitivamente"><i class="fa-solid fa-trash"></i></button><button class="btn-primary" style="padding: 0.5rem 1rem; width: auto;" onclick="window.adicionarTopico(${d.id})"><i class="fa-solid fa-plus"></i> Novo Assunto</button></div></div><div class="stats-grid-detail"><div><span style="color: var(--text-muted);">Estado da disciplina:</span> <strong style="color: ${isDesativada ? 'var(--danger-color)' : 'var(--success-color)'};">${isDesativada ? 'Desativada' : 'Ativa'}</strong></div><div><span style="color: var(--text-muted);">Horas estudadas:</span> <strong>${textoTempo}</strong></div><div><span style="color: var(--text-muted);">Acertos:</span> <strong style="color: var(--success-color);">${acertosTotais}</strong></div><div><span style="color: var(--text-muted);">Erros:</span> <strong style="color: var(--danger-color);">${errosTotais}</strong></div><div><span style="color: var(--text-muted);">Total de questões:</span> <strong>${totalQuestoes}</strong></div><div><span style="color: var(--text-muted);">Progresso do Edital:</span> <strong>${progressoGeral}%</strong></div></div><div class="progress-bar-container" style="margin-bottom: 25px;"><div class="progress-bar-fill" style="width: ${progressoGeral}%"></div></div><h3 style="margin-bottom: 10px; font-size: 1.1rem;">Assuntos da Matéria</h3><ul class="topicos-list">${topicosHTML}</ul>`;
+                    let pausaBadge = d.reviewConfig?.isPaused ? `<span style="background:var(--icon-red-bg); color:var(--danger-color); font-size:0.72rem; font-weight:700; padding:2px 8px; border-radius:10px; margin-left:6px;"><i class="fa-solid fa-pause"></i> Pausada</span>` : '';
+                    detailContainer.innerHTML = `<div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--border-color); padding-bottom: 15px; margin-bottom: 15px; flex-wrap:wrap; gap: 10px;"><h2 style="font-size: 1.5rem; color: var(--primary-color);"><i class="fa-solid fa-book"></i> ${d.nome}${pausaBadge}</h2><div style="display: flex; gap: 10px; flex-wrap:wrap;">${botoesStatusHtml}<button class="btn-primary" style="padding: 0.5rem 1rem; width: auto; background: var(--hover-bg); color: var(--primary-color);" onclick="window.abrirConfigRevisao(${d.id})"><i class="fa-solid fa-gears"></i> Motor de Revisão</button><button class="btn-icon" onclick="window.editarDisciplina(${d.id})" title="Renomear Disciplina"><i class="fa-solid fa-pen"></i></button><button class="btn-icon" style="color: var(--danger-color); border-color: var(--danger-color);" onclick="window.excluirDisciplina(${d.id})" title="Excluir Definitivamente"><i class="fa-solid fa-trash"></i></button><button class="btn-primary" style="padding: 0.5rem 1rem; width: auto;" onclick="window.adicionarTopico(${d.id})"><i class="fa-solid fa-plus"></i> Novo Assunto</button></div></div><div class="stats-grid-detail"><div><span style="color: var(--text-muted);">Estado da disciplina:</span> <strong style="color: ${isDesativada ? 'var(--danger-color)' : 'var(--success-color)'};">${isDesativada ? 'Desativada' : 'Ativa'}</strong></div><div><span style="color: var(--text-muted);">Horas estudadas:</span> <strong>${textoTempo}</strong></div><div><span style="color: var(--text-muted);">Acertos:</span> <strong style="color: var(--success-color);">${acertosTotais}</strong></div><div><span style="color: var(--text-muted);">Erros:</span> <strong style="color: var(--danger-color);">${errosTotais}</strong></div><div><span style="color: var(--text-muted);">Total de questões:</span> <strong>${totalQuestoes}</strong></div><div><span style="color: var(--text-muted);">Progresso do Edital:</span> <strong>${progressoGeral}%</strong></div></div><div class="progress-bar-container" style="margin-bottom: 25px;"><div class="progress-bar-fill" style="width: ${progressoGeral}%"></div></div><h3 style="margin-bottom: 10px; font-size: 1.1rem;">Assuntos da Matéria ${isBlocoStrategy ? '<span style="font-size:0.75rem; color:var(--primary-color); font-weight:600;">(Modo Bloco — atribua classes nos campos ao lado)</span>' : ''}</h3><ul class="topicos-list">${topicosHTML}</ul>`;
                 }
             }
         };
