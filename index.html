@@ -732,7 +732,11 @@
                         <button class="btn-close" onclick="window.fecharModalRelatorioSemanal()"><i class="fa-solid fa-xmark"></i></button>
                     </div>
                 </div>
-                <p id="relatorio-semanal-data" style="text-align: center; font-weight: 700; color: var(--text-main); margin-bottom: 1.5rem; font-size: 1.1rem;"></p>
+                <p id="relatorio-semanal-data" style="text-align: center; font-weight: 700; color: var(--text-main); margin-bottom: 1.5rem; font-size: 1.1rem; display:flex; align-items:center; justify-content:center; gap: 12px;">
+                    <button id="relatorio-semanal-btn-ant" class="btn-icon" title="Semana anterior" onclick="window.navegarRelatorioSemanal(-1)"><i class="fa-solid fa-chevron-left"></i></button>
+                    <span id="relatorio-semanal-data-texto"></span>
+                    <button id="relatorio-semanal-btn-prox" class="btn-icon" title="Próxima semana" onclick="window.navegarRelatorioSemanal(1)"><i class="fa-solid fa-chevron-right"></i></button>
+                </p>
                 <h3 style="font-size: 1.1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 5px; margin-bottom: 10px; color: var(--primary-color);">1. Resumo por Disciplina</h3>
                 <div style="overflow-x: auto; max-height: 250px; overflow-y: auto; margin-bottom: 1.5rem; border: 1px solid var(--border-color); border-radius: 6px;">
                     <table style="width: 100%; border-collapse: collapse;">
@@ -2605,13 +2609,13 @@
             document.getElementById('modal-relatorio-semanal').classList.add('hidden');
         };
 
-        window.obterDatasSemanaAtual = function() {
+        window.obterDatasSemanaAtual = function(offsetSemanas = 0) {
             let today = new Date();
             let dayOfWeek = today.getDay(); 
             let diffToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
             
             let monday = new Date(today);
-            monday.setDate(today.getDate() + diffToMonday);
+            monday.setDate(today.getDate() + diffToMonday + (offsetSemanas * 7));
             monday.setHours(0,0,0,0);
             
             let sunday = new Date(monday);
@@ -2621,13 +2625,37 @@
             return { monday, sunday };
         };
 
+        // Controla qual semana está a ser exibida no Relatório Semanal (0 = semana atual, -1 = semana anterior, etc.)
+        window.relatorioSemanalOffset = 0;
+
+        window.navegarRelatorioSemanal = function(delta) {
+            // Não permite avançar para semanas futuras além da atual
+            if (window.relatorioSemanalOffset + delta > 0) return;
+            window.relatorioSemanalOffset += delta;
+            window.renderizarRelatorioSemanal(window.relatorioSemanalOffset);
+        };
+
         window.abrirModalRelatorioSemanal = function() {
-            let { monday, sunday } = window.obterDatasSemanaAtual();
+            window.relatorioSemanalOffset = 0;
+            window.renderizarRelatorioSemanal(0);
+            document.getElementById('modal-relatorio-semanal').classList.remove('hidden');
+        };
+
+        window.renderizarRelatorioSemanal = function(offsetSemanas = 0) {
+            let { monday, sunday } = window.obterDatasSemanaAtual(offsetSemanas);
 
             let strMon = `${String(monday.getDate()).padStart(2,'0')}/${String(monday.getMonth()+1).padStart(2,'0')}/${monday.getFullYear()}`;
             let strSun = `${String(sunday.getDate()).padStart(2,'0')}/${String(sunday.getMonth()+1).padStart(2,'0')}/${sunday.getFullYear()}`;
             
-            document.getElementById('relatorio-semanal-data').innerText = `Período: ${strMon} a ${strSun}`;
+            document.getElementById('relatorio-semanal-data-texto').innerText = `Período: ${strMon} a ${strSun}`;
+
+            // Atualiza estado do botão "Próxima Semana" (não permite avançar para o futuro)
+            let btnProx = document.getElementById('relatorio-semanal-btn-prox');
+            if (btnProx) {
+                btnProx.disabled = (offsetSemanas >= 0);
+                btnProx.style.opacity = (offsetSemanas >= 0) ? '0.4' : '1';
+                btnProx.style.cursor = (offsetSemanas >= 0) ? 'not-allowed' : 'pointer';
+            }
 
             let isoMon = window.formatarDataLocalParaISO(monday);
             let isoSun = window.formatarDataLocalParaISO(sunday);
@@ -2797,12 +2825,10 @@
                 ulRev += '</ul>';
                 revisoesListaEl.innerHTML = ulRev;
             }
-
-            document.getElementById('modal-relatorio-semanal').classList.remove('hidden');
         };
 
         window.imprimirRelatorioSemanal = function() {
-            let { monday, sunday } = window.obterDatasSemanaAtual();
+            let { monday, sunday } = window.obterDatasSemanaAtual(window.relatorioSemanalOffset || 0);
             let strMon = `${String(monday.getDate()).padStart(2,'0')}/${String(monday.getMonth()+1).padStart(2,'0')}/${monday.getFullYear()}`;
             let strSun = `${String(sunday.getDate()).padStart(2,'0')}/${String(sunday.getMonth()+1).padStart(2,'0')}/${sunday.getFullYear()}`;
             
