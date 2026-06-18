@@ -817,7 +817,7 @@
         <div id="modal-estudo" class="modal-overlay hidden">
             <div class="modal-content">
                 <div class="modal-header"><h2 id="modal-estudo-titulo">Registar Estudo Finalizado</h2><button class="btn-close" onclick="window.fecharModalEstudo()"><i class="fa-solid fa-xmark"></i></button></div>
-                <input type="hidden" id="estudo-edit-doc-id"><input type="hidden" id="estudo-tarefa-id-conclusao"><input type="hidden" id="estudo-tarefa-context-conclusao">
+                <input type="hidden" id="estudo-edit-doc-id"><input type="hidden" id="estudo-tarefa-id-conclusao"><input type="hidden" id="estudo-tarefa-context-conclusao"><input type="hidden" id="estudo-bloco-classe">
                 <div class="form-group"><label>Data</label><input type="date" id="estudo-data" class="form-control"></div>
                 <div class="form-group"><label>Disciplina</label><select id="select-disciplina" class="form-control" onchange="window.atualizarTopicosEstudo()"></select></div>
                 <div class="form-group"><label>Tópico</label><select id="select-topico" class="form-control"></select></div>
@@ -1781,6 +1781,22 @@
                         // Encontra a data mais recente entre todos os assuntos da classe
                         entries.sort((a,b) => new Date(b.data) - new Date(a.data));
                         let mostRecentEntry = entries[0];
+
+                        // Verifica se há registros de revisão em bloco (campo blocoClasse) mais recentes
+                        // Esses registros são salvos quando o usuário conclui uma "Revisão em Bloco: Classe X"
+                        let blocoReviewRecords = registrosDeEstudo.filter(r =>
+                            r.blocoClasse === classe &&
+                            window.normalizarDisciplina(r.disciplina) === window.normalizarDisciplina(discNome)
+                        );
+                        if (blocoReviewRecords.length > 0) {
+                            blocoReviewRecords.sort((a, b) => new Date(b.data) - new Date(a.data));
+                            let latestBlocoRec = blocoReviewRecords[0];
+                            // Se a revisão em bloco foi feita após o último estudo individual, usa ela como base
+                            if (new Date(latestBlocoRec.data) > new Date(mostRecentEntry.data)) {
+                                mostRecentEntry = { data: latestBlocoRec.data, record: latestBlocoRec, tHist: entries[0].tHist };
+                            }
+                        }
+
                         let baseDate = new Date(mostRecentEntry.data + "T00:00:00");
                         baseDate.setDate(baseDate.getDate() + intervalDays);
 
@@ -2082,11 +2098,16 @@
 
             window.abrirModalEstudoPreenchido(disciplina, realTopico);
 
-            // Preenche Revisão nas categorias e desativa agendamento de nova revisão
+            // Preenche Revisão nas categorias
             let cbRevisao = document.querySelector('input[name="estudo-categoria"][value="Revisão"]');
             if(cbRevisao) cbRevisao.checked = true;
-            // Para bloco, não reagenda (o scheduler já recalcula pelo histórico da classe)
-            document.getElementById('estudo-agendar-revisao').checked = !isBlocoReview;
+
+            // Para revisão em bloco: guarda a classe num campo oculto e mantém agendamento ATIVO
+            // (o scheduler usa 'blocoClasse' no registro para recalcular a próxima data do bloco)
+            let campoBloco = document.getElementById('estudo-bloco-classe');
+            if (campoBloco) campoBloco.value = isBlocoReview ? (nomeClasse || '') : '';
+            // Bloco precisa de agendarRevisao=true para que o scheduler saiba que foi feita
+            document.getElementById('estudo-agendar-revisao').checked = true;
 
             // Banner informativo no modal para contexto de bloco
             let bannerEl = document.getElementById('estudo-bloco-banner');
@@ -3722,6 +3743,7 @@
             document.getElementById('modal-estudo').classList.remove('hidden');
             document.getElementById('modal-estudo-titulo').innerText = "Registar Estudo Finalizado";
             document.getElementById('estudo-edit-doc-id').value = '';
+            let _bCf = document.getElementById('estudo-bloco-classe'); if(_bCf) _bCf.value = '';
             document.getElementById('estudo-tarefa-id-conclusao').value = '';
             document.getElementById('estudo-tarefa-context-conclusao').value = '';
             document.getElementById('estudo-data').value = window.formatarDataLocalParaISO(new Date());
@@ -3793,6 +3815,10 @@
 
             if(!data || !disciplina || !topico) { window.mostrarAlerta("Preencha data, disciplina e tópico."); return; }
 
+            // Se for uma revisão em bloco, captura a classe para que o scheduler consiga rastrear
+            let blocoClasseField = document.getElementById('estudo-bloco-classe');
+            let blocoClasse = blocoClasseField ? blocoClasseField.value.trim() : '';
+
             let regData = {
                 data: data, disciplina: disciplina, topico: topico,
                 tempo: { horas: horas, minutos: minutos }, agendarRevisao: agendarRevisao,
@@ -3800,6 +3826,9 @@
                 questoes: { acertos: acertos, erros: erros },
                 comentario: comentario, timestamp: Date.now()
             };
+
+            // Adiciona marcador de bloco para o scheduler (não afeta display nem estatísticas)
+            if (blocoClasse) regData.blocoClasse = blocoClasse;
 
             let contextConclusao = document.getElementById('estudo-tarefa-context-conclusao').value;
             let idConclusao = document.getElementById('estudo-tarefa-id-conclusao').value;
@@ -3872,6 +3901,7 @@
             document.getElementById('estudo-horas').value = reg.tempo?.horas || '';
             document.getElementById('estudo-minutos').value = reg.tempo?.minutos || '';
             document.getElementById('estudo-agendar-revisao').checked = reg.agendarRevisao !== false;
+            let _bCfEdit = document.getElementById('estudo-bloco-classe'); if(_bCfEdit) _bCfEdit.value = reg.blocoClasse || '';
             document.getElementById('estudo-acertos').value = reg.questoes?.acertos || '';
             document.getElementById('estudo-erros').value = reg.questoes?.erros || '';
             document.getElementById('estudo-comentario').value = reg.comentario || '';
