@@ -1723,7 +1723,11 @@
         window.calcularAgendaRevisoes = function() {
             let topicHistory = {};
             registrosDeEstudo.forEach(reg => {
-                if (!reg.agendarRevisao) return; 
+                if (!reg.agendarRevisao) return;
+                // Registros de Revisão em Bloco salvos como 'Simulados e outras questões' com blocoClasse
+                // são rastreados separadamente pelo campo blocoClasse — não entram no topicHistory
+                // para evitar geração de cards de revisão espúrios
+                if (reg.blocoClasse && reg.topico === 'Simulados e outras questões') return;
                 let chave = reg.disciplina + "|||" + reg.topico; 
                 if (!topicHistory[chave]) topicHistory[chave] = { disciplina: reg.disciplina, topico: reg.topico, records: [] };
                 topicHistory[chave].records.push(reg);
